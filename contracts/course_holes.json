@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Course Holes Contract",
+  "description": "Hole-specific layout and characteristics for each hole on a golf course. Static information that defines the physical challenge of each hole.",
+  "type": "object",
+  "properties": {
+    "course_id": {
+      "type": "string",
+      "description": "Unique course identifier"
+    },
+    "course_name": {
+      "type": "string",
+      "description": "Name of the golf course"
+    },
+    "course_elevation_feet": {
+      "type": "integer",
+      "description": "Course elevation above sea level in feet. Used for distance adjustments (+0.116% per foot)"
+    },
+    "holes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "hole_id": {
+            "type": "string",
+            "description": "Unique identifier for this hole"
+          },
+          "hole_number": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18,
+            "description": "Hole number on course"
+          },
+          "par": {
+            "type": "integer",
+            "enum": [3, 4, 5],
+            "description": "Standard strokes for hole"
+          },
+          "handicap_index": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 18,
+            "description": "Difficulty ranking on course. 1=hardest, 18=easiest. Used in handicap calculations"
+          },
+          "distance_to_pin_yards": {
+            "type": "integer",
+            "description": "Baseline distance in yards from tee to center of green"
+          },
+          "shot_bearing_degrees": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 359,
+            "description": "Compass bearing of shot direction (0=North, 90=East, 180=South, 270=West). Used to calculate wind relative to shot"
+          },
+          "elevation_change_feet": {
+            "type": "integer",
+            "description": "Net elevation change from tee to green in feet. Positive=uphill, Negative=downhill. NOTE: Future enhancement - would need golf simulator data for hole-by-hole undulation"
+          },
+          "fairway_type": {
+            "type": "string",
+            "enum": ["fairway", "rough", "sand", "water"],
+            "description": "Primary fairway surface"
+          },
+          "hazards": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "hazard_type": {
+                  "type": "string",
+                  "enum": ["water", "bunker", "out_of_bounds", "trees"],
+                  "description": "Type of hazard"
+                },
+                "location": {
+                  "type": "string",
+                  "enum": ["left", "right", "center", "short", "long"],
+                  "description": "Location relative to hole/fairway"
+                },
+                "distance_from_tee_yards": {
+                  "type": "integer",
+                  "description": "Distance from tee when hazard becomes relevant"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": ["water", "bunker", "out_of_bounds"],
+                  "description": "Severity: water=penalty, bunker=no penalty but difficult, out_of_bounds=major penalty"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Human-readable description (e.g., 'Water right side entire hole')"
+                }
+              },
+              "required": ["hazard_type", "location", "distance_from_tee_yards", "severity"]
+            },
+            "description": "Major hazards to consider when making club selection"
+          },
+          "green_shape": {
+            "type": "string",
+            "enum": ["small", "medium", "large", "narrow", "wide", "elevated"],
+            "description": "General shape/size of green for approach planning"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Strategic notes about the hole"
+          }
+        },
+        "required": [
+          "hole_id",
+          "hole_number",
+          "par",
+          "handicap_index",
+          "distance_to_pin_yards",
+          "shot_bearing_degrees",
+          "fairway_type"
+        ]
+      },
+      "description": "Array of 18 holes"
+    }
+  },
+  "required": [
+    "course_id",
+    "course_name",
+    "course_elevation_feet",
+    "holes"
+  ]
+}

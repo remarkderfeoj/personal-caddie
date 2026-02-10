@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Weather Conditions Contract",
+  "description": "Real-time environmental conditions affecting shot physics. These are the primary modifiers to baseline club distances.",
+  "type": "object",
+  "properties": {
+    "condition_id": {
+      "type": "string",
+      "description": "Unique identifier for this weather condition snapshot"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this weather was recorded"
+    },
+    "temperature_fahrenheit": {
+      "type": "number",
+      "description": "Air temperature in Fahrenheit. PHYSICS: ~2 yards per 10°F change from baseline 70°F. Cold=shorter, hot=longer"
+    },
+    "wind_speed_mph": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Steady wind speed in mph. Will be used with wind_direction to calculate relative wind to shot"
+    },
+    "wind_direction_compass": {
+      "type": "string",
+      "enum": ["N", "NE", "E", "SE", "S", "SW", "W", "NW", "calm"],
+      "description": "Direction wind is blowing FROM (compass direction). Caddie calculates headwind/tailwind relative to shot bearing"
+    },
+    "humidity_percent": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Relative humidity percentage. PHYSICS: Minimal impact (< 1 yard across 0-100%). Included for completeness, low priority"
+    },
+    "rain": {
+      "type": "boolean",
+      "description": "Is it currently raining? PHYSICS: 3-5% distance reduction from wet ball/grooves and wet fairway"
+    },
+    "ground_conditions": {
+      "type": "string",
+      "enum": ["dry", "damp", "wet", "muddy"],
+      "description": "Fairway moisture affecting roll distance. Dry=full roll, wet/muddy=reduced roll"
+    },
+    "recent_rain_history": {
+      "type": "object",
+      "properties": {
+        "rain_past_7_days": {
+          "type": "boolean",
+          "description": "Has it rained in the past week?"
+        },
+        "rain_past_14_days": {
+          "type": "boolean",
+          "description": "Has it rained in the past two weeks?"
+        },
+        "estimated_fairway_wetness": {
+          "type": "string",
+          "enum": ["dry", "slightly_damp", "damp", "wet"],
+          "description": "Caddie's estimate based on rain history and ground conditions"
+        }
+      },
+      "description": "Historical context for determining fairway moisture"
+    },
+    "dew_point_fahrenheit": {
+      "type": "number",
+      "description": "Dew point temperature. Useful for predicting morning dew on grass (relevant for early tee times)"
+    },
+    "notes": [
+      "All physics adjustments calculated from this data",
+      "Temperature is most impactful (~2 yards/10°F)",
+      "Wind is complex - caddie calculates relative to shot bearing",
+      "Humidity and dew point are informational for now",
+      "Ground conditions can be estimated from rain history"
+    ]
+  },
+  "required": [
+    "condition_id",
+    "timestamp",
+    "temperature_fahrenheit",
+    "wind_speed_mph",
+    "wind_direction_compass",
+    "ground_conditions"
+  ]
+}

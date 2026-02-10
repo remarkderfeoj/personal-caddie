@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Player Baseline Contract",
+  "description": "Player's personal club distances and performance characteristics. Customizes the generic club specifications to individual player capabilities.",
+  "type": "object",
+  "properties": {
+    "player_id": {
+      "type": "string",
+      "description": "Unique player identifier"
+    },
+    "player_name": {
+      "type": "string",
+      "description": "Player's name"
+    },
+    "created_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this baseline was created"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When baseline was last calibrated"
+    },
+    "club_distances": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "club_type": {
+            "type": "string",
+            "enum": [
+              "driver",
+              "wood_3",
+              "wood_5",
+              "iron_2",
+              "iron_3",
+              "iron_4",
+              "iron_5",
+              "iron_6",
+              "iron_7",
+              "iron_8",
+              "iron_9",
+              "pitching_wedge",
+              "gap_wedge",
+              "sand_wedge",
+              "lob_wedge"
+            ]
+          },
+          "carry_distance": {
+            "type": "integer",
+            "description": "Player's actual carry distance in yards under standard conditions (sea level, 70°F, calm wind, dry fairway)"
+          },
+          "total_distance": {
+            "type": "integer",
+            "description": "Player's carry + roll distance on dry, firm fairway"
+          },
+          "consistency_notes": {
+            "type": "string",
+            "description": "Optional notes on how consistent this distance is (e.g., 'very consistent', 'varies by 5 yards')"
+          },
+          "measurement_method": {
+            "type": "string",
+            "enum": ["rangefinder", "gps_watch", "course_markers", "estimated"],
+            "description": "How was this distance measured/estimated?"
+          }
+        },
+        "required": ["club_type", "carry_distance", "total_distance", "measurement_method"]
+      },
+      "description": "Array of player's baseline distances for each club"
+    },
+    "general_characteristics": {
+      "type": "object",
+      "properties": {
+        "gender": {
+          "type": "string",
+          "enum": ["male", "female", "other"],
+          "description": "Player gender (affects distance expectations)"
+        },
+        "typical_swing_speed": {
+          "type": "integer",
+          "description": "Approximate driver swing speed in mph (informational)"
+        },
+        "miss_pattern": {
+          "type": "string",
+          "enum": ["slice", "hook", "pull", "push", "neutral"],
+          "description": "Primary miss pattern with longer clubs"
+        },
+        "short_game_strength": {
+          "type": "string",
+          "enum": ["weak", "average", "strong"],
+          "description": "How comfortable is player inside 100 yards?"
+        }
+      }
+    },
+    "notes": [
+      "Player should measure/estimate distances when fresh and warmed up",
+      "These distances are baselines under standard conditions",
+      "Weather/elevation/course adjustments will be calculated by caddie system",
+      "Update periodically (every few months) as player improves"
+    ]
+  },
+  "required": [
+    "player_id",
+    "player_name",
+    "created_date",
+    "club_distances"
+  ]
+}

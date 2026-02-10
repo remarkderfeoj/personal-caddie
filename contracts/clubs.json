@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Clubs Contract",
+  "description": "Golf club specifications and baseline performance characteristics under standard conditions (sea level, 70°F, calm wind, dry fairway, amateur golfer with ~90mph driver swing speed)",
+  "type": "object",
+  "properties": {
+    "clubs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "club_id": {
+            "type": "string",
+            "description": "Unique identifier for club"
+          },
+          "club_type": {
+            "type": "string",
+            "enum": [
+              "driver",
+              "wood_3",
+              "wood_5",
+              "iron_2",
+              "iron_3",
+              "iron_4",
+              "iron_5",
+              "iron_6",
+              "iron_7",
+              "iron_8",
+              "iron_9",
+              "pitching_wedge",
+              "gap_wedge",
+              "sand_wedge",
+              "lob_wedge"
+            ],
+            "description": "Club classification"
+          },
+          "loft_angle": {
+            "type": "number",
+            "minimum": 8.5,
+            "maximum": 60,
+            "description": "Club face angle in degrees relative to ground"
+          },
+          "baseline_carry_distance": {
+            "type": "integer",
+            "description": "Expected carry distance in yards under standard conditions (distance to first bounce, not including roll)",
+            "examples": [
+              "driver: 220",
+              "3_wood: 210",
+              "5_wood: 200",
+              "6_iron: 165",
+              "pitching_wedge: 105"
+            ]
+          },
+          "baseline_total_distance": {
+            "type": "integer",
+            "description": "Carry distance + expected roll on firm, dry fairway in yards"
+          },
+          "dispersion_margin": {
+            "type": "integer",
+            "description": "Typical accuracy margin in yards. Higher for longer clubs, lower for short irons/wedges",
+            "examples": [
+              "driver: 15 yards",
+              "6_iron: 10 yards",
+              "pitching_wedge: 5 yards"
+            ]
+          }
+        },
+        "required": [
+          "club_id",
+          "club_type",
+          "loft_angle",
+          "baseline_carry_distance",
+          "baseline_total_distance",
+          "dispersion_margin"
+        ]
+      }
+    },
+    "ownership": "System",
+    "update_frequency": "As new club technology emerges",
+    "notes": [
+      "These are amateur golfer baselines, not PGA Tour distances",
+      "Distances assume ~90mph driver swing speed",
+      "Female golfers typically see 15-20% less distance",
+      "Short game wedges (gap/sand/lob) are highly player-dependent"
+    ]
+  },
+  "required": ["clubs"]
+}

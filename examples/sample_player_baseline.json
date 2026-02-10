@@ -1,0 +1,112 @@
+{
+  "player_id": "joe_kramer_001",
+  "player_name": "Joe Kramer",
+  "created_date": "2024-01-15T10:00:00Z",
+  "last_updated": "2024-01-15T10:00:00Z",
+  "club_distances": [
+    {
+      "club_type": "driver",
+      "carry_distance": 220,
+      "total_distance": 235,
+      "consistency_notes": "Very consistent, small dispersion",
+      "measurement_method": "rangefinder"
+    },
+    {
+      "club_type": "wood_3",
+      "carry_distance": 210,
+      "total_distance": 225,
+      "consistency_notes": "Reliable club",
+      "measurement_method": "rangefinder"
+    },
+    {
+      "club_type": "wood_5",
+      "carry_distance": 200,
+      "total_distance": 215,
+      "consistency_notes": "Good all-rounder",
+      "measurement_method": "rangefinder"
+    },
+    {
+      "club_type": "iron_3",
+      "carry_distance": 195,
+      "total_distance": 205,
+      "consistency_notes": null,
+      "measurement_method": "estimated"
+    },
+    {
+      "club_type": "iron_4",
+      "carry_distance": 185,
+      "total_distance": 195,
+      "consistency_notes": null,
+      "measurement_method": "estimated"
+    },
+    {
+      "club_type": "iron_5",
+      "carry_distance": 175,
+      "total_distance": 185,
+      "consistency_notes": "Smooth swing",
+      "measurement_method": "gps_watch"
+    },
+    {
+      "club_type": "iron_6",
+      "carry_distance": 165,
+      "total_distance": 172,
+      "consistency_notes": "Tight dispersion",
+      "measurement_method": "gps_watch"
+    },
+    {
+      "club_type": "iron_7",
+      "carry_distance": 155,
+      "total_distance": 161,
+      "consistency_notes": null,
+      "measurement_method": "rangefinder"
+    },
+    {
+      "club_type": "iron_8",
+      "carry_distance": 145,
+      "total_distance": 150,
+      "consistency_notes": "Consistent",
+      "measurement_method": "rangefinder"
+    },
+    {
+      "club_type": "iron_9",
+      "carry_distance": 135,
+      "total_distance": 139,
+      "consistency_notes": null,
+      "measurement_method": "estimated"
+    },
+    {
+      "club_type": "pitching_wedge",
+      "carry_distance": 110,
+      "total_distance": 113,
+      "consistency_notes": "Good control",
+      "measurement_method": "rangefinder"
+    },
+    {
+      "club_type": "gap_wedge",
+      "carry_distance": 95,
+      "total_distance": 97,
+      "consistency_notes": null,
+      "measurement_method": "estimated"
+    },
+    {
+      "club_type": "sand_wedge",
+      "carry_distance": 80,
+      "total_distance": 82,
+      "consistency_notes": "Strong from bunkers",
+      "measurement_method": "estimated"
+    },
+    {
+      "club_type": "lob_wedge",
+      "carry_distance": 60,
+      "total_distance": 61,
+      "consistency_notes": null,
+      "measurement_method": "estimated"
+    }
+  ],
+  "general_characteristics": {
+    "gender": "male",
+    "typical_swing_speed": 92,
+    "miss_pattern": "push",
+    "short_game_strength": "strong"
+  }
+}

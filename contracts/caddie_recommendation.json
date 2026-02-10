@@ -1,0 +1,188 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Caddie Recommendation Contract",
+  "description": "Output of the recommendation engine. Suggests optimal club selection and strategy based on physics, course conditions, and risk/reward analysis.",
+  "type": "object",
+  "properties": {
+    "recommendation_id": {
+      "type": "string",
+      "description": "Unique identifier for this recommendation"
+    },
+    "shot_analysis_id": {
+      "type": "string",
+      "description": "Foreign key to shot_analysis - what analysis prompted this recommendation"
+    },
+    "primary_recommendation": {
+      "type": "object",
+      "properties": {
+        "club": {
+          "type": "string",
+          "enum": [
+            "driver",
+            "wood_3",
+            "wood_5",
+            "iron_2",
+            "iron_3",
+            "iron_4",
+            "iron_5",
+            "iron_6",
+            "iron_7",
+            "iron_8",
+            "iron_9",
+            "pitching_wedge",
+            "gap_wedge",
+            "sand_wedge",
+            "lob_wedge"
+          ],
+          "description": "Recommended club for this shot"
+        },
+        "target_area": {
+          "type": "string",
+          "description": "WHERE to aim - not just 'center of green'. E.g., 'left side of fairway', 'center green take water out of play', 'back left bunker is the danger'"
+        },
+        "expected_carry_yards": {
+          "type": "integer",
+          "description": "Adjusted carry distance for current conditions (temp, elevation, wind, rain)"
+        },
+        "expected_total_yards": {
+          "type": "integer",
+          "description": "Carry + expected roll based on ground conditions"
+        },
+        "confidence_percent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "How confident is this recommendation? High when: short distance, calm, clear. Low when: long, windy, hazards"
+        }
+      },
+      "required": [
+        "club",
+        "target_area",
+        "expected_carry_yards",
+        "expected_total_yards",
+        "confidence_percent"
+      ]
+    },
+    "adjustment_summary": {
+      "type": "object",
+      "properties": {
+        "temperature_adjustment_yards": {
+          "type": "integer",
+          "description": "Distance added/subtracted for temperature (±2 yards per 10°F from 70°F)"
+        },
+        "elevation_adjustment_yards": {
+          "type": "integer",
+          "description": "Distance added for altitude (+0.116% per foot)"
+        },
+        "wind_adjustment_yards": {
+          "type": "integer",
+          "description": "Distance added/subtracted for wind relative to shot (headwind negative, tailwind positive)"
+        },
+        "rain_adjustment_percent": {
+          "type": "number",
+          "description": "Percentage reduction for wet conditions (3-5%)"
+        },
+        "lie_adjustment_percent": {
+          "type": "number",
+          "description": "Percentage adjustment for current lie quality vs. fairway"
+        },
+        "human_readable_summary": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Human-readable explanation of adjustments made. E.g., ['+3 yards for temperature', '-2 yards headwind', '-5% wet fairway']"
+        }
+      },
+      "required": ["human_readable_summary"]
+    },
+    "alternative_clubs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "club": {
+            "type": "string",
+            "enum": [
+              "driver",
+              "wood_3",
+              "wood_5",
+              "iron_2",
+              "iron_3",
+              "iron_4",
+              "iron_5",
+              "iron_6",
+              "iron_7",
+              "iron_8",
+              "iron_9",
+              "pitching_wedge",
+              "gap_wedge",
+              "sand_wedge",
+              "lob_wedge"
+            ]
+          },
+          "confidence_percent": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "rationale": {
+            "type": "string",
+            "description": "WHY this club? E.g., 'Conservative play - lays up short of water' or 'Aggressive - goes over hazard'"
+          }
+        },
+        "required": ["club", "confidence_percent", "rationale"]
+      },
+      "description": "Secondary options ranked by confidence. Only include if there's actual strategic value - don't offer alternatives just for completeness"
+    },
+    "hazard_analysis": {
+      "type": "object",
+      "properties": {
+        "hazards_in_play": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "hazard_type": {
+                "type": "string",
+                "enum": ["water", "bunker", "out_of_bounds", "trees"]
+              },
+              "location": {
+                "type": "string"
+              },
+              "distance_from_tee": {
+                "type": "integer"
+              },
+              "risk_level": {
+                "type": "string",
+                "enum": ["low", "medium", "high"]
+              }
+            }
+          },
+          "description": "Hazards relevant to this shot distance"
+        },
+        "safe_miss_direction": {
+          "type": "string",
+          "enum": ["left", "right", "center", "long", "short"],
+          "description": "If you miss, where should you miss? Takes hazards into account"
+        }
+      }
+    },
+    "strategy_notes": {
+      "type": "string",
+      "description": "Additional strategic context. E.g., 'Conservative play: aim center green, take water completely out of play' or 'Aggressive: attack this tucked pin from the left side'"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When was this recommendation generated?"
+    }
+  },
+  "required": [
+    "recommendation_id",
+    "shot_analysis_id",
+    "primary_recommendation",
+    "adjustment_summary",
+    "hazard_analysis"
+  ]
+}

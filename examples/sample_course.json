@@ -1,0 +1,98 @@
+{
+  "course_id": "pebble_beach",
+  "course_name": "Pebble Beach Golf Links (Simplified - 3 Holes)",
+  "course_elevation_feet": 200,
+  "holes": [
+    {
+      "hole_id": "pebble_1",
+      "hole_number": 1,
+      "par": 4,
+      "handicap_index": 8,
+      "distance_to_pin_yards": 375,
+      "shot_bearing_degrees": 45,
+      "elevation_change_feet": null,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "out_of_bounds",
+          "location": "left",
+          "distance_from_tee_yards": 0,
+          "severity": "out_of_bounds",
+          "description": "OB entire left side along coastal cliffs"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 300,
+          "severity": "bunker",
+          "description": "Right side fairway bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Classic opening hole. Coastal winds can be strong. Aim center fairway."
+    },
+    {
+      "hole_id": "pebble_7",
+      "hole_number": 7,
+      "par": 3,
+      "handicap_index": 12,
+      "distance_to_pin_yards": 110,
+      "shot_bearing_degrees": 315,
+      "elevation_change_feet": -20,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 0,
+          "severity": "water",
+          "description": "Ocean left of green"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 105,
+          "severity": "bunker",
+          "description": "Right greenside bunker"
+        }
+      ],
+      "green_shape": "narrow",
+      "notes": "Iconic short par 3. Water guards entire left side. Conservative play is safest."
+    },
+    {
+      "hole_id": "pebble_18",
+      "hole_number": 18,
+      "par": 5,
+      "handicap_index": 2,
+      "distance_to_pin_yards": 548,
+      "shot_bearing_degrees": 90,
+      "elevation_change_feet": 30,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "right",
+          "distance_from_tee_yards": 400,
+          "severity": "water",
+          "description": "Ocean right from landing area to green"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 450,
+          "severity": "bunker",
+          "description": "Left fairway bunker in landing zone"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 480,
+          "severity": "bunker",
+          "description": "Right greenside bunker"
+        }
+      ],
+      "green_shape": "large",
+      "notes": "Finishing hole plays uphill. Water entire right side. Most players lay up short, go for birdie with approach."
+    }
+  ]
+}

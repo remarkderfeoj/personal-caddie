@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Shot Analysis Contract",
+  "description": "Input data for caddie recommendation engine. Real-time information about the current shot situation - what the player provides when asking for a club recommendation.",
+  "type": "object",
+  "properties": {
+    "analysis_id": {
+      "type": "string",
+      "description": "Unique identifier for this shot analysis"
+    },
+    "player_id": {
+      "type": "string",
+      "description": "Player making the shot"
+    },
+    "hole_id": {
+      "type": "string",
+      "description": "Foreign key to course_holes - which hole is being played"
+    },
+    "weather_condition_id": {
+      "type": "string",
+      "description": "Foreign key to weather_conditions - current conditions"
+    },
+    "pin_location": {
+      "type": "string",
+      "enum": ["front", "center", "back"],
+      "description": "Pin position on green. Modifies effective distance to target"
+    },
+    "current_distance_to_pin_yards": {
+      "type": "integer",
+      "description": "Distance from player's current location to pin in yards. Provided by GPS/rangefinder/user input"
+    },
+    "player_lie": {
+      "type": "string",
+      "enum": ["tee", "fairway", "rough", "bunker", "woods", "semi_rough"],
+      "description": "Where ball currently sits. Affects club selection viability/risk"
+    },
+    "lie_quality": {
+      "type": "string",
+      "enum": ["clean", "normal", "thick", "plugged"],
+      "description": "Quality of lie - affects club selection and expected distance"
+    },
+    "wind_relative_to_shot": {
+      "type": "string",
+      "enum": ["headwind", "tailwind", "crosswind_left", "crosswind_right", "calm"],
+      "description": "Wind direction relative to shot direction (not compass). Caddie calculates from weather + hole bearing"
+    },
+    "wind_strength_estimate": {
+      "type": "string",
+      "enum": ["calm", "light", "moderate", "strong"],
+      "description": "Qualitative assessment of wind strength for this specific shot"
+    },
+    "pin_placement_strategy": {
+      "type": "string",
+      "enum": ["aggressive", "balanced", "conservative"],
+      "description": "Player's desired approach - attack pin or play safe?"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Any additional context about the shot (e.g., 'must clear water', 'lay up before bunker')"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When was this shot analysis requested?"
+    }
+  },
+  "required": [
+    "analysis_id",
+    "player_id",
+    "hole_id",
+    "weather_condition_id",
+    "pin_location",
+    "current_distance_to_pin_yards",
+    "player_lie"
+  ]
+}
