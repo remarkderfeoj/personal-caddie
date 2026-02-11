@@ -1,12 +1,15 @@
 """
 Pydantic models derived from semantic contracts.
 These models validate and serialize data according to the contract specifications.
+
+SECURITY: All models include validation constraints to prevent injection attacks.
 """
 
 from datetime import datetime
 from typing import Optional, List
 from enum import Enum
-from pydantic import BaseModel, Field
+import re
+from pydantic import BaseModel, Field, field_validator
 
 
 # ============================================================================
@@ -34,12 +37,12 @@ class ClubType(str, Enum):
 
 class Club(BaseModel):
     """Individual club specification from clubs.json"""
-    club_id: str
+    club_id: str = Field(max_length=50, pattern=r'^[a-zA-Z0-9_-]+$')
     club_type: ClubType
     loft_angle: float = Field(ge=8.5, le=60)
-    baseline_carry_distance: int = Field(description="Carry distance in yards under standard conditions")
-    baseline_total_distance: int = Field(description="Carry + roll on firm, dry fairway")
-    dispersion_margin: int = Field(description="Typical accuracy margin in yards")
+    baseline_carry_distance: int = Field(ge=0, le=400, description="Carry distance in yards under standard conditions")
+    baseline_total_distance: int = Field(ge=0, le=450, description="Carry + roll on firm, dry fairway")
+    dispersion_margin: int = Field(ge=0, le=100, description="Typical accuracy margin in yards")
 
     class Config:
         use_enum_values = False
@@ -83,9 +86,9 @@ class ShortGameStrength(str, Enum):
 class ClubDistance(BaseModel):
     """Player's baseline distance for a specific club"""
     club_type: ClubType
-    carry_distance: int = Field(description="Player's carry distance in yards")
-    total_distance: int = Field(description="Carry + roll on dry, firm fairway")
-    consistency_notes: Optional[str] = None
+    carry_distance: int = Field(ge=0, le=400, description="Player's carry distance in yards")
+    total_distance: int = Field(ge=0, le=450, description="Carry + roll on dry, firm fairway")
+    consistency_notes: Optional[str] = Field(None, max_length=500)
     measurement_method: MeasurementMethod
 
 
@@ -99,12 +102,21 @@ class GeneralCharacteristics(BaseModel):
 
 class PlayerBaseline(BaseModel):
     """Player baseline contract - personal club distances and characteristics"""
-    player_id: str
-    player_name: str
+    player_id: str = Field(max_length=50, pattern=r'^[a-zA-Z0-9_-]+$')
+    player_name: str = Field(max_length=100)
     created_date: datetime
     last_updated: Optional[datetime] = None
     club_distances: List[ClubDistance]
     general_characteristics: Optional[GeneralCharacteristics] = None
+    
+    @field_validator('player_name')
+    @classmethod
+    def sanitize_player_name(cls, v: str) -> str:
+        """Strip whitespace and reject HTML/special chars"""
+        v = v.strip()
+        if '<' in v or '>' in v or '\x00' in v:
+            raise ValueError('Invalid characters in player name')
+        return v
 
 
 # ============================================================================
@@ -139,9 +151,9 @@ class Hazard(BaseModel):
     """Hazard on a hole"""
     hazard_type: HazardType
     location: HazardLocation
-    distance_from_tee_yards: int
+    distance_from_tee_yards: int = Field(ge=0, le=800)
     severity: HazardSeverity
-    description: Optional[str] = None
+    description: Optional[str] = Field(None, max_length=500)
 
 
 class GreenShape(str, Enum):
@@ -164,25 +176,34 @@ class FairwayType(str, Enum):
 
 class Hole(BaseModel):
     """Single hole on a golf course"""
-    hole_id: str
+    hole_id: str = Field(max_length=50, pattern=r'^[a-zA-Z0-9_-]+$')
     hole_number: int = Field(ge=1, le=18)
-    par: int = Field(enum=[3, 4, 5])
+    par: int = Field(ge=3, le=5)
     handicap_index: int = Field(ge=1, le=18)
-    distance_to_pin_yards: int
+    distance_to_pin_yards: int = Field(ge=50, le=700)
     shot_bearing_degrees: int = Field(ge=0, le=359, description="Compass bearing of shot direction")
-    elevation_change_feet: Optional[int] = None
+    elevation_change_feet: Optional[int] = Field(None, ge=-500, le=500)
     fairway_type: FairwayType
     hazards: Optional[List[Hazard]] = None
     green_shape: Optional[GreenShape] = None
-    notes: Optional[str] = None
+    notes: Optional[str] = Field(None, max_length=1000)
 
 
 class CourseHoles(BaseModel):
     """Complete course information"""
-    course_id: str
-    course_name: str
-    course_elevation_feet: int
+    course_id: str = Field(max_length=50, pattern=r'^[a-zA-Z0-9_-]+$')
+    course_name: str = Field(max_length=200)
+    course_elevation_feet: int = Field(ge=-1000, le=15000)
     holes: List[Hole]
+    
+    @field_validator('course_name')
+    @classmethod
+    def sanitize_course_name(cls, v: str) -> str:
+        """Strip whitespace and reject HTML/special chars"""
+        v = v.strip()
+        if '<' in v or '>' in v or '\x00' in v:
+            raise ValueError('Invalid characters in course name')
+        return v
 
 
 # ============================================================================
@@ -227,16 +248,16 @@ class RecentRainHistory(BaseModel):
 
 class WeatherConditions(BaseModel):
     """Real-time weather data"""
-    condition_id: str
+    condition_id: str = Field(max_length=50, pattern=r'^[a-zA-Z0-9_-]+$')
     timestamp: datetime
-    temperature_fahrenheit: float
-    wind_speed_mph: float = Field(ge=0)
+    temperature_fahrenheit: float = Field(ge=-50, le=150)
+    wind_speed_mph: float = Field(ge=0, le=100)
     wind_direction_compass: WindDirection
     humidity_percent: int = Field(ge=0, le=100)
     rain: bool
     ground_conditions: GroundConditions
     recent_rain_history: Optional[RecentRainHistory] = None
-    dew_point_fahrenheit: Optional[float] = None
+    dew_point_fahrenheit: Optional[float] = Field(None, ge=-50, le=150)
 
 
 # ============================================================================
@@ -294,19 +315,30 @@ class PinPlacementStrategy(str, Enum):
 
 class ShotAnalysis(BaseModel):
     """Input for caddie recommendation engine"""
-    analysis_id: str
-    player_id: str
-    hole_id: str
-    weather_condition_id: str
+    analysis_id: str = Field(max_length=50, pattern=r'^[a-zA-Z0-9_-]+$')
+    player_id: str = Field(max_length=50, pattern=r'^[a-zA-Z0-9_-]+$')
+    hole_id: str = Field(max_length=50, pattern=r'^[a-zA-Z0-9_-]+$')
+    weather_condition_id: str = Field(max_length=50, pattern=r'^[a-zA-Z0-9_-]+$')
     pin_location: PinLocation
-    current_distance_to_pin_yards: int
+    current_distance_to_pin_yards: int = Field(ge=1, le=700)
     player_lie: PlayerLie
     lie_quality: Optional[LieQuality] = None
     wind_relative_to_shot: Optional[WindRelativeToShot] = None
     wind_strength_estimate: Optional[WindStrengthEstimate] = None
     pin_placement_strategy: Optional[PinPlacementStrategy] = None
-    notes: Optional[str] = None
+    notes: Optional[str] = Field(None, max_length=1000)
     timestamp: datetime = Field(default_factory=datetime.now)
+    
+    @field_validator('notes')
+    @classmethod
+    def sanitize_notes(cls, v: Optional[str]) -> Optional[str]:
+        """Strip whitespace and reject HTML/special chars"""
+        if v is None:
+            return v
+        v = v.strip()
+        if '<' in v or '>' in v or '\x00' in v:
+            raise ValueError('Invalid characters in notes')
+        return v
 
 
 # ============================================================================
@@ -316,9 +348,9 @@ class ShotAnalysis(BaseModel):
 class PrimaryRecommendation(BaseModel):
     """The main club recommendation"""
     club: ClubType
-    target_area: str = Field(description="Where to aim, not just 'center'")
-    expected_carry_yards: int
-    expected_total_yards: int
+    target_area: str = Field(max_length=200, description="Where to aim, not just 'center'")
+    expected_carry_yards: int = Field(ge=0, le=400)
+    expected_total_yards: int = Field(ge=0, le=450)
     confidence_percent: int = Field(ge=0, le=100)
 
 
@@ -336,7 +368,7 @@ class AlternativeClub(BaseModel):
     """Alternative club option with reasoning"""
     club: ClubType
     confidence_percent: int = Field(ge=0, le=100)
-    rationale: str = Field(description="Why this club - must have strategic value")
+    rationale: str = Field(max_length=500, description="Why this club - must have strategic value")
 
 
 class SafeMissDirection(str, Enum):
@@ -358,8 +390,8 @@ class RiskLevel(str, Enum):
 class HazardInPlay(BaseModel):
     """Hazard relevant to this shot"""
     hazard_type: HazardType
-    location: str
-    distance_from_tee: int
+    location: str = Field(max_length=50)
+    distance_from_tee: int = Field(ge=0, le=800)
     risk_level: RiskLevel
 
 
@@ -371,11 +403,11 @@ class HazardAnalysis(BaseModel):
 
 class CaddieRecommendation(BaseModel):
     """Output of caddie recommendation engine"""
-    recommendation_id: str
-    shot_analysis_id: str
+    recommendation_id: str = Field(max_length=50)
+    shot_analysis_id: str = Field(max_length=50)
     primary_recommendation: PrimaryRecommendation
     adjustment_summary: AdjustmentSummary
     alternative_clubs: Optional[List[AlternativeClub]] = None
     hazard_analysis: HazardAnalysis
-    strategy_notes: Optional[str] = None
+    strategy_notes: Optional[str] = Field(None, max_length=1000)
     timestamp: datetime = Field(default_factory=datetime.now)
