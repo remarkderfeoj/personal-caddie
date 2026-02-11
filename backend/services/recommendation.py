@@ -1,229 +1,40 @@
 """
-Personal Caddie Recommendation Engine
+Recommendation Engine Module
 
-Core physics calculations and club selection logic for golf shot recommendations.
-Combines player baseline distances with real-time weather and course conditions.
+Main orchestrator for club recommendations:
+- Combines physics calculations with course strategy
+- Filters viable clubs based on distance
+- Applies player strategy preferences
+- Generates primary and alternative recommendations
 """
 
-from typing import Dict, List, Optional, Tuple
-from datetime import datetime
+from typing import Dict, Optional
 from models import (
-    PlayerBaseline, ClubDistance, ClubType,
-    Hole, Hazard, WeatherConditions,
-    ShotAnalysis, CaddieRecommendation,
-    PrimaryRecommendation, AdjustmentSummary,
-    HazardAnalysis, HazardInPlay, RiskLevel,
-    AlternativeClub, SafeMissDirection,
+    PlayerBaseline,
+    Hole,
+    WeatherConditions,
+    ShotAnalysis,
+    CaddieRecommendation,
+    PrimaryRecommendation,
+    AdjustmentSummary,
+    HazardAnalysis,
+    HazardInPlay,
+    AlternativeClub,
+)
+from .physics import (
+    calculate_temperature_adjustment,
+    calculate_elevation_adjustment,
+    calculate_wind_adjustment,
+    calculate_rain_adjustment,
+    calculate_lie_adjustment,
+    calculate_wind_relative_to_shot,
+)
+from .course_strategy import (
+    analyze_hazards_for_shot,
+    generate_target_area,
+    generate_strategy_notes,
 )
 
-
-# ============================================================================
-# PHYSICS CALCULATORS
-# ============================================================================
-
-def calculate_temperature_adjustment(temp_f: float, baseline_distance: int) -> int:
-    """
-    Temperature adjustment: ±2 yards per 10°F from 70°F baseline.
-
-    Physics: Cold air is denser → more drag → shorter flight
-            Hot air is less dense → less drag → longer flight
-
-    Args:
-        temp_f: Current temperature in Fahrenheit
-        baseline_distance: Player's baseline distance in yards
-
-    Returns:
-        Adjustment in yards (positive = add distance, negative = subtract)
-    """
-    temp_diff = temp_f - 70.0
-    adjustment_per_10f = 2
-    adjustment = (temp_diff / 10.0) * adjustment_per_10f
-    return round(adjustment)
-
-
-def calculate_elevation_adjustment(elevation_feet: int, baseline_distance: int) -> int:
-    """
-    Elevation adjustment: +0.116% distance per foot above sea level.
-
-    Physics: Higher elevation → thinner air → less drag → longer flight
-
-    Args:
-        elevation_feet: Course elevation above sea level in feet
-        baseline_distance: Player's baseline distance in yards
-
-    Returns:
-        Additional yards gained from elevation
-    """
-    if elevation_feet <= 0:
-        return 0
-
-    elevation_multiplier = 1 + (elevation_feet * 0.00116)
-    adjusted_distance = baseline_distance * elevation_multiplier
-
-    return round(adjusted_distance - baseline_distance)
-
-
-def calculate_wind_adjustment(
-    wind_relative: str,
-    wind_speed_mph: float,
-    baseline_distance: int
-) -> int:
-    """
-    Wind adjustment based on relative wind direction.
-
-    Physics:
-    - Headwind: -3% to -5% distance (uses -4% average)
-    - Tailwind: +3% to +5% distance (uses +4% average)
-    - Crosswind: Minimal distance effect, mostly accuracy
-
-    Args:
-        wind_relative: Wind direction relative to shot
-        wind_speed_mph: Wind speed in mph
-        baseline_distance: Player's baseline distance in yards
-
-    Returns:
-        Adjustment in yards (positive or negative)
-    """
-    if wind_relative == "calm" or wind_speed_mph < 5:
-        return 0
-
-    # Scale adjustment by wind strength
-    if wind_speed_mph < 10:
-        strength_factor = 0.5
-    elif wind_speed_mph < 15:
-        strength_factor = 1.0
-    else:
-        strength_factor = 1.5
-
-    # Base adjustment percentages
-    if wind_relative == "headwind":
-        adjustment_pct = -0.04 * strength_factor
-    elif wind_relative == "tailwind":
-        adjustment_pct = 0.04 * strength_factor
-    else:  # crosswind
-        adjustment_pct = -0.01 * strength_factor
-
-    adjustment = baseline_distance * adjustment_pct
-    return round(adjustment)
-
-
-def calculate_rain_adjustment(rain: bool, ground_wet: bool) -> float:
-    """
-    Rain/wet conditions adjustment: -3% to -5% distance reduction.
-
-    Physics:
-    - Rain during flight: Wet ball, reduced spin
-    - Wet fairway: Reduced roll, ball plugging
-    - Wet grooves: Poor contact, less spin
-
-    Args:
-        rain: Is it currently raining?
-        ground_wet: Is ground wet/damp?
-
-    Returns:
-        Percentage reduction (e.g., 0.04 = 4% reduction)
-    """
-    if rain:
-        return 0.05
-    elif ground_wet:
-        return 0.03
-    return 0.0
-
-
-def calculate_lie_adjustment(lie: str, lie_quality: Optional[str]) -> float:
-    """
-    Lie adjustment based on ball position.
-
-    Args:
-        lie: PlayerLie enum (tee, fairway, rough, bunker, etc.)
-        lie_quality: LieQuality enum (clean, normal, thick, plugged)
-
-    Returns:
-        Percentage reduction (e.g., 0.10 = 10% reduction)
-    """
-    if lie in ["tee", "fairway"] and lie_quality in ["clean", "normal", None]:
-        return 0.0
-
-    if lie == "semi_rough":
-        return 0.05
-
-    if lie == "rough":
-        if lie_quality == "thick":
-            return 0.25
-        return 0.15
-
-    if lie == "bunker":
-        return 0.20
-
-    if lie == "woods" or lie_quality == "plugged":
-        return 0.35
-
-    return 0.0
-
-
-# ============================================================================
-# WIND CONVERTER
-# ============================================================================
-
-def compass_to_degrees(compass: str) -> int:
-    """
-    Convert compass direction to degrees.
-
-    Args:
-        compass: N, NE, E, SE, S, SW, W, NW
-
-    Returns:
-        Degrees (0=N, 90=E, 180=S, 270=W)
-    """
-    compass_map = {
-        "N": 0, "NE": 45, "E": 90, "SE": 135,
-        "S": 180, "SW": 225, "W": 270, "NW": 315,
-        "calm": -1
-    }
-    return compass_map.get(compass.upper(), -1)
-
-
-def calculate_wind_relative_to_shot(
-    wind_direction_compass: str,
-    shot_bearing_degrees: int,
-    wind_speed_mph: float
-) -> Tuple[str, int]:
-    """
-    Convert compass wind direction to shot-relative wind.
-
-    Wind direction is where wind is blowing FROM.
-    Shot bearing is where shot is headed TO.
-
-    Args:
-        wind_direction_compass: Compass direction (N, NE, E, etc.)
-        shot_bearing_degrees: Shot direction in degrees (0-359)
-        wind_speed_mph: Wind speed
-
-    Returns:
-        Tuple of (wind_relative_type, wind_adjustment_yards)
-    """
-    if wind_direction_compass == "calm" or wind_speed_mph < 5:
-        return ("calm", 0)
-
-    wind_degrees = compass_to_degrees(wind_direction_compass)
-    if wind_degrees < 0:
-        return ("calm", 0)
-
-    angle_diff = (wind_degrees - shot_bearing_degrees) % 360
-
-    if angle_diff <= 45 or angle_diff >= 315:
-        return ("headwind", angle_diff)
-    elif 45 < angle_diff <= 135:
-        return ("crosswind_left", angle_diff)
-    elif 135 < angle_diff <= 225:
-        return ("tailwind", angle_diff)
-    else:
-        return ("crosswind_right", angle_diff)
-
-
-# ============================================================================
-# COMPREHENSIVE DISTANCE CALCULATOR
-# ============================================================================
 
 def calculate_adjusted_distance(
     baseline_carry: int,
@@ -280,93 +91,16 @@ def calculate_adjusted_distance(
     }
 
 
-# ============================================================================
-# HAZARD ANALYZER
-# ============================================================================
-
-def analyze_hazards_for_shot(
-    expected_distance: int,
-    dispersion_margin: int,
-    hole_hazards: List[Hazard]
-) -> Dict:
-    """
-    Identify which hazards are in play for a given shot distance.
-
-    A hazard is "in play" if the shot's expected landing area
-    (distance ± dispersion) overlaps with the hazard location.
-
-    Args:
-        expected_distance: Adjusted total distance for this club
-        dispersion_margin: Accuracy margin in yards
-        hole_hazards: List of hazards on this hole
-
-    Returns:
-        Dictionary with hazards_in_play and safe_miss_direction
-    """
-    hazards_in_play = []
-
-    min_distance = expected_distance - dispersion_margin
-    max_distance = expected_distance + dispersion_margin
-
-    for hazard in hole_hazards:
-        hazard_distance = hazard.distance_from_tee_yards
-
-        if (min_distance - 20) <= hazard_distance <= (max_distance + 20):
-            if hazard.severity == "out_of_bounds":
-                risk = "high"
-            elif hazard.severity == "water":
-                risk = "high"
-            elif hazard.severity == "bunker":
-                risk = "medium" if abs(expected_distance - hazard_distance) < 10 else "low"
-            else:
-                risk = "medium"
-
-            hazards_in_play.append({
-                "hazard_type": hazard.hazard_type,
-                "location": hazard.location,
-                "distance_from_tee": hazard_distance,
-                "risk_level": risk,
-                "description": hazard.description
-            })
-
-    safe_miss = determine_safe_miss_direction(hazards_in_play)
-
-    return {
-        "hazards_in_play": hazards_in_play,
-        "safe_miss_direction": safe_miss
-    }
-
-
-def determine_safe_miss_direction(hazards: List[Dict]) -> str:
-    """
-    Determine the safest direction to miss based on hazard locations.
-
-    Args:
-        hazards: List of hazards in play
-
-    Returns:
-        Safe miss direction (left, right, center, long, short)
-    """
-    if not hazards:
-        return "center"
-
-    left_count = sum(1 for h in hazards if h["location"] == "left" and h["risk_level"] == "high")
-    right_count = sum(1 for h in hazards if h["location"] == "right" and h["risk_level"] == "high")
-
-    if left_count > right_count:
-        return "right"
-    elif right_count > left_count:
-        return "left"
-    else:
-        return "center"
-
-
-# ============================================================================
-# HELPER FUNCTIONS
-# ============================================================================
-
 def estimate_dispersion(club_type: str) -> int:
-    """Estimate dispersion margin for a club type."""
+    """
+    Estimate dispersion margin for a club type.
+    
+    Args:
+        club_type: Club type identifier
+    
+    Returns:
+        Dispersion in yards
+    """
     dispersion_map = {
         "driver": 20, "wood_3": 18, "wood_5": 15,
         "iron_2": 15, "iron_3": 14, "iron_4": 13,
@@ -378,30 +112,24 @@ def estimate_dispersion(club_type: str) -> int:
     return dispersion_map.get(club_type, 10)
 
 
-def generate_target_area(hole: Hole, hazard_analysis: Dict, pin_location: str) -> str:
-    """Generate human-readable target area description."""
-    safe_miss = hazard_analysis["safe_miss_direction"]
-    hazards = hazard_analysis["hazards_in_play"]
-
-    if not hazards:
-        return f"Aim {pin_location} of green, no major hazards"
-
-    high_risk = [h for h in hazards if h["risk_level"] == "high"]
-
-    if high_risk:
-        hazard_desc = ", ".join([f"{h['hazard_type']} {h['location']}" for h in high_risk])
-        return f"Aim {safe_miss}, avoid {hazard_desc}"
-    else:
-        return f"Aim center, {pin_location} pin position"
-
-
 def generate_alternative_rationale(
     alt_option: Dict,
     primary_option: Dict,
     strategy: str,
     target_distance: int
 ) -> Optional[str]:
-    """Generate rationale for alternative club recommendation."""
+    """
+    Generate rationale for alternative club recommendation.
+    
+    Args:
+        alt_option: Alternative club option
+        primary_option: Primary club option
+        strategy: Player strategy
+        target_distance: Target distance to pin
+    
+    Returns:
+        Rationale string or None
+    """
     alt_distance = alt_option["adjusted_total"]
     primary_distance = primary_option["adjusted_total"]
 
@@ -418,34 +146,6 @@ def generate_alternative_rationale(
 
     return None
 
-
-def generate_strategy_notes(
-    option: Dict,
-    hole: Hole,
-    strategy: str,
-    pin_location: str
-) -> str:
-    """Generate strategic guidance for the shot."""
-    hazards = option["hazard_analysis"]["hazards_in_play"]
-    high_risk = [h for h in hazards if h["risk_level"] == "high"]
-
-    if high_risk:
-        if strategy == "conservative":
-            return f"Conservative play recommended: High-risk {high_risk[0]['hazard_type']} in play. Play for center of green."
-        else:
-            return f"Caution: {high_risk[0]['hazard_type']} {high_risk[0]['location']} is in play. Commit to your line."
-    else:
-        if pin_location == "front":
-            return "Pin is accessible - front of green, good birdie opportunity."
-        elif pin_location == "back":
-            return "Back pin - take enough club, don't leave it short."
-        else:
-            return "Clean look at the flag - trust your distance."
-
-
-# ============================================================================
-# MAIN RECOMMENDATION ENGINE
-# ============================================================================
 
 def generate_recommendation(
     shot_analysis: ShotAnalysis,
@@ -472,6 +172,7 @@ def generate_recommendation(
         player_baseline: Player's club distances
         hole: Hole information
         weather: Weather conditions
+        course_elevation_feet: Course elevation above sea level
 
     Returns:
         CaddieRecommendation with primary club, alternatives, hazards, strategy
