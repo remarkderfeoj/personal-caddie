@@ -182,7 +182,7 @@ class CourseHoles(BaseModel):
     course_id: str
     course_name: str
     course_elevation_feet: int
-    holes: List[Hole] = Field(min_items=18, max_items=18)
+    holes: List[Hole]
 
 
 # ============================================================================

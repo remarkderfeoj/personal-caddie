@@ -22,6 +22,7 @@ from models import (
     ShotAnalysis,
     CaddieRecommendation,
 )
+from services import generate_recommendation
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -192,21 +193,52 @@ def get_recommendation(analysis: ShotAnalysis) -> CaddieRecommendation:
     - Hazard analysis
     - Confidence level
     """
-    # TODO: Implement recommendation engine
-    # Steps:
-    # 1. Load player baseline
-    # 2. Load course hole data
-    # 3. Load weather conditions
-    # 4. Calculate adjusted distances for each club
-    # 5. Apply course management logic (hazards, pin placement, risk/reward)
-    # 6. Generate primary recommendation + alternatives
-    # 7. Return as CaddieRecommendation
+    # Load player baseline from example file (MVP)
+    player_file = os.path.join(
+        os.path.dirname(__file__),
+        "../examples/sample_player_baseline.json"
+    )
+    with open(player_file, "r") as f:
+        player_data = json.load(f)
+    player_baseline = PlayerBaseline(**player_data)
 
-    return {
-        "status": "not_implemented",
-        "message": "Recommendation engine coming soon",
-        "shot_analysis_id": analysis.analysis_id,
-    }
+    # Load course data from example file (MVP)
+    course_file = os.path.join(
+        os.path.dirname(__file__),
+        "../examples/sample_course.json"
+    )
+    with open(course_file, "r") as f:
+        course_data = json.load(f)
+    course = CourseHoles(**course_data)
+
+    # Find the hole
+    hole = next((h for h in course.holes if h.hole_id == analysis.hole_id), None)
+    if not hole:
+        raise HTTPException(status_code=404, detail=f"Hole {analysis.hole_id} not found")
+
+    # Create weather conditions
+    # TODO: In production, fetch from database using analysis.weather_condition_id
+    weather = WeatherConditions(
+        condition_id=analysis.weather_condition_id,
+        timestamp=datetime.now(),
+        temperature_fahrenheit=70.0,
+        wind_speed_mph=5.0,
+        wind_direction_compass="calm",
+        humidity_percent=50,
+        rain=False,
+        ground_conditions="dry"
+    )
+
+    # Generate recommendation using services module
+    recommendation = generate_recommendation(
+        shot_analysis=analysis,
+        player_baseline=player_baseline,
+        hole=hole,
+        weather=weather,
+        course_elevation_feet=course.course_elevation_feet
+    )
+
+    return recommendation
 
 
 # ============================================================================
@@ -243,12 +275,17 @@ def get_sample_course():
 # ERROR HANDLERS
 # ============================================================================
 
+from fastapi.responses import JSONResponse
+
 @app.exception_handler(ValueError)
 async def value_error_handler(request, exc):
-    return {
-        "error": "Invalid input",
-        "detail": str(exc),
-    }
+    return JSONResponse(
+        status_code=400,
+        content={
+            "error": "Invalid input",
+            "detail": str(exc),
+        }
+    )
 
 
 if __name__ == "__main__":
