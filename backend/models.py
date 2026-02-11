@@ -6,7 +6,7 @@ SECURITY: All models include validation constraints to prevent injection attacks
 """
 
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Dict
 from enum import Enum
 import re
 from pydantic import BaseModel, Field, field_validator
@@ -411,3 +411,103 @@ class CaddieRecommendation(BaseModel):
     hazard_analysis: HazardAnalysis
     strategy_notes: Optional[str] = Field(None, max_length=1000)
     timestamp: datetime = Field(default_factory=datetime.now)
+
+
+# ============================================================================
+# PLAYER PROFILE CONTRACT MODELS (Task 2)
+# ============================================================================
+
+class MissDirection(str, Enum):
+    """Primary miss direction"""
+    LEFT = "left"
+    RIGHT = "right"
+    STRAIGHT = "straight"
+    INCONSISTENT = "inconsistent"
+
+
+class DispersionTendency(BaseModel):
+    """Miss patterns and accuracy data for a specific club"""
+    miss_direction: MissDirection
+    miss_frequency: float = Field(ge=0.0, le=1.0, description="Fraction of shots that miss in this direction")
+    distance_variance_yards: int = Field(ge=0, le=50, description="Typical distance inconsistency")
+    sample_size: int = Field(ge=0, description="Number of shots tracked")
+
+
+class HoleTypeStats(BaseModel):
+    """Performance statistics for a hole type"""
+    rounds_played: int = Field(ge=0)
+    average_score: float = Field(ge=1.0, le=20.0)
+    average_to_par: float = Field(ge=-5.0, le=15.0)
+    best_score: int = Field(ge=1, le=20)
+    worst_score: int = Field(ge=1, le=20)
+
+
+class ScoringByPar(BaseModel):
+    """Scoring breakdown by par"""
+    par_3: Optional[HoleTypeStats] = None
+    par_4: Optional[HoleTypeStats] = None
+    par_5: Optional[HoleTypeStats] = None
+
+
+class ScoringHistory(BaseModel):
+    """Performance patterns by hole type"""
+    by_par: Optional[ScoringByPar] = None
+    by_distance_range: Optional[Dict[str, HoleTypeStats]] = None
+
+
+class FatigueModel(BaseModel):
+    """Performance degradation patterns"""
+    front_nine_average: Optional[float] = None
+    back_nine_average: Optional[float] = None
+    fatigue_factor: float = Field(ge=0.0, le=2.0, default=1.0, description="1.0 = no change, >1.0 = worse on back 9")
+    distance_loss_back_nine_yards: int = Field(ge=0, le=50, default=0)
+
+
+class CaddieVoicePreference(str, Enum):
+    """Preferred caddie communication style"""
+    DECISIVE = "decisive"  # One call, no alternatives
+    ANALYTICAL = "analytical"  # Show all the data
+    BALANCED = "balanced"  # Primary + context
+
+
+class RiskTolerance(str, Enum):
+    """Default risk tolerance"""
+    CONSERVATIVE = "conservative"
+    BALANCED = "balanced"
+    AGGRESSIVE = "aggressive"
+
+
+class PlayerProfile(BaseModel):
+    """Comprehensive player profile with tendencies and learning"""
+    profile_id: str = Field(max_length=50, pattern=r'^[a-zA-Z0-9_-]+$')
+    player_id: str = Field(max_length=50, pattern=r'^[a-zA-Z0-9_-]+$')
+    player_name: str = Field(max_length=100)
+    created_date: datetime
+    last_updated: Optional[datetime] = None
+    dispersion_tendencies: Optional[Dict[str, DispersionTendency]] = None
+    comfort_ratings: Optional[Dict[str, float]] = None  # club_type -> 0.0-1.0
+    scoring_history: Optional[ScoringHistory] = None
+    fatigue_model: Optional[FatigueModel] = None
+    caddie_voice_preference: CaddieVoicePreference = CaddieVoicePreference.BALANCED
+    risk_tolerance: RiskTolerance = RiskTolerance.BALANCED
+    notes: Optional[str] = Field(None, max_length=2000)
+    
+    @field_validator('player_name')
+    @classmethod
+    def sanitize_player_name_profile(cls, v: str) -> str:
+        """Strip whitespace and reject HTML/special chars"""
+        v = v.strip()
+        if '<' in v or '>' in v or '\x00' in v:
+            raise ValueError('Invalid characters in player name')
+        return v
+    
+    @field_validator('notes')
+    @classmethod
+    def sanitize_notes_profile(cls, v: Optional[str]) -> Optional[str]:
+        """Strip whitespace and reject HTML/special chars"""
+        if v is None:
+            return v
+        v = v.strip()
+        if '<' in v or '>' in v or '\x00' in v:
+            raise ValueError('Invalid characters in notes')
+        return v

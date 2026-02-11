@@ -1,0 +1,178 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Player Profile Contract",
+  "description": "Comprehensive player profile including tendencies, preferences, and performance history. Enables the caddie to learn and adapt to the specific player over time.",
+  "type": "object",
+  "required": ["profile_id", "player_id", "player_name", "created_date"],
+  "properties": {
+    "profile_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]+$",
+      "maxLength": 50,
+      "description": "Unique profile identifier"
+    },
+    "player_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]+$",
+      "maxLength": 50,
+      "description": "Links to player_baseline.player_id"
+    },
+    "player_name": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "Player's name"
+    },
+    "created_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this profile was created"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last time profile was updated"
+    },
+    "dispersion_tendencies": {
+      "type": "object",
+      "description": "Miss patterns and accuracy data by club",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "miss_direction": {
+            "type": "string",
+            "enum": ["left", "right", "straight", "inconsistent"],
+            "description": "Primary miss direction for this club"
+          },
+          "miss_frequency": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "description": "Fraction of shots that miss in this direction (0.0-1.0)"
+          },
+          "distance_variance_yards": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 50,
+            "description": "Typical distance inconsistency in yards"
+          },
+          "sample_size": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of shots tracked for this club"
+          }
+        }
+      }
+    },
+    "comfort_ratings": {
+      "type": "object",
+      "description": "Confidence/comfort level with each club (0.0 = uncomfortable, 1.0 = very confident)",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0.0,
+        "maximum": 1.0
+      }
+    },
+    "scoring_history": {
+      "type": "object",
+      "description": "Performance patterns by hole type",
+      "properties": {
+        "by_par": {
+          "type": "object",
+          "description": "Average score by par",
+          "properties": {
+            "par_3": {
+              "$ref": "#/definitions/hole_type_stats"
+            },
+            "par_4": {
+              "$ref": "#/definitions/hole_type_stats"
+            },
+            "par_5": {
+              "$ref": "#/definitions/hole_type_stats"
+            }
+          }
+        },
+        "by_distance_range": {
+          "type": "object",
+          "description": "Performance by hole length",
+          "additionalProperties": {
+            "$ref": "#/definitions/hole_type_stats"
+          }
+        }
+      }
+    },
+    "fatigue_model": {
+      "type": "object",
+      "description": "Performance degradation patterns",
+      "properties": {
+        "front_nine_average": {
+          "type": "number",
+          "description": "Average score to par on front 9"
+        },
+        "back_nine_average": {
+          "type": "number",
+          "description": "Average score to par on back 9"
+        },
+        "fatigue_factor": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 2.0,
+          "description": "Multiplier for back 9 performance (1.0 = no change, >1.0 = worse on back 9)"
+        },
+        "distance_loss_back_nine_yards": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50,
+          "description": "Average distance loss on back 9 due to fatigue"
+        }
+      }
+    },
+    "caddie_voice_preference": {
+      "type": "string",
+      "enum": ["decisive", "analytical", "balanced"],
+      "description": "Preferred caddie communication style",
+      "default": "balanced"
+    },
+    "risk_tolerance": {
+      "type": "string",
+      "enum": ["conservative", "balanced", "aggressive"],
+      "description": "Default risk tolerance",
+      "default": "balanced"
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "Free-form notes about the player"
+    }
+  },
+  "definitions": {
+    "hole_type_stats": {
+      "type": "object",
+      "properties": {
+        "rounds_played": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "average_score": {
+          "type": "number",
+          "minimum": 1.0,
+          "maximum": 20.0
+        },
+        "average_to_par": {
+          "type": "number",
+          "minimum": -5.0,
+          "maximum": 15.0
+        },
+        "best_score": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "worst_score": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        }
+      }
+    }
+  }
+}

@@ -19,6 +19,12 @@ from .course_strategy import (
     generate_target_area,
     generate_strategy_notes,
 )
+from .player_model import (
+    player_service,
+    PlayerModelService,
+    PlayerRepository,
+    JSONPlayerRepository,
+)
 
 __all__ = [
     "generate_recommendation",
@@ -32,4 +38,8 @@ __all__ = [
     "determine_safe_miss_direction",
     "generate_target_area",
     "generate_strategy_notes",
+    "player_service",
+    "PlayerModelService",
+    "PlayerRepository",
+    "JSONPlayerRepository",
 ]

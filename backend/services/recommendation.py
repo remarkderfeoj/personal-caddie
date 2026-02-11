@@ -34,6 +34,7 @@ from .course_strategy import (
     generate_target_area,
     generate_strategy_notes,
 )
+from .player_model import player_service
 
 
 def calculate_adjusted_distance(
@@ -248,6 +249,45 @@ def generate_recommendation(
 
         high_risk_count = sum(1 for h in hazard_analysis["hazards_in_play"] if h["risk_level"] == "high")
         option["match_score"] -= (high_risk_count * 15)
+
+    # 4b. Apply player-specific adjustments (Task 2: Player Model)
+    player_profile = player_service.repo.get_profile(shot_analysis.player_id)
+    
+    if player_profile:
+        # Apply fatigue adjustment if on back 9
+        hole_number = hole.hole_number
+        if hole_number > 9:
+            fatigue_multiplier = player_service.get_fatigue_adjustment(shot_analysis.player_id, hole_number)
+            for option in viable_clubs:
+                option["adjusted_carry"] = int(option["adjusted_carry"] * fatigue_multiplier)
+                option["adjusted_total"] = int(option["adjusted_total"] * fatigue_multiplier)
+        
+        # Apply miss tendency vs hazard location penalty
+        for option in viable_clubs:
+            club_key = option["club_type"].value if hasattr(option["club_type"], 'value') else str(option["club_type"])
+            tendency = player_service.get_player_tendency(shot_analysis.player_id, club_key)
+            
+            if tendency:
+                # Check if player's miss direction aligns with high-risk hazards
+                hazards = option["hazard_analysis"]["hazards_in_play"]
+                high_risk_on_miss_side = any(
+                    h["risk_level"] == "high" and h["location"] == tendency.miss_direction.value
+                    for h in hazards
+                )
+                
+                if high_risk_on_miss_side:
+                    # Penalize clubs where player's miss tendency points at hazard
+                    penalty = int(20 * tendency.miss_frequency)
+                    option["match_score"] -= penalty
+        
+        # Apply comfort ratings as tiebreaker
+        for option in viable_clubs:
+            club_key = option["club_type"].value if hasattr(option["club_type"], 'value') else str(option["club_type"])
+            comfort = player_service.get_comfort_rating(shot_analysis.player_id, club_key)
+            
+            # Comfort is 0.0-1.0, add 0-10 points
+            comfort_bonus = int((comfort - 0.5) * 20)  # Scales from -10 to +10
+            option["match_score"] += comfort_bonus
 
     # 5. Apply strategy preference
     strategy = shot_analysis.pin_placement_strategy.value if shot_analysis.pin_placement_strategy and hasattr(shot_analysis.pin_placement_strategy, 'value') else (shot_analysis.pin_placement_strategy or "balanced")
