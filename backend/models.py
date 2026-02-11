@@ -342,34 +342,8 @@ class ShotAnalysis(BaseModel):
 
 
 # ============================================================================
-# CADDIE RECOMMENDATION CONTRACT MODELS
+# CADDIE RECOMMENDATION CONTRACT MODELS (Task 4: Conviction-First Format)
 # ============================================================================
-
-class PrimaryRecommendation(BaseModel):
-    """The main club recommendation"""
-    club: ClubType
-    target_area: str = Field(max_length=200, description="Where to aim, not just 'center'")
-    expected_carry_yards: int = Field(ge=0, le=400)
-    expected_total_yards: int = Field(ge=0, le=450)
-    confidence_percent: int = Field(ge=0, le=100)
-
-
-class AdjustmentSummary(BaseModel):
-    """Breakdown of distance adjustments"""
-    temperature_adjustment_yards: int = 0
-    elevation_adjustment_yards: int = 0
-    wind_adjustment_yards: int = 0
-    rain_adjustment_percent: float = 0.0
-    lie_adjustment_percent: float = 0.0
-    human_readable_summary: List[str]
-
-
-class AlternativeClub(BaseModel):
-    """Alternative club option with reasoning"""
-    club: ClubType
-    confidence_percent: int = Field(ge=0, le=100)
-    rationale: str = Field(max_length=500, description="Why this club - must have strategic value")
-
 
 class SafeMissDirection(str, Enum):
     """Safe miss direction given hazards"""
@@ -395,22 +369,89 @@ class HazardInPlay(BaseModel):
     risk_level: RiskLevel
 
 
-class HazardAnalysis(BaseModel):
-    """Analysis of hazards for this shot"""
-    hazards_in_play: List[HazardInPlay] = []
-    safe_miss_direction: Optional[SafeMissDirection] = None
+class AlternativePlay(BaseModel):
+    """Alternative club option - clearly secondary"""
+    club: ClubType
+    target: str = Field(max_length=200, description="Where to aim with this club")
+    scenario: str = Field(max_length=300, description="When you'd pick this: 'If wind picks up' or 'If you want safety'")
+
+
+class RiskReward(BaseModel):
+    """Risk/reward framing for aggressive vs conservative play"""
+    aggressive_upside: str = Field(max_length=200, description="Best case if aggressive")
+    aggressive_downside: str = Field(max_length=200, description="Worst case if aggressive")
+    conservative_upside: str = Field(max_length=200, description="Best case if conservative")
+    conservative_downside: str = Field(max_length=200, description="Worst case if conservative")
 
 
 class CaddieRecommendation(BaseModel):
-    """Output of caddie recommendation engine"""
+    """
+    Conviction-first caddie recommendation.
+    
+    Philosophy: A great caddie gives you THE play, not a menu of options.
+    Alternatives exist but are clearly secondary.
+    """
     recommendation_id: str = Field(max_length=50)
     shot_analysis_id: str = Field(max_length=50)
-    primary_recommendation: PrimaryRecommendation
-    adjustment_summary: AdjustmentSummary
-    alternative_clubs: Optional[List[AlternativeClub]] = None
-    hazard_analysis: HazardAnalysis
-    strategy_notes: Optional[str] = Field(None, max_length=1000)
     timestamp: datetime = Field(default_factory=datetime.now)
+    
+    # THE CALL — what a great caddie would say
+    primary_club: ClubType
+    primary_target: str = Field(max_length=200, description="Where to aim (specific)")
+    caddie_call: str = Field(max_length=200, description="The one-liner: '7-iron, center green. Trust it.'")
+    caddie_note: str = Field(max_length=500, description="Situational context from round awareness")
+    
+    # THE REASONING — expandable detail
+    why: str = Field(max_length=500, description="Brief explanation of why this is the play")
+    adjusted_distance: int = Field(ge=0, le=450, description="Expected total distance")
+    optimal_miss: str = Field(max_length=200, description="Where to miss if you miss")
+    danger_zone: str = Field(max_length=200, description="Where you absolutely cannot go")
+    
+    # ALTERNATIVES — max 2, clearly secondary
+    alternatives: Optional[List[AlternativePlay]] = Field(None, max_length=2)
+    
+    # RISK FRAMING
+    risk_reward: RiskReward
+    
+    # LEGACY FIELDS (for backward compatibility during transition)
+    confidence_percent: Optional[int] = Field(None, ge=0, le=100)
+    expected_carry_yards: Optional[int] = Field(None, ge=0, le=400)
+
+
+# ============================================================================
+# LEGACY MODELS (deprecated, kept for backward compatibility)
+# ============================================================================
+
+class PrimaryRecommendation(BaseModel):
+    """DEPRECATED: Use CaddieRecommendation fields directly"""
+    club: ClubType
+    target_area: str = Field(max_length=200)
+    expected_carry_yards: int = Field(ge=0, le=400)
+    expected_total_yards: int = Field(ge=0, le=450)
+    confidence_percent: int = Field(ge=0, le=100)
+
+
+class AdjustmentSummary(BaseModel):
+    """DEPRECATED: Physics adjustments now in 'why' field"""
+    temperature_adjustment_yards: int = 0
+    elevation_adjustment_yards: int = 0
+    wind_adjustment_yards: int = 0
+    rain_adjustment_percent: float = 0.0
+    lie_adjustment_percent: float = 0.0
+    human_readable_summary: List[str]
+
+
+class AlternativeClub(BaseModel):
+    """DEPRECATED: Use AlternativePlay instead"""
+    club: ClubType
+    confidence_percent: int = Field(ge=0, le=100)
+    rationale: str = Field(max_length=500)
+
+
+class HazardAnalysis(BaseModel):
+    """DEPRECATED: Hazards now in optimal_miss and danger_zone fields"""
+    hazards_in_play: List[HazardInPlay] = []
+    safe_miss_direction: Optional[SafeMissDirection] = None
 
 
 # ============================================================================

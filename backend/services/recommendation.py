@@ -305,77 +305,118 @@ def generate_recommendation(
     viable_clubs.sort(key=lambda x: x["match_score"], reverse=True)
     primary_option = viable_clubs[0]
 
-    # 7. Generate primary recommendation
+    # 7. Generate conviction-first recommendation (Task 4)
     pin_loc = shot_analysis.pin_location.value if hasattr(shot_analysis.pin_location, 'value') else shot_analysis.pin_location
-    primary_rec = PrimaryRecommendation(
-        club=primary_option["club_type"],
-        target_area=generate_target_area(hole, primary_option["hazard_analysis"], pin_loc),
-        expected_carry_yards=primary_option["adjusted_carry"],
-        expected_total_yards=primary_option["adjusted_total"],
-        confidence_percent=min(95, max(50, int(primary_option["match_score"])))
-    )
-
-    # 8. Generate adjustment summary
+    
+    # Extract club as string
+    club_str = primary_option["club_type"].value if hasattr(primary_option["club_type"], 'value') else str(primary_option["club_type"])
+    club_display = club_str.replace("_", " ").title()
+    
+    # Generate target area
+    target_area = generate_target_area(hole, primary_option["hazard_analysis"], pin_loc)
+    
+    # Generate caddie call (one-liner)
+    caddie_call = f"{club_display}, {target_area.lower()}. Trust it."
+    
+    # Generate caddie note (situational context - default for now, can wire in RoundContext later)
+    if hole.par == 3:
+        caddie_note = "Good par 3. Trust your distance."
+    elif hole.par == 5:
+        caddie_note = "Scoring hole. Let's make birdie."
+    else:
+        caddie_note = "Fairway first, then we'll go at the pin."
+    
+    # Generate "why" explanation
     adj = primary_option["adjustments"]
-    summary_lines = []
-    if adj["temperature_yards"] != 0:
-        summary_lines.append(f"{adj['temperature_yards']:+d} yards for temperature ({weather.temperature_fahrenheit:.0f}°F)")
-    if adj["elevation_yards"] != 0:
-        summary_lines.append(f"+{adj['elevation_yards']} yards for elevation")
+    adj_parts = []
+    if adj["elevation_yards"] > 0:
+        adj_parts.append(f"+{adj['elevation_yards']}y elevation")
     if adj["wind_yards"] != 0:
-        summary_lines.append(f"{adj['wind_yards']:+d} yards for {wind_relative}")
-    if adj["rain_percent"] > 0:
-        summary_lines.append(f"-{adj['rain_percent']*100:.0f}% for wet conditions")
-    if adj["lie_percent"] > 0:
-        lie_str = shot_analysis.player_lie.value if hasattr(shot_analysis.player_lie, 'value') else shot_analysis.player_lie
-        summary_lines.append(f"-{adj['lie_percent']*100:.0f}% for {lie_str}")
-
-    adjustment_summary = AdjustmentSummary(
-        temperature_adjustment_yards=adj["temperature_yards"],
-        elevation_adjustment_yards=adj["elevation_yards"],
-        wind_adjustment_yards=adj["wind_yards"],
-        rain_adjustment_percent=adj["rain_percent"],
-        lie_adjustment_percent=adj["lie_percent"],
-        human_readable_summary=summary_lines if summary_lines else ["No significant adjustments"]
-    )
-
-    # 9. Generate alternatives
+        adj_parts.append(f"{adj['wind_yards']:+d}y {wind_relative}")
+    if adj["temperature_yards"] != 0:
+        adj_parts.append(f"{adj['temperature_yards']:+d}y temp")
+    
+    hazards = primary_option["hazard_analysis"]["hazards_in_play"]
+    if hazards:
+        hazard_names = [h["hazard_type"] for h in hazards if h["risk_level"] == "high"]
+        if hazard_names:
+            adj_parts.append(f"avoid {', '.join(hazard_names)}")
+    
+    if adj_parts:
+        why = f"{club_display} plays {primary_option['adjusted_total']} yards here ({', '.join(adj_parts)})."
+    else:
+        why = f"{club_display} is the right club for {target_distance} yards."
+    
+    # Optimal miss and danger zone
+    safe_miss = primary_option["hazard_analysis"]["safe_miss_direction"]
+    optimal_miss = f"Miss {safe_miss} is safe" if safe_miss and safe_miss != "center" else "Center is fine"
+    
+    high_risk_hazards = [h for h in hazards if h["risk_level"] == "high"]
+    if high_risk_hazards:
+        danger_desc = ", ".join([f"{h['hazard_type']} {h['location']}" for h in high_risk_hazards])
+        danger_zone = f"Do not miss {danger_desc}"
+    else:
+        danger_zone = "No major danger zones"
+    
+    # Generate alternatives (max 2)
     alternatives = []
     for option in viable_clubs[1:3]:
+        if len(alternatives) >= 2:
+            break
         distance_diff = abs(option["adjusted_total"] - primary_option["adjusted_total"])
         if distance_diff > 10:
-            rationale = generate_alternative_rationale(option, primary_option, strategy, target_distance)
-            if rationale:
-                alternatives.append(AlternativeClub(
-                    club=option["club_type"],
-                    confidence_percent=min(90, max(40, int(option["match_score"]))),
-                    rationale=rationale
-                ))
-
-    # 10. Build hazard analysis for output
-    hazard_output = HazardAnalysis(
-        hazards_in_play=[
-            HazardInPlay(
-                hazard_type=h["hazard_type"],
-                location=h["location"],
-                distance_from_tee=h["distance_from_tee"],
-                risk_level=h["risk_level"]
-            )
-            for h in primary_option["hazard_analysis"]["hazards_in_play"]
-        ],
-        safe_miss_direction=primary_option["hazard_analysis"]["safe_miss_direction"]
+            alt_club_str = option["club_type"].value if hasattr(option["club_type"], 'value') else str(option["club_type"])
+            alt_club_display = alt_club_str.replace("_", " ").title()
+            
+            # Determine scenario
+            if option["adjusted_total"] < primary_option["adjusted_total"]:
+                scenario = f"If you want safety or wind picks up"
+                target = f"Lay up to {option['adjusted_total']} yards"
+            else:
+                scenario = f"If you want more club or wind dies"
+                target = f"Take dead aim, {option['adjusted_total']} yards"
+            
+            alternatives.append(AlternativePlay(
+                club=option["club_type"],
+                target=target,
+                scenario=scenario
+            ))
+    
+    # Generate risk/reward framing
+    if strategy == "aggressive":
+        aggressive_upside = f"Birdie putt from {10 + hole.par * 2} feet"
+        aggressive_downside = f"Possible {high_risk_hazards[0]['hazard_type']} if missed" if high_risk_hazards else "Tough up-and-down"
+        conservative_upside = f"25-30 foot putt, makeable for birdie"
+        conservative_downside = "Easy two-putt par"
+    else:
+        aggressive_upside = f"Close look at birdie"
+        aggressive_downside = f"Risk of {high_risk_hazards[0]['hazard_type']}" if high_risk_hazards else "Difficult recovery"
+        conservative_upside = f"Safe par with birdie chance"
+        conservative_downside = "Comfortable two-putt"
+    
+    risk_reward = RiskReward(
+        aggressive_upside=aggressive_upside,
+        aggressive_downside=aggressive_downside,
+        conservative_upside=conservative_upside,
+        conservative_downside=conservative_downside
     )
-
-    # 11. Generate strategy notes
-    strategy_notes = generate_strategy_notes(primary_option, hole, strategy, pin_loc)
-
-    # 12. Return complete recommendation
+    
+    # 8. Return conviction-first recommendation
+    from models import AlternativePlay, RiskReward
+    
     return CaddieRecommendation(
         recommendation_id=f"rec_{shot_analysis.analysis_id}",
         shot_analysis_id=shot_analysis.analysis_id,
-        primary_recommendation=primary_rec,
-        adjustment_summary=adjustment_summary,
-        alternative_clubs=alternatives if alternatives else None,
-        hazard_analysis=hazard_output,
-        strategy_notes=strategy_notes
+        primary_club=primary_option["club_type"],
+        primary_target=target_area,
+        caddie_call=caddie_call,
+        caddie_note=caddie_note,
+        why=why,
+        adjusted_distance=primary_option["adjusted_total"],
+        optimal_miss=optimal_miss,
+        danger_zone=danger_zone,
+        alternatives=alternatives if alternatives else None,
+        risk_reward=risk_reward,
+        confidence_percent=min(95, max(50, int(primary_option["match_score"]))),
+        expected_carry_yards=primary_option["adjusted_carry"]
     )
