@@ -25,6 +25,13 @@ from .player_model import (
     PlayerRepository,
     JSONPlayerRepository,
 )
+from .round_context import (
+    calculate_momentum,
+    get_round_phase,
+    get_strategy_adjustment,
+    generate_caddie_note,
+    should_modify_aggression,
+)
 
 __all__ = [
     "generate_recommendation",
@@ -42,4 +49,9 @@ __all__ = [
     "PlayerModelService",
     "PlayerRepository",
     "JSONPlayerRepository",
+    "calculate_momentum",
+    "get_round_phase",
+    "get_strategy_adjustment",
+    "generate_caddie_note",
+    "should_modify_aggression",
 ]

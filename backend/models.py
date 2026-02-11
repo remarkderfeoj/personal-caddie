@@ -511,3 +511,31 @@ class PlayerProfile(BaseModel):
         if '<' in v or '>' in v or '\x00' in v:
             raise ValueError('Invalid characters in notes')
         return v
+
+
+# ============================================================================
+# ROUND CONTEXT MODELS (Task 3)
+# ============================================================================
+
+class Momentum(str, Enum):
+    """Player momentum indicator"""
+    HOT = "hot"
+    STEADY = "steady"
+    COLD = "cold"
+
+
+class RoundPhase(str, Enum):
+    """Phase of the round"""
+    EARLY = "early"  # Holes 1-6
+    MIDDLE = "middle"  # Holes 7-12
+    CLOSING = "closing"  # Holes 13-18
+
+
+class RoundContext(BaseModel):
+    """Context about how the round is progressing"""
+    current_hole: int = Field(ge=1, le=18)
+    score_to_par: int = Field(ge=-18, le=50, description="Current round score relative to par")
+    last_3_holes_scores: List[int] = Field(max_length=3, description="Scores on last 3 holes")
+    last_3_holes_pars: List[int] = Field(max_length=3, description="Pars for last 3 holes")
+    momentum: Momentum
+    round_phase: RoundPhase
