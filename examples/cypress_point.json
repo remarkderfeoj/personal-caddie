@@ -1,0 +1,84 @@
+{
+  "course_id": "cypress_point",
+  "course_name": "Cypress Point Club",
+  "course_elevation_feet": 20,
+  "holes": [
+    {
+      "hole_id": "cypress_15",
+      "hole_number": 15,
+      "par": 3,
+      "handicap_index": 13,
+      "distance_to_pin_yards": 143,
+      "shot_bearing_degrees": 210,
+      "elevation_change_feet": -30,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 0,
+          "severity": "water",
+          "description": "Pacific Ocean"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 135,
+          "severity": "bunker",
+          "description": "Bailout area bunker"
+        }
+      ],
+      "green_shape": "small",
+      "notes": "Downhill par 3 over ocean inlet"
+    },
+    {
+      "hole_id": "cypress_16",
+      "hole_number": 16,
+      "par": 4,
+      "handicap_index": 1,
+      "distance_to_pin_yards": 231,
+      "shot_bearing_degrees": 180,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "center",
+          "distance_from_tee_yards": 0,
+          "severity": "water",
+          "description": "Pacific Ocean - 220 yards carry"
+        }
+      ],
+      "green_shape": "small",
+      "notes": "Most famous par 3 in America - 220 yard carry over Pacific"
+    },
+    {
+      "hole_id": "cypress_17",
+      "hole_number": 17,
+      "par": 4,
+      "handicap_index": 7,
+      "distance_to_pin_yards": 393,
+      "shot_bearing_degrees": 90,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 0,
+          "severity": "water",
+          "description": "Pacific Ocean along left side"
+        },
+        {
+          "hazard_type": "trees",
+          "location": "right",
+          "distance_from_tee_yards": 250,
+          "severity": "bunker",
+          "description": "Cypress trees"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Alister MacKenzie masterpiece on Monterey Peninsula"
+    }
+  ]
+}

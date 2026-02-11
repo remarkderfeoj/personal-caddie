@@ -1,0 +1,77 @@
+{
+  "course_id": "st_andrews_old",
+  "course_name": "St Andrews Old Course",
+  "course_elevation_feet": 30,
+  "holes": [
+    {
+      "hole_id": "st_andrews_1",
+      "hole_number": 1,
+      "par": 4,
+      "handicap_index": 12,
+      "distance_to_pin_yards": 376,
+      "shot_bearing_degrees": 90,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 250,
+          "severity": "bunker",
+          "description": "Swilcan Burn bunker"
+        }
+      ],
+      "green_shape": "wide",
+      "notes": "Iconic opener with Swilcan Burn and town backdrop"
+    },
+    {
+      "hole_id": "st_andrews_17",
+      "hole_number": 17,
+      "par": 4,
+      "handicap_index": 1,
+      "distance_to_pin_yards": 495,
+      "shot_bearing_degrees": 270,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 0,
+          "severity": "bunker",
+          "description": "Road Hole Bunker"
+        },
+        {
+          "hazard_type": "out_of_bounds",
+          "location": "right",
+          "distance_from_tee_yards": 380,
+          "severity": "out_of_bounds",
+          "description": "Road"
+        }
+      ],
+      "green_shape": "narrow",
+      "notes": "Famous Road Hole - most difficult par 4 in golf"
+    },
+    {
+      "hole_id": "st_andrews_18",
+      "hole_number": 18,
+      "par": 4,
+      "handicap_index": 10,
+      "distance_to_pin_yards": 356,
+      "shot_bearing_degrees": 0,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "center",
+          "distance_from_tee_yards": 90,
+          "severity": "bunker",
+          "description": "Valley of Sin"
+        }
+      ],
+      "green_shape": "wide",
+      "notes": "Home of Golf - Swilcan Bridge and finishing green"
+    }
+  ]
+}

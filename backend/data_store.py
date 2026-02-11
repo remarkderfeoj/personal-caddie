@@ -23,17 +23,20 @@ class DataStore:
         """Load example data from files"""
         examples_dir = Path(__file__).parent.parent / "examples"
         
-        # Load sample course
-        course_file = examples_dir / "sample_course.json"
-        if course_file.exists():
+        # Load all course JSON files
+        for course_file in examples_dir.glob("*.json"):
+            # Skip player files
+            if "player" in course_file.name.lower():
+                continue
+            
             try:
                 with open(course_file, 'r') as f:
                     course_data = json.load(f)
                 course = CourseHoles(**course_data)
                 self.courses[course.course_id] = course
-                print(f"Loaded course: {course.course_name}")
+                print(f"Loaded course: {course.course_name} ({len(course.holes)} holes)")
             except Exception as e:
-                print(f"Error loading course: {e}")
+                print(f"Error loading {course_file.name}: {e}")
         
         # Load sample player
         player_file = examples_dir / "sample_player_baseline.json"
