@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Caddie - Progress Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            opacity: 0.8;
+            font-size: 14px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .status-dot.online {
+            background: #4ade80;
+            box-shadow: 0 0 10px #4ade80;
+        }
+        
+        .status-dot.offline {
+            background: #ef4444;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .metric:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-label {
+            opacity: 0.8;
+            font-size: 14px;
+        }
+        
+        .metric-value {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .commit-item {
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .commit-hash {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            opacity: 0.7;
+            margin-bottom: 4px;
+        }
+        
+        .commit-message {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .commit-time {
+            font-size: 12px;
+            opacity: 0.6;
+            margin-top: 4px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .badge-success {
+            background: #10b981;
+        }
+        
+        .badge-info {
+            background: #3b82f6;
+        }
+        
+        .badge-warning {
+            background: #f59e0b;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            opacity: 0.6;
+        }
+        
+        .error {
+            color: #fca5a5;
+            padding: 15px;
+            background: rgba(239, 68, 68, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .refresh-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .refresh-btn:active {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .footer {
+            text-align: center;
+            opacity: 0.6;
+            font-size: 12px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⛳ Personal Caddie</h1>
+            <div class="subtitle">Development Progress Dashboard</div>
+        </header>
+
+        <div class="card">
+            <h2>
+                <span class="status-dot" id="status-dot"></span>
+                API Status
+            </h2>
+            <div id="api-status" class="loading">Checking...</div>
+        </div>
+
+        <div class="card">
+            <h2>📊 Project Stats</h2>
+            <div id="project-stats">
+                <div class="metric">
+                    <span class="metric-label">Available Courses</span>
+                    <span class="metric-value" id="course-count">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Players</span>
+                    <span class="metric-value" id="player-count">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Total Holes</span>
+                    <span class="metric-value" id="hole-count">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>✨ Features</h2>
+            <div>
+                <span class="badge badge-success">Player Learning</span>
+                <span class="badge badge-success">Round Context</span>
+                <span class="badge badge-success">Conviction Recommendations</span>
+                <span class="badge badge-success">Rate Limited</span>
+                <span class="badge badge-success">Input Validated</span>
+                <span class="badge badge-success">Course Search</span>
+                <span class="badge badge-info">41 Tests</span>
+                <span class="badge badge-warning">PostgreSQL Ready</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📝 Recent Work</h2>
+            <div id="recent-commits">
+                <div class="commit-item">
+                    <div class="commit-hash">7228711</div>
+                    <div class="commit-message">PostgreSQL migration + API docs + test courses</div>
+                    <div class="commit-time">Just now</div>
+                </div>
+                <div class="commit-item">
+                    <div class="commit-hash">dc24f95</div>
+                    <div class="commit-message">Wire RoundContext into live recommendations</div>
+                    <div class="commit-time">10 minutes ago</div>
+                </div>
+                <div class="commit-item">
+                    <div class="commit-hash">e87359c</div>
+                    <div class="commit-message">Add comprehensive unit and integration tests</div>
+                    <div class="commit-time">20 minutes ago</div>
+                </div>
+                <div class="commit-item">
+                    <div class="commit-hash">065c140</div>
+                    <div class="commit-message">Implement working course search and data store</div>
+                    <div class="commit-time">30 minutes ago</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🔗 Quick Links</h2>
+            <div>
+                <a href="http://localhost:8000/docs" style="color: #93c5fd; text-decoration: none; display: block; padding: 8px 0;">
+                    📚 API Documentation (Swagger)
+                </a>
+                <a href="http://localhost:8000/health" style="color: #93c5fd; text-decoration: none; display: block; padding: 8px 0;">
+                    💚 Health Check
+                </a>
+                <a href="https://github.com/remarkderfeoj/personal-caddie" style="color: #93c5fd; text-decoration: none; display: block; padding: 8px 0;">
+                    📦 GitHub Repository
+                </a>
+            </div>
+        </div>
+
+        <button class="refresh-btn" onclick="loadData()">🔄 Refresh Data</button>
+
+        <div class="footer">
+            Last updated: <span id="last-updated">-</span>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.hostname === 'localhost' 
+            ? 'http://localhost:8000' 
+            : 'https://your-production-url.com';
+
+        async function loadData() {
+            try {
+                // Check API health
+                const healthRes = await fetch(`${API_BASE}/health`);
+                const health = await healthRes.json();
+                
+                document.getElementById('status-dot').className = 
+                    health.status === 'healthy' ? 'status-dot online' : 'status-dot offline';
+                document.getElementById('api-status').innerHTML = 
+                    `<div class="metric"><span class="metric-label">Status</span><span class="metric-value">✅ ${health.status}</span></div>`;
+
+                // Load courses
+                const coursesRes = await fetch(`${API_BASE}/api/v1/courses`);
+                const coursesData = await coursesRes.json();
+                
+                document.getElementById('course-count').textContent = coursesData.count || 0;
+                
+                // Calculate total holes
+                const totalHoles = coursesData.courses.reduce((sum, c) => sum + c.holes, 0);
+                document.getElementById('hole-count').textContent = totalHoles;
+                
+                // Players (placeholder - would need actual endpoint)
+                document.getElementById('player-count').textContent = '1+';
+                
+                document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('api-status').innerHTML = 
+                    `<div class="error">⚠️ Could not connect to API. Make sure server is running on ${API_BASE}</div>`;
+                document.getElementById('status-dot').className = 'status-dot offline';
+            }
+        }
+
+        // Load data on page load
+        loadData();
+
+        // Auto-refresh every 30 seconds
+        setInterval(loadData, 30000);
+    </script>
+</body>
+</html>
