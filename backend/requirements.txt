@@ -1,5 +1,13 @@
+# Run: pip-audit -r requirements.txt to check for known vulnerabilities
+
 fastapi==0.104.1
 uvicorn==0.24.0
 pydantic==2.5.0
 pydantic-settings==2.1.0
 python-dotenv==1.0.0
+
+# Rate limiting
+slowapi==0.1.9
+
+# Database (Phase 2)
+sqlalchemy==2.0.23

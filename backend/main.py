@@ -6,14 +6,21 @@ Provides API endpoints for:
 - Player baseline management
 - Course data
 - Shot analysis and recommendations
+
+SECURITY: Rate limited, CORS configured, input validated.
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List
+from fastapi.responses import JSONResponse
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from typing import List, Optional
 from datetime import datetime
 import json
 import os
+import logging
 
 from models import (
     PlayerBaseline,
@@ -23,6 +30,14 @@ from models import (
     CaddieRecommendation,
 )
 from services import generate_recommendation
+from auth import get_current_user, get_optional_user, User
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Initialize rate limiter
+limiter = Limiter(key_func=get_remote_address)
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -31,14 +46,38 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# Add CORS middleware for frontend integration (Phase 2)
+# Add rate limiter to app state
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Configure CORS (restrict to frontend origin in production)
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Restrict in production
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
+
+
+# ============================================================================
+# GLOBAL ERROR HANDLER
+# ============================================================================
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """
+    Global exception handler - never leaks stack traces to clients.
+    
+    Logs full error internally, returns safe generic message.
+    """
+    logger.error(f"Unhandled exception: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error"}
+    )
 
 
 # ============================================================================
@@ -46,7 +85,8 @@ app.add_middleware(
 # ============================================================================
 
 @app.get("/")
-def read_root():
+@limiter.limit("100/minute")
+def read_root(request: Request):
     """Root endpoint - API information"""
     return {
         "name": "Personal Caddie API",
@@ -57,7 +97,8 @@ def read_root():
 
 
 @app.get("/health")
-def health_check():
+@limiter.limit("100/minute")
+def health_check(request: Request):
     """Health check endpoint"""
     return {"status": "healthy"}
 
@@ -67,7 +108,8 @@ def health_check():
 # ============================================================================
 
 @app.post("/api/v1/players/baseline")
-def create_player_baseline(baseline: PlayerBaseline):
+@limiter.limit("100/minute")
+def create_player_baseline(request: Request, baseline: PlayerBaseline):
     """
     Create or update a player's baseline distances.
 
@@ -88,7 +130,8 @@ def create_player_baseline(baseline: PlayerBaseline):
 
 
 @app.get("/api/v1/players/{player_id}/baseline")
-def get_player_baseline(player_id: str):
+@limiter.limit("100/minute")
+def get_player_baseline(request: Request, player_id: str):
     """Retrieve a player's baseline distances"""
     # TODO: Fetch from database
     return {
@@ -102,7 +145,8 @@ def get_player_baseline(player_id: str):
 # ============================================================================
 
 @app.post("/api/v1/courses")
-def create_course(course: CourseHoles):
+@limiter.limit("100/minute")
+def create_course(request: Request, course: CourseHoles):
     """
     Register a golf course with all 18 holes.
 
@@ -121,14 +165,16 @@ def create_course(course: CourseHoles):
 
 
 @app.get("/api/v1/courses/{course_id}")
-def get_course(course_id: str):
+@limiter.limit("100/minute")
+def get_course(request: Request, course_id: str):
     """Retrieve course data"""
     # TODO: Fetch from database
     return {"course_id": course_id, "message": "TODO: Implement database fetch"}
 
 
 @app.get("/api/v1/courses/{course_id}/holes/{hole_number}")
-def get_hole(course_id: str, hole_number: int):
+@limiter.limit("100/minute")
+def get_hole(request: Request, course_id: str, hole_number: int):
     """Get data for a specific hole"""
     if hole_number < 1 or hole_number > 18:
         raise HTTPException(status_code=400, detail="Hole number must be 1-18")
@@ -145,7 +191,8 @@ def get_hole(course_id: str, hole_number: int):
 # ============================================================================
 
 @app.post("/api/v1/weather")
-def record_weather(weather: WeatherConditions):
+@limiter.limit("100/minute")
+def record_weather(request: Request, weather: WeatherConditions):
     """
     Record current weather conditions.
     Used for calculating distance adjustments.
@@ -160,7 +207,8 @@ def record_weather(weather: WeatherConditions):
 
 
 @app.get("/api/v1/weather/{condition_id}")
-def get_weather(condition_id: str):
+@limiter.limit("100/minute")
+def get_weather(request: Request, condition_id: str):
     """Retrieve recorded weather"""
     # TODO: Fetch from database
     return {"condition_id": condition_id, "message": "TODO: Implement database fetch"}
@@ -171,7 +219,12 @@ def get_weather(condition_id: str):
 # ============================================================================
 
 @app.post("/api/v1/recommendations")
-def get_recommendation(analysis: ShotAnalysis) -> CaddieRecommendation:
+@limiter.limit("20/minute")
+def get_recommendation(
+    request: Request,
+    analysis: ShotAnalysis,
+    current_user: Optional[User] = Depends(get_optional_user)
+) -> CaddieRecommendation:
     """
     Get a caddie recommendation for a shot.
 
@@ -246,7 +299,8 @@ def get_recommendation(analysis: ShotAnalysis) -> CaddieRecommendation:
 # ============================================================================
 
 @app.get("/api/v1/examples/sample-player")
-def get_sample_player():
+@limiter.limit("100/minute")
+def get_sample_player(request: Request):
     """Returns example player baseline for testing"""
     example_file = os.path.join(
         os.path.dirname(__file__),
@@ -259,7 +313,8 @@ def get_sample_player():
 
 
 @app.get("/api/v1/examples/sample-course")
-def get_sample_course():
+@limiter.limit("100/minute")
+def get_sample_course(request: Request):
     """Returns example course data for testing"""
     example_file = os.path.join(
         os.path.dirname(__file__),
