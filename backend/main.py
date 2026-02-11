@@ -31,6 +31,7 @@ from models import (
 )
 from services import generate_recommendation
 from auth import get_current_user, get_optional_user, User
+from data_store import data_store
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -120,7 +121,7 @@ def create_player_baseline(request: Request, baseline: PlayerBaseline):
 
     These are used as the baseline for all adjustments.
     """
-    # TODO: Persist to database
+    data_store.add_player(baseline)
     return {
         "status": "created",
         "player_id": baseline.player_id,
@@ -131,18 +132,60 @@ def create_player_baseline(request: Request, baseline: PlayerBaseline):
 
 @app.get("/api/v1/players/{player_id}/baseline")
 @limiter.limit("100/minute")
-def get_player_baseline(request: Request, player_id: str):
+def get_player_baseline(request: Request, player_id: str) -> PlayerBaseline:
     """Retrieve a player's baseline distances"""
-    # TODO: Fetch from database
-    return {
-        "player_id": player_id,
-        "message": "TODO: Implement database fetch",
-    }
+    player = data_store.get_player_by_id(player_id)
+    if not player:
+        raise HTTPException(status_code=404, detail=f"Player {player_id} not found")
+    return player
 
 
 # ============================================================================
 # COURSE DATA ENDPOINTS
 # ============================================================================
+
+@app.get("/api/v1/courses")
+@limiter.limit("100/minute")
+def list_courses(request: Request, search: Optional[str] = None):
+    """
+    List all courses or search by name.
+    
+    Query params:
+        search: Optional search string (searches course name and ID)
+    
+    Returns:
+        List of matching courses
+    """
+    if search:
+        courses = data_store.search_courses(search)
+        return {
+            "count": len(courses),
+            "query": search,
+            "courses": [
+                {
+                    "course_id": c.course_id,
+                    "course_name": c.course_name,
+                    "elevation_feet": c.course_elevation_feet,
+                    "holes": len(c.holes)
+                }
+                for c in courses
+            ]
+        }
+    else:
+        courses = data_store.list_all_courses()
+        return {
+            "count": len(courses),
+            "courses": [
+                {
+                    "course_id": c.course_id,
+                    "course_name": c.course_name,
+                    "elevation_feet": c.course_elevation_feet,
+                    "holes": len(c.holes)
+                }
+                for c in courses
+            ]
+        }
+
 
 @app.post("/api/v1/courses")
 @limiter.limit("100/minute")
@@ -153,9 +196,9 @@ def create_course(request: Request, course: CourseHoles):
     Required fields:
     - course_name
     - course_elevation_feet
-    - 18 holes with distance, par, bearing, hazards
+    - holes (list of hole data)
     """
-    # TODO: Persist to database
+    data_store.add_course(course)
     return {
         "status": "created",
         "course_id": course.course_id,
@@ -166,10 +209,16 @@ def create_course(request: Request, course: CourseHoles):
 
 @app.get("/api/v1/courses/{course_id}")
 @limiter.limit("100/minute")
-def get_course(request: Request, course_id: str):
-    """Retrieve course data"""
-    # TODO: Fetch from database
-    return {"course_id": course_id, "message": "TODO: Implement database fetch"}
+def get_course(request: Request, course_id: str) -> CourseHoles:
+    """
+    Retrieve full course data by ID.
+    
+    Returns complete course with all holes, hazards, etc.
+    """
+    course = data_store.get_course_by_id(course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail=f"Course {course_id} not found")
+    return course
 
 
 @app.get("/api/v1/courses/{course_id}/holes/{hole_number}")
@@ -178,12 +227,16 @@ def get_hole(request: Request, course_id: str, hole_number: int):
     """Get data for a specific hole"""
     if hole_number < 1 or hole_number > 18:
         raise HTTPException(status_code=400, detail="Hole number must be 1-18")
-    # TODO: Fetch from database
-    return {
-        "course_id": course_id,
-        "hole_number": hole_number,
-        "message": "TODO: Implement database fetch",
-    }
+    
+    course = data_store.get_course_by_id(course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail=f"Course {course_id} not found")
+    
+    hole = next((h for h in course.holes if h.hole_number == hole_number), None)
+    if not hole:
+        raise HTTPException(status_code=404, detail=f"Hole {hole_number} not found on course {course_id}")
+    
+    return hole
 
 
 # ============================================================================
@@ -246,27 +299,26 @@ def get_recommendation(
     - Hazard analysis
     - Confidence level
     """
-    # Load player baseline from example file (MVP)
-    player_file = os.path.join(
-        os.path.dirname(__file__),
-        "../examples/sample_player_baseline.json"
-    )
-    with open(player_file, "r") as f:
-        player_data = json.load(f)
-    player_baseline = PlayerBaseline(**player_data)
+    # Load player baseline from data store
+    player_baseline = data_store.get_player_by_id(analysis.player_id)
+    if not player_baseline:
+        raise HTTPException(status_code=404, detail=f"Player {analysis.player_id} not found")
 
-    # Load course data from example file (MVP)
-    course_file = os.path.join(
-        os.path.dirname(__file__),
-        "../examples/sample_course.json"
-    )
-    with open(course_file, "r") as f:
-        course_data = json.load(f)
-    course = CourseHoles(**course_data)
-
-    # Find the hole
-    hole = next((h for h in course.holes if h.hole_id == analysis.hole_id), None)
-    if not hole:
+    # Extract course ID from hole ID (format: "course_hole")
+    # For now, we need to search through courses to find the hole
+    course = None
+    hole = None
+    
+    for c in data_store.list_all_courses():
+        for h in c.holes:
+            if h.hole_id == analysis.hole_id:
+                course = c
+                hole = h
+                break
+        if course:
+            break
+    
+    if not course or not hole:
         raise HTTPException(status_code=404, detail=f"Hole {analysis.hole_id} not found")
 
     # Create weather conditions
