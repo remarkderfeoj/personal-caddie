@@ -1,13 +1,465 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Personal Caddie - Golf Shot Advisor</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Personal Caddie</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1e5128 0%, #2d6a4f 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-top: 20px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2d6a4f;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #d8f3dc;
+            border-radius: 12px;
+            font-size: 16px;
+            background: #fff;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2d6a4f;
+            box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #2d6a4f 0%, #1e5128 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(45, 106, 79, 0.4);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .recommendation {
+            background: linear-gradient(135deg, #1e5128 0%, #2d6a4f 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-top: 20px;
+        }
+
+        .caddie-call {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+        }
+
+        .club-display {
+            font-size: 48px;
+            text-align: center;
+            margin: 25px 0;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 15px;
+        }
+
+        .detail:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            opacity: 0.8;
+        }
+
+        .detail-value {
+            font-weight: 600;
+        }
+
+        .notes {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            font-size: 18px;
+        }
+
+        .error {
+            background: #dc3545;
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .course-search {
+            position: relative;
+        }
+
+        .course-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #2d6a4f;
+            border-radius: 12px;
+            margin-top: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .course-result {
+            padding: 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #e9ecef;
+            transition: background 0.2s;
+        }
+
+        .course-result:hover {
+            background: #d8f3dc;
+        }
+
+        .course-result:last-child {
+            border-bottom: none;
+        }
+
+        .course-name {
+            font-weight: 600;
+            color: #2d6a4f;
+        }
+
+        .course-location {
+            font-size: 12px;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⛳️ Personal Caddie</h1>
+            <div class="subtitle">Your Smart Golf Assistant</div>
+        </header>
+
+        <div class="card">
+            <form id="shotForm">
+                <div class="form-group course-search">
+                    <label>Course</label>
+                    <input type="text" id="courseSearch" placeholder="Search for a course..." autocomplete="off">
+                    <div id="courseResults" class="course-results hidden"></div>
+                    <input type="hidden" id="courseId">
+                </div>
+
+                <div class="form-group">
+                    <label>Hole Number</label>
+                    <input type="number" id="holeNumber" min="1" max="18" value="1">
+                </div>
+
+                <div class="form-group">
+                    <label>Distance to Pin (yards)</label>
+                    <input type="number" id="distance" min="1" value="150">
+                </div>
+
+                <div class="form-group">
+                    <label>Wind Speed (mph)</label>
+                    <input type="number" id="windSpeed" min="0" max="50" value="0">
+                </div>
+
+                <div class="form-group">
+                    <label>Wind Direction</label>
+                    <select id="windDirection">
+                        <option value="calm">Calm</option>
+                        <option value="headwind">Headwind</option>
+                        <option value="tailwind">Tailwind</option>
+                        <option value="left-to-right">Left to Right</option>
+                        <option value="right-to-left">Right to Left</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Lie</label>
+                    <select id="lie">
+                        <option value="fairway">Fairway</option>
+                        <option value="rough">Rough</option>
+                        <option value="tee">Tee</option>
+                        <option value="sand">Sand</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Elevation Change (feet)</label>
+                    <input type="number" id="elevation" value="0" step="5">
+                </div>
+
+                <button type="submit" class="btn" id="submitBtn">Get Recommendation</button>
+            </form>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:8000' 
+            : window.location.origin;
+
+        let selectedCourse = null;
+        let searchTimeout = null;
+
+        // Course search
+        document.getElementById('courseSearch').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            const query = e.target.value.trim();
+            
+            if (query.length < 2) {
+                document.getElementById('courseResults').classList.add('hidden');
+                return;
+            }
+
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const response = await fetch(`${API_URL}/api/v1/courses?search=${encodeURIComponent(query)}`);
+                    const data = await response.json();
+                    
+                    const resultsDiv = document.getElementById('courseResults');
+                    
+                    if (data.courses && data.courses.length > 0) {
+                        resultsDiv.innerHTML = data.courses.map(course => `
+                            <div class="course-result" data-id="${course.id}">
+                                <div class="course-name">${course.name}</div>
+                                <div class="course-location">${course.location || 'Unknown location'}</div>
+                            </div>
+                        `).join('');
+                        resultsDiv.classList.remove('hidden');
+                        
+                        // Add click handlers
+                        resultsDiv.querySelectorAll('.course-result').forEach(el => {
+                            el.addEventListener('click', () => {
+                                const courseId = el.dataset.id;
+                                const courseName = el.querySelector('.course-name').textContent;
+                                
+                                selectedCourse = data.courses.find(c => c.id === courseId);
+                                document.getElementById('courseSearch').value = courseName;
+                                document.getElementById('courseId').value = courseId;
+                                resultsDiv.classList.add('hidden');
+                            });
+                        });
+                    } else {
+                        resultsDiv.innerHTML = '<div class="course-result">No courses found</div>';
+                        resultsDiv.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error('Course search error:', error);
+                }
+            }, 300);
+        });
+
+        // Close results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.course-search')) {
+                document.getElementById('courseResults').classList.add('hidden');
+            }
+        });
+
+        // Form submission
+        document.getElementById('shotForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!selectedCourse) {
+                alert('Please select a course');
+                return;
+            }
+
+            const btn = document.getElementById('submitBtn');
+            const resultDiv = document.getElementById('result');
+            
+            btn.disabled = true;
+            btn.textContent = 'Analyzing...';
+            resultDiv.innerHTML = '<div class="card loading">🔄 Calculating optimal shot...</div>';
+
+            try {
+                const requestData = {
+                    course_id: document.getElementById('courseId').value,
+                    hole_number: parseInt(document.getElementById('holeNumber').value),
+                    distance_to_pin: parseInt(document.getElementById('distance').value),
+                    wind_speed: parseInt(document.getElementById('windSpeed').value),
+                    wind_direction: document.getElementById('windDirection').value,
+                    lie: document.getElementById('lie').value,
+                    elevation_change: parseInt(document.getElementById('elevation').value)
+                };
+
+                const response = await fetch(`${API_URL}/api/v1/recommendation/simple`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="recommendation">
+                        <div class="caddie-call">${data.caddie_call}</div>
+                        <div class="club-display">${data.primary_club}</div>
+                        
+                        <div class="detail">
+                            <span class="detail-label">Adjusted Distance</span>
+                            <span class="detail-value">${data.adjusted_distance} yds</span>
+                        </div>
+                        <div class="detail">
+                            <span class="detail-label">Shot Shape</span>
+                            <span class="detail-value">${data.shot_shape}</span>
+                        </div>
+                        <div class="detail">
+                            <span class="detail-label">Confidence</span>
+                            <span class="detail-value">${Math.round(data.confidence * 100)}%</span>
+                        </div>
+                        
+                        ${data.notes ? `<div class="notes">${data.notes}</div>` : ''}
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Error getting recommendation. Make sure the API is running.
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Get Recommendation';
+            }
+        });
+
+        // Load a default course on startup
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch(`${API_URL}/api/v1/courses?search=Augusta`);
+                const data = await response.json();
+                if (data.courses && data.courses.length > 0) {
+                    selectedCourse = data.courses[0];
+                    document.getElementById('courseSearch').value = selectedCourse.name;
+                    document.getElementById('courseId').value = selectedCourse.id;
+                }
+            } catch (error) {
+                console.log('Could not load default course');
+            }
+        });
+    </script>
+</body>
 </html>

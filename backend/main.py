@@ -12,7 +12,8 @@ SECURITY: Rate limited, CORS configured, input validated.
 
 from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -51,12 +52,13 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Configure CORS (restrict to frontend origin in production)
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+# Configure CORS (allow all for mobile access in development)
+# In production, set ALLOWED_ORIGINS env var to restrict
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=["*"] if "*" in ALLOWED_ORIGINS else ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
@@ -85,6 +87,16 @@ async def global_exception_handler(request: Request, exc: Exception):
 # HEALTH & INFO ENDPOINTS
 # ============================================================================
 
+@app.get("/app")
+async def serve_app():
+    """Serve the mobile web app"""
+    frontend_path = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)),
+        "frontend/index.html"
+    )
+    return FileResponse(frontend_path)
+
+
 @app.get("/")
 @limiter.limit("100/minute")
 def read_root(request: Request):
@@ -94,6 +106,7 @@ def read_root(request: Request):
         "version": "0.1.0",
         "description": "AI-powered golf caddie recommendation system",
         "status": "running",
+        "web_app": "/app",
     }
 
 
@@ -163,8 +176,9 @@ def list_courses(request: Request, search: Optional[str] = None):
             "query": search,
             "courses": [
                 {
-                    "course_id": c.course_id,
-                    "course_name": c.course_name,
+                    "id": c.course_id,
+                    "name": c.course_name,
+                    "location": getattr(c, 'location', 'Unknown'),
                     "elevation_feet": c.course_elevation_feet,
                     "holes": len(c.holes)
                 }
@@ -177,8 +191,9 @@ def list_courses(request: Request, search: Optional[str] = None):
             "count": len(courses),
             "courses": [
                 {
-                    "course_id": c.course_id,
-                    "course_name": c.course_name,
+                    "id": c.course_id,
+                    "name": c.course_name,
+                    "location": getattr(c, 'location', 'Unknown'),
                     "elevation_feet": c.course_elevation_feet,
                     "holes": len(c.holes)
                 }
@@ -271,7 +286,92 @@ def get_weather(request: Request, condition_id: str):
 # RECOMMENDATION ENDPOINTS (CORE FUNCTIONALITY)
 # ============================================================================
 
-@app.post("/api/v1/recommendations")
+@app.post("/api/v1/recommendation/simple")
+@limiter.limit("20/minute")
+async def get_simple_recommendation(request: Request):
+    """
+    Simplified recommendation endpoint for web app.
+    Accepts basic shot parameters and returns recommendation.
+    """
+    try:
+        data = await request.json()
+        
+        # Extract parameters
+        course_id = data.get("course_id")
+        hole_number = data.get("hole_number", 1)
+        distance_to_pin = data.get("distance_to_pin", 150)
+        wind_speed = data.get("wind_speed", 0)
+        wind_direction = data.get("wind_direction", "calm")
+        lie = data.get("lie", "fairway")
+        elevation_change = data.get("elevation_change", 0)
+        
+        # Get course and hole
+        course = data_store.get_course_by_id(course_id)
+        if not course:
+            raise HTTPException(status_code=404, detail=f"Course {course_id} not found")
+        
+        hole = next((h for h in course.holes if h.hole_number == hole_number), None)
+        if not hole:
+            raise HTTPException(status_code=404, detail=f"Hole {hole_number} not found")
+        
+        # Use default player for now (could be parameterized later)
+        players = data_store.list_all_players()
+        if not players:
+            raise HTTPException(status_code=404, detail="No players configured")
+        player_baseline = players[0]
+        
+        # Create simplified weather
+        weather = WeatherConditions(
+            condition_id="current",
+            timestamp=datetime.now(),
+            temperature_fahrenheit=70.0,
+            wind_speed_mph=float(wind_speed),
+            wind_direction_compass=wind_direction,
+            humidity_percent=50,
+            rain=False,
+            ground_conditions="dry"
+        )
+        
+        # Create shot analysis
+        analysis = ShotAnalysis(
+            shot_id=f"shot_{datetime.now().timestamp()}",
+            player_id=player_baseline.player_id,
+            hole_id=hole.hole_id,
+            distance_to_pin=distance_to_pin,
+            lie=lie,
+            pin_location="center",
+            weather_condition_id="current",
+            wind_relative_to_shot=wind_direction,
+            player_strategy_preference="balanced",
+            timestamp=datetime.now()
+        )
+        
+        # Generate recommendation
+        from services import generate_recommendation
+        recommendation = generate_recommendation(
+            shot_analysis=analysis,
+            player_baseline=player_baseline,
+            hole=hole,
+            weather=weather,
+            course_elevation_feet=course.course_elevation_feet + elevation_change,
+            round_context=None
+        )
+        
+        return {
+            "caddie_call": recommendation.caddie_call,
+            "primary_club": recommendation.primary_club,
+            "adjusted_distance": recommendation.adjusted_distance,
+            "shot_shape": recommendation.shot_shape or "straight",
+            "confidence": recommendation.confidence_level,
+            "notes": recommendation.notes
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in simple recommendation: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v1/recommendation")
 @limiter.limit("20/minute")
 def get_recommendation(
     request: Request,

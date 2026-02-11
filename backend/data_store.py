@@ -90,6 +90,10 @@ class DataStore:
     def add_player(self, player: PlayerBaseline) -> None:
         """Add or update a player"""
         self.players[player.player_id] = player
+    
+    def list_all_players(self) -> List[PlayerBaseline]:
+        """Get all players"""
+        return list(self.players.values())
 
 
 # Global data store instance
