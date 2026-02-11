@@ -334,13 +334,19 @@ def get_recommendation(
         ground_conditions="dry"
     )
 
+    # Build round context if available in request
+    # TODO: Accept RoundContext as part of request body in future
+    round_ctx = None
+    # For now, round_context is optional - can be added to API later
+    
     # Generate recommendation using services module
     recommendation = generate_recommendation(
         shot_analysis=analysis,
         player_baseline=player_baseline,
         hole=hole,
         weather=weather,
-        course_elevation_feet=course.course_elevation_feet
+        course_elevation_feet=course.course_elevation_feet,
+        round_context=round_ctx
     )
 
     return recommendation

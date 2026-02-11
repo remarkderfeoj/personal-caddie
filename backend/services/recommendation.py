@@ -35,6 +35,7 @@ from .course_strategy import (
     generate_strategy_notes,
 )
 from .player_model import player_service
+from .round_context import generate_caddie_note
 
 
 def calculate_adjusted_distance(
@@ -153,7 +154,8 @@ def generate_recommendation(
     player_baseline: PlayerBaseline,
     hole: Hole,
     weather: WeatherConditions,
-    course_elevation_feet: int = 0
+    course_elevation_feet: int = 0,
+    round_context: Optional[Dict] = None
 ) -> CaddieRecommendation:
     """
     Main recommendation engine orchestrator.
@@ -318,13 +320,26 @@ def generate_recommendation(
     # Generate caddie call (one-liner)
     caddie_call = f"{club_display}, {target_area.lower()}. Trust it."
     
-    # Generate caddie note (situational context - default for now, can wire in RoundContext later)
-    if hole.par == 3:
-        caddie_note = "Good par 3. Trust your distance."
-    elif hole.par == 5:
-        caddie_note = "Scoring hole. Let's make birdie."
+    # Generate caddie note (situational context from RoundContext)
+    if round_context:
+        # Use round-aware messaging
+        caddie_note = generate_caddie_note(
+            momentum=round_context.get("momentum", "steady"),
+            round_phase=round_context.get("round_phase", "middle"),
+            score_to_par=round_context.get("score_to_par", 0),
+            last_hole_score=round_context.get("last_hole_score", hole.par),
+            last_hole_par=round_context.get("last_hole_par", hole.par),
+            hole_par=hole.par,
+            hole_difficulty=round_context.get("hole_difficulty", "average")
+        )
     else:
-        caddie_note = "Fairway first, then we'll go at the pin."
+        # Default messaging without round context
+        if hole.par == 3:
+            caddie_note = "Good par 3. Trust your distance."
+        elif hole.par == 5:
+            caddie_note = "Scoring hole. Let's make birdie."
+        else:
+            caddie_note = "Fairway first, then we'll go at the pin."
     
     # Generate "why" explanation
     adj = primary_option["adjustments"]
