@@ -138,9 +138,26 @@
         .hole-svg-container {
             width: 100%; aspect-ratio: 1/1.8; background: #0a1510;
             border-radius: 12px; overflow: hidden; margin-bottom: 12px;
-            position: relative;
+            position: relative; cursor: crosshair;
         }
         .hole-svg-container svg { width: 100%; height: 100%; }
+        .tap-hint {
+            font-size: 11px; color: var(--text2); text-align: center;
+            margin-top: -8px; margin-bottom: 12px; opacity: .6;
+        }
+
+        /* Wind compass */
+        .wind-compass {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
+        }
+        .wind-btn {
+            padding: 10px 4px; border-radius: 8px;
+            background: var(--bg); border: 1px solid rgba(255,255,255,.1);
+            color: var(--text2); font-size: 11px; text-align: center;
+            cursor: pointer; transition: all .2s;
+        }
+        .wind-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(0,212,170,.08); }
+        .wind-btn:active { transform: scale(.95); }
 
         .hole-info-row {
             display: flex; justify-content: space-between; padding: 10px 0;
@@ -320,21 +337,21 @@
                     </select>
                 </div>
             </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Wind (mph)</label>
-                    <input type="number" id="fWind" value="0" min="0" max="50">
+            <div class="form-group">
+                <label>Wind Speed (mph)</label>
+                <input type="range" id="fWind" min="0" max="35" value="0" style="width:100%;accent-color:var(--accent)" oninput="document.getElementById('windVal').textContent=this.value+' mph'">
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-top:4px"><span>Calm</span><span id="windVal">0 mph</span><span>35+</span></div>
+            </div>
+            <div class="form-group" style="margin-top:8px">
+                <label>Wind Direction (relative to shot)</label>
+                <div class="wind-compass">
+                    <div class="wind-btn active" data-wind="calm" onclick="setWind(this)">🍃<br>Calm</div>
+                    <div class="wind-btn" data-wind="headwind" onclick="setWind(this)">⬆️<br>Into</div>
+                    <div class="wind-btn" data-wind="tailwind" onclick="setWind(this)">⬇️<br>Helping</div>
+                    <div class="wind-btn" data-wind="left-to-right" onclick="setWind(this)">➡️<br>L→R</div>
+                    <div class="wind-btn" data-wind="right-to-left" onclick="setWind(this)">⬅️<br>R→L</div>
                 </div>
-                <div class="form-group">
-                    <label>Wind Dir</label>
-                    <select id="fWindDir">
-                        <option value="calm">Calm</option>
-                        <option value="headwind">Headwind</option>
-                        <option value="tailwind">Tailwind</option>
-                        <option value="left-to-right">L→R</option>
-                        <option value="right-to-left">R→L</option>
-                    </select>
-                </div>
+                <input type="hidden" id="fWindDir" value="calm">
             </div>
             <div class="form-row">
                 <div class="form-group">
@@ -399,10 +416,26 @@ function renderCourseGrid(courses) {
     if (!courses.length) { grid.innerHTML = '<div style="color:var(--text2);text-align:center;padding:20px">No courses found</div>'; return; }
 
     const featured = ['augusta_national', 'tpc_sawgrass', 'st_andrews_old', 'pebble_beach', 'pine_valley'];
-    grid.innerHTML = courses.map(c => {
+    const local = ['rocky_river', 'eagle_chase', 'sunset_hills', 'warrior_gc', 'skybrook'];
+    
+    // Sort: local first, then featured, then rest
+    const sorted = [...courses].sort((a, b) => {
+        const aLocal = local.includes(a.id) ? 0 : 1;
+        const bLocal = local.includes(b.id) ? 0 : 1;
+        if (aLocal !== bLocal) return aLocal - bLocal;
+        const aFeat = featured.includes(a.id) ? 0 : 1;
+        const bFeat = featured.includes(b.id) ? 0 : 1;
+        return aFeat - bFeat;
+    });
+
+    grid.innerHTML = sorted.map(c => {
         const isFeatured = featured.includes(c.id);
+        const isLocal = local.includes(c.id);
+        let badge = '';
+        if (isLocal) badge = '<span class="course-card-badge" style="background:rgba(79,195,247,.15);color:#4fc3f7">📍 Charlotte Area</span>';
+        else if (isFeatured) badge = '<span class="course-card-badge featured-badge">⭐ Featured</span>';
         return `<div class="course-card" onclick="openCourse('${c.id}')">
-            ${isFeatured ? '<span class="course-card-badge featured-badge">⭐ Featured</span>' : ''}
+            ${badge}
             <div class="course-card-name">${c.name}</div>
             <div class="course-card-meta">
                 <span>⛳ ${c.holes} holes</span>
@@ -480,7 +513,8 @@ function renderHoleDetail(hole) {
                     <span class="badge" style="background:rgba(255,255,255,.06);color:var(--text2)">${hole.distance} yds</span>
                 </div>
             </div>
-            <div class="hole-svg-container">${generateHoleSVG(hole)}</div>
+            <div class="hole-svg-container" onclick="handleHoleTap(event, ${hole.hole_number})" id="holeVizSvg">${generateHoleSVG(hole)}</div>
+            <div class="tap-hint">👆 Tap the hole to set your position and get distance to pin</div>
             <div class="hole-info-row"><span class="hole-info-label">Distance</span><span class="hole-info-value">${hole.distance} yards</span></div>
             <div class="hole-info-row"><span class="hole-info-label">Par</span><span class="hole-info-value">${hole.par}</span></div>
             <div class="hole-info-row"><span class="hole-info-label">Handicap</span><span class="hole-info-value">${hole.handicap_index}</span></div>
@@ -493,8 +527,15 @@ function renderHoleDetail(hole) {
     `;
 }
 
+// ── WIND SELECTOR ──
+function setWind(el) {
+    document.querySelectorAll('.wind-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('fWindDir').value = el.dataset.wind;
+}
+
 // ── HOLE SVG VISUALIZATION ──
-function generateHoleSVG(hole) {
+function generateHoleSVG(hole, interactive) {
     const w = 300, h = 540;
     const isPar3 = hole.par === 3;
     const isPar5 = hole.par === 5;
@@ -536,19 +577,22 @@ function generateHoleSVG(hole) {
         }
     });
 
-    // Yardage markers
-    const markers = [];
-    if (!isPar3) {
-        const m150 = fwBottom - ((150 / hole.distance) * (fwBottom - fwTop));
-        const m200 = fwBottom - ((200 / hole.distance) * (fwBottom - fwTop));
-        markers.push({ y: m150, label: '150' });
-        if (hole.distance > 250) markers.push({ y: m200, label: '200' });
-    }
+    // Distance reference lines from pin (100, 150, 200, 250)
+    const distLines = [100, 150, 200];
+    if (hole.distance > 350) distLines.push(250);
+    if (hole.distance > 500) distLines.push(300);
 
-    const markersSVG = markers.map(m => `
-        <line x1="${w/2-fwWidth+10}" y1="${m.y}" x2="${w/2+fwWidth-10}" y2="${m.y}" stroke="rgba(255,255,255,.15)" stroke-width="1" stroke-dasharray="4,4"/>
-        <text x="${w/2+fwWidth+8}" y="${m.y+4}" font-size="9" fill="rgba(255,255,255,.3)">${m.label}</text>
-    `).join('');
+    const markersSVG = distLines.filter(d => d < hole.distance - 30).map(d => {
+        const y = greenY + ((d / hole.distance) * (fwBottom - fwTop));
+        const color = d === 150 ? 'rgba(0,212,170,.4)' : 'rgba(255,255,255,.15)';
+        const textColor = d === 150 ? 'rgba(0,212,170,.6)' : 'rgba(255,255,255,.3)';
+        const sw = d === 150 ? '1.5' : '1';
+        return `
+            <line x1="${w/2-fwWidth+10}" y1="${y}" x2="${w/2+fwWidth-10}" y2="${y}" stroke="${color}" stroke-width="${sw}" stroke-dasharray="4,4"/>
+            <text x="${w/2+fwWidth+5}" y="${y+4}" font-size="9" fill="${textColor}" font-weight="${d===150?'bold':'normal'}">${d}</text>
+            <text x="${w/2-fwWidth-2}" y="${y+4}" font-size="9" fill="${textColor}" text-anchor="end">${d}</text>
+        `;
+    }).join('');
 
     return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
         <!-- Rough -->
@@ -577,6 +621,77 @@ function generateHoleSVG(hole) {
     </svg>`;
 }
 
+// ── INTERACTIVE HOLE TAP ──
+let playerPosition = null;
+
+function handleHoleTap(event, holeNum) {
+    const container = event.currentTarget;
+    const rect = container.getBoundingClientRect();
+    const clickY = event.clientY - rect.top;
+    const clickX = event.clientX - rect.left;
+    const relY = clickY / rect.height;
+    const relX = clickX / rect.width;
+
+    const hole = selectedHole || currentHoles.find(h => h.hole_number === holeNum);
+    if (!hole) return;
+
+    // Map click position to distance from pin
+    // Top of SVG = pin (greenY), bottom = tee
+    // SVG layout: green ~top 20%, tee ~bottom 85%
+    const greenFrac = 0.15;  // green is at ~15% from top
+    const teeFrac = 0.85;    // tee is at ~85% from top
+
+    if (relY < greenFrac || relY > teeFrac + 0.05) return; // Outside playable area
+
+    const distFrac = (relY - greenFrac) / (teeFrac - greenFrac);
+    const distToPin = Math.round(distFrac * hole.distance);
+    
+    // Determine lie based on X position
+    const centerFrac = 0.5;
+    const fwHalf = 0.15; // fairway is ~30% of width
+    let lie = 'fairway';
+    if (Math.abs(relX - centerFrac) > fwHalf + 0.05) lie = 'rough';
+    
+    playerPosition = { distToPin, lie, relX, relY };
+
+    // Update the SVG with player marker
+    const svgContainer = document.getElementById('holeVizSvg');
+    if (svgContainer) {
+        const svg = svgContainer.querySelector('svg');
+        if (svg) {
+            // Remove old marker
+            const old = svg.querySelector('#playerMarker');
+            if (old) old.remove();
+            
+            const svgW = 300, svgH = 540;
+            const px = relX * svgW;
+            const py = relY * svgH;
+            
+            const marker = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            marker.id = 'playerMarker';
+            marker.innerHTML = `
+                <circle cx="${px}" cy="${py}" r="8" fill="var(--accent,#00d4aa)" opacity="0.9" stroke="white" stroke-width="2"/>
+                <circle cx="${px}" cy="${py}" r="3" fill="white"/>
+                <rect x="${px-35}" y="${py+14}" width="70" height="22" rx="6" fill="rgba(0,0,0,.8)"/>
+                <text x="${px}" y="${py+29}" text-anchor="middle" font-size="12" font-weight="bold" fill="#00d4aa">${distToPin} yds</text>
+            `;
+            svg.appendChild(marker);
+        }
+    }
+
+    // Update the distance input in shot form
+    document.getElementById('fDistance').value = distToPin;
+    document.getElementById('fLie').value = lie === 'rough' ? 'rough' : 'fairway';
+    
+    // Show mini toast
+    const hint = document.querySelector('.tap-hint');
+    if (hint) {
+        hint.textContent = `📍 ${distToPin} yards to pin • ${lie} • Tap "Get Club" below`;
+        hint.style.opacity = '1';
+        hint.style.color = 'var(--accent)';
+    }
+}
+
 // ── SHOT ADVISOR ──
 function startShot() {
     showScreen('shot');
@@ -589,7 +704,8 @@ function startShot() {
                     <h3>${currentCourse?.name || 'Course'} — Hole ${selectedHole.hole_number}</h3>
                     <span class="badge badge-par${selectedHole.par === 3 ? '3' : selectedHole.par === 5 ? '5' : '4'}">Par ${selectedHole.par}</span>
                 </div>
-                <div class="hole-svg-container">${generateHoleSVG(selectedHole)}</div>
+                <div class="hole-svg-container" onclick="handleHoleTap(event, ${selectedHole.hole_number})" id="holeVizSvg">${generateHoleSVG(selectedHole)}</div>
+                <div class="tap-hint">👆 Tap your position on the hole to auto-calculate distance</div>
             </div>
         `;
     }

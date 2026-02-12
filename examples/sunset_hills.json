@@ -1,0 +1,399 @@
+{
+  "course_id": "sunset_hills",
+  "course_name": "Sunset Hills Golf Course",
+  "course_elevation_feet": 750,
+  "holes": [
+    {
+      "hole_id": "sunset_hills_1",
+      "hole_number": 1,
+      "par": 4,
+      "handicap_index": 5,
+      "distance_to_pin_yards": 415,
+      "shot_bearing_degrees": 50,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 269,
+          "severity": "bunker",
+          "description": "Bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": ""
+    },
+    {
+      "hole_id": "sunset_hills_2",
+      "hole_number": 2,
+      "par": 5,
+      "handicap_index": 3,
+      "distance_to_pin_yards": 464,
+      "shot_bearing_degrees": 70,
+      "elevation_change_feet": 10,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 301,
+          "severity": "bunker",
+          "description": "Bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": ""
+    },
+    {
+      "hole_id": "sunset_hills_3",
+      "hole_number": 3,
+      "par": 4,
+      "handicap_index": 13,
+      "distance_to_pin_yards": 263,
+      "shot_bearing_degrees": 90,
+      "elevation_change_feet": -5,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 170,
+          "severity": "bunker",
+          "description": "Bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": ""
+    },
+    {
+      "hole_id": "sunset_hills_4",
+      "hole_number": 4,
+      "par": 4,
+      "handicap_index": 9,
+      "distance_to_pin_yards": 308,
+      "shot_bearing_degrees": 110,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 200,
+          "severity": "bunker",
+          "description": "Bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": ""
+    },
+    {
+      "hole_id": "sunset_hills_5",
+      "hole_number": 5,
+      "par": 4,
+      "handicap_index": 11,
+      "distance_to_pin_yards": 300,
+      "shot_bearing_degrees": 130,
+      "elevation_change_feet": 5,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 195,
+          "severity": "bunker",
+          "description": "Bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": ""
+    },
+    {
+      "hole_id": "sunset_hills_6",
+      "hole_number": 6,
+      "par": 3,
+      "handicap_index": 17,
+      "distance_to_pin_yards": 145,
+      "shot_bearing_degrees": 150,
+      "elevation_change_feet": -10,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 94,
+          "severity": "bunker",
+          "description": "Bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": ""
+    },
+    {
+      "hole_id": "sunset_hills_7",
+      "hole_number": 7,
+      "par": 4,
+      "handicap_index": 7,
+      "distance_to_pin_yards": 280,
+      "shot_bearing_degrees": 170,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 182,
+          "severity": "bunker",
+          "description": "Bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": ""
+    },
+    {
+      "hole_id": "sunset_hills_8",
+      "hole_number": 8,
+      "par": 3,
+      "handicap_index": 15,
+      "distance_to_pin_yards": 134,
+      "shot_bearing_degrees": 190,
+      "elevation_change_feet": 5,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 87,
+          "severity": "bunker",
+          "description": "Bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": ""
+    },
+    {
+      "hole_id": "sunset_hills_9",
+      "hole_number": 9,
+      "par": 4,
+      "handicap_index": 1,
+      "distance_to_pin_yards": 330,
+      "shot_bearing_degrees": 210,
+      "elevation_change_feet": 10,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 214,
+          "severity": "bunker",
+          "description": "Bunker"
+        },
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 280,
+          "severity": "water",
+          "description": "Creek left"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "#1 handicap hole"
+    },
+    {
+      "hole_id": "sunset_hills_10",
+      "hole_number": 10,
+      "par": 5,
+      "handicap_index": 2,
+      "distance_to_pin_yards": 570,
+      "shot_bearing_degrees": 230,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "right",
+          "distance_from_tee_yards": 460,
+          "severity": "water",
+          "description": "Pond right of green"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 500,
+          "severity": "bunker",
+          "description": "Greenside bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Long par 5 - #2 handicap"
+    },
+    {
+      "hole_id": "sunset_hills_11",
+      "hole_number": 11,
+      "par": 4,
+      "handicap_index": 4,
+      "distance_to_pin_yards": 433,
+      "shot_bearing_degrees": 250,
+      "elevation_change_feet": -10,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 281,
+          "severity": "bunker",
+          "description": "Bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": ""
+    },
+    {
+      "hole_id": "sunset_hills_12",
+      "hole_number": 12,
+      "par": 3,
+      "handicap_index": 16,
+      "distance_to_pin_yards": 141,
+      "shot_bearing_degrees": 270,
+      "elevation_change_feet": 5,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 91,
+          "severity": "bunker",
+          "description": "Bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": ""
+    },
+    {
+      "hole_id": "sunset_hills_13",
+      "hole_number": 13,
+      "par": 5,
+      "handicap_index": 10,
+      "distance_to_pin_yards": 417,
+      "shot_bearing_degrees": 290,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 271,
+          "severity": "bunker",
+          "description": "Bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": ""
+    },
+    {
+      "hole_id": "sunset_hills_14",
+      "hole_number": 14,
+      "par": 4,
+      "handicap_index": 6,
+      "distance_to_pin_yards": 346,
+      "shot_bearing_degrees": 310,
+      "elevation_change_feet": -5,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 224,
+          "severity": "bunker",
+          "description": "Bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": ""
+    },
+    {
+      "hole_id": "sunset_hills_15",
+      "hole_number": 15,
+      "par": 3,
+      "handicap_index": 18,
+      "distance_to_pin_yards": 132,
+      "shot_bearing_degrees": 330,
+      "elevation_change_feet": 10,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 85,
+          "severity": "bunker",
+          "description": "Bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": ""
+    },
+    {
+      "hole_id": "sunset_hills_16",
+      "hole_number": 16,
+      "par": 4,
+      "handicap_index": 8,
+      "distance_to_pin_yards": 382,
+      "shot_bearing_degrees": 350,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 248,
+          "severity": "bunker",
+          "description": "Bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": ""
+    },
+    {
+      "hole_id": "sunset_hills_17",
+      "hole_number": 17,
+      "par": 4,
+      "handicap_index": 14,
+      "distance_to_pin_yards": 333,
+      "shot_bearing_degrees": 10,
+      "elevation_change_feet": 5,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 216,
+          "severity": "bunker",
+          "description": "Bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": ""
+    },
+    {
+      "hole_id": "sunset_hills_18",
+      "hole_number": 18,
+      "par": 4,
+      "handicap_index": 12,
+      "distance_to_pin_yards": 383,
+      "shot_bearing_degrees": 30,
+      "elevation_change_feet": -10,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 248,
+          "severity": "bunker",
+          "description": "Bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": ""
+    }
+  ]
+}
