@@ -312,6 +312,10 @@
             ? 'http://localhost:8000' 
             : window.location.origin;
 
+        console.log('API_URL:', API_URL);
+        console.log('Current origin:', window.location.origin);
+        console.log('Hostname:', window.location.hostname);
+
         let selectedCourse = null;
         let searchTimeout = null;
 
@@ -435,9 +439,31 @@
 
             } catch (error) {
                 console.error('Error:', error);
+                let errorMessage = '❌ Error getting recommendation.';
+                let errorDetails = '';
+                
+                if (error.message.includes('HTTP')) {
+                    errorMessage += ` Server returned ${error.message}`;
+                    // Try to get error details from response
+                    try {
+                        const errorData = await response.json();
+                        if (errorData.detail) {
+                            errorDetails = `<br><br><strong>Server says:</strong> ${errorData.detail}`;
+                        }
+                    } catch (e) {
+                        errorDetails = '<br><br>Server response was not JSON.';
+                    }
+                } else if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
+                    errorMessage += ' <strong>Cannot connect to server.</strong>';
+                    errorDetails = `<br><br>Trying to reach: ${API_URL}<br>Check if the server is running.`;
+                } else {
+                    errorMessage += ` ${error.message}`;
+                }
+                
                 resultDiv.innerHTML = `
                     <div class="error">
-                        ❌ Error getting recommendation. Make sure the API is running.
+                        ${errorMessage}
+                        ${errorDetails}
                     </div>
                 `;
             } finally {
