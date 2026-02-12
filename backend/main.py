@@ -383,11 +383,21 @@ async def get_simple_recommendation(request: Request):
         if not hole:
             raise HTTPException(status_code=404, detail=f"Hole {hole_number} not found")
         
-        # Use default player
-        players = data_store.list_all_players()
-        if not players:
-            raise HTTPException(status_code=404, detail="No players configured")
-        player_baseline = players[0]
+        # Use specific player if provided, else default
+        player_id = data.get("player_id")
+        if player_id:
+            player_baseline = data_store.get_player_by_id(player_id)
+            if not player_baseline:
+                # Fall back to default
+                players = data_store.list_all_players()
+                if not players:
+                    raise HTTPException(status_code=404, detail="No players configured")
+                player_baseline = players[0]
+        else:
+            players = data_store.list_all_players()
+            if not players:
+                raise HTTPException(status_code=404, detail="No players configured")
+            player_baseline = players[0]
         
         # Map frontend wind direction to WindRelativeToShot enum values
         wind_map = {

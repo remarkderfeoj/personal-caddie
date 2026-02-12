@@ -309,6 +309,85 @@
         }
         .bottom-nav button.active { color: var(--accent); }
         .bottom-nav button .icon { font-size: 22px; }
+
+        /* ── MY BAG / ONBOARDING ── */
+        .bag-header {
+            text-align: center; padding: 20px 0 10px;
+        }
+        .bag-header h2 { font-size: 22px; margin-bottom: 4px; }
+        .bag-header p { color: var(--text2); font-size: 14px; }
+        .bag-name-input {
+            width: 100%; padding: 14px 18px; background: var(--card);
+            border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius);
+            color: var(--text); font-size: 16px; outline: none; margin-bottom: 16px;
+        }
+        .bag-name-input:focus { border-color: var(--accent); }
+        .bag-section { margin-bottom: 20px; }
+        .bag-section-title {
+            font-size: 12px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 1.5px; color: var(--text2); margin-bottom: 10px;
+        }
+        .club-row {
+            display: flex; align-items: center; gap: 12px;
+            background: var(--card); border-radius: 12px; padding: 12px 16px;
+            margin-bottom: 8px; border: 1px solid transparent;
+            transition: all .2s;
+        }
+        .club-row.in-bag { border-color: rgba(0,212,170,.2); background: var(--card-hover); }
+        .club-toggle {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,.15); background: transparent;
+            color: var(--text2); font-size: 16px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all .2s; flex-shrink: 0;
+        }
+        .club-toggle.active {
+            border-color: var(--accent); background: rgba(0,212,170,.15); color: var(--accent);
+        }
+        .club-name { flex: 1; font-size: 15px; font-weight: 500; }
+        .club-distance-inputs { display: flex; gap: 8px; align-items: center; }
+        .club-dist-input {
+            width: 60px; padding: 8px; text-align: center;
+            background: var(--bg); border: 1px solid rgba(255,255,255,.1);
+            border-radius: 8px; color: var(--text); font-size: 14px; font-weight: 600;
+        }
+        .club-dist-input:focus { outline: none; border-color: var(--accent); }
+        .club-dist-label { font-size: 10px; color: var(--text2); text-align: center; }
+        .club-dist-group { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .bag-save-btn {
+            width: 100%; padding: 16px; margin-top: 16px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            color: #000; border: none; border-radius: 12px;
+            font-size: 16px; font-weight: 700; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 1px;
+            transition: all .2s; box-shadow: 0 4px 20px rgba(0,212,170,.3);
+        }
+        .bag-save-btn:active { transform: scale(.98); opacity: .9; }
+        .bag-save-btn:disabled { opacity: .4; cursor: not-allowed; }
+        .bag-status {
+            text-align: center; margin-top: 12px; font-size: 14px;
+            padding: 12px; border-radius: 10px;
+        }
+        .bag-status.success { background: rgba(0,212,170,.1); color: var(--accent); }
+        .bag-status.error { background: rgba(255,107,107,.1); color: var(--danger); }
+        .bag-preset-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+        .bag-preset-btn {
+            padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(255,255,255,.15);
+            background: transparent; color: var(--text2); font-size: 13px;
+            cursor: pointer; transition: all .2s;
+        }
+        .bag-preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .bag-preset-btn.active { border-color: var(--accent); background: rgba(0,212,170,.1); color: var(--accent); }
+        .bag-general {
+            background: var(--card); border-radius: 12px; padding: 16px;
+            margin-bottom: 16px;
+        }
+        .bag-general .form-row { margin-bottom: 12px; }
+        .bag-general .form-row:last-child { margin-bottom: 0; }
+        .bag-count {
+            font-size: 13px; color: var(--text2); text-align: right; margin-bottom: 8px;
+        }
+        .bag-count span { color: var(--accent); font-weight: 600; }
     </style>
 </head>
 <body>
@@ -390,9 +469,82 @@
         <div id="recResult"></div>
     </div>
 
+    <!-- SCREEN: MY BAG -->
+    <div class="screen" id="screenBag">
+        <div class="bag-header">
+            <h2>🏌️ My Bag</h2>
+            <p>Set up your clubs so your caddie knows your game</p>
+        </div>
+
+        <input class="bag-name-input" id="bagPlayerName" placeholder="Your name" autocomplete="name">
+
+        <div class="section-title">Quick Setup</div>
+        <div class="bag-preset-row">
+            <button class="bag-preset-btn" onclick="applyPreset('beginner')">🟢 Beginner</button>
+            <button class="bag-preset-btn" onclick="applyPreset('average')">🔵 Average</button>
+            <button class="bag-preset-btn" onclick="applyPreset('advanced')">🟡 Advanced</button>
+            <button class="bag-preset-btn" onclick="applyPreset('scratch')">🔴 Scratch</button>
+        </div>
+
+        <div class="bag-count">Clubs in bag: <span id="bagClubCount">0</span> / 14</div>
+
+        <div id="bagClubList"></div>
+
+        <div class="section-title">General</div>
+        <div class="bag-general">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Miss Tendency</label>
+                    <select id="bagMiss">
+                        <option value="">Not sure</option>
+                        <option value="push">Push / Fade</option>
+                        <option value="pull">Pull / Draw</option>
+                        <option value="slice">Slice</option>
+                        <option value="hook">Hook</option>
+                        <option value="thin">Thin</option>
+                        <option value="fat">Fat</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Short Game</label>
+                    <select id="bagShortGame">
+                        <option value="">Average</option>
+                        <option value="strong">Strong</option>
+                        <option value="weak">Weak</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Measurement</label>
+                    <select id="bagMeasure">
+                        <option value="estimated">Estimated</option>
+                        <option value="gps_watch">GPS Watch</option>
+                        <option value="rangefinder">Rangefinder</option>
+                        <option value="course_markers">Course Markers</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Swing Speed</label>
+                    <select id="bagSpeed">
+                        <option value="">Don't know</option>
+                        <option value="70">~70 mph (Slow)</option>
+                        <option value="85">~85 mph (Average)</option>
+                        <option value="95">~95 mph (Fast)</option>
+                        <option value="105">~105 mph (Tour)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <button class="bag-save-btn" id="bagSaveBtn" onclick="saveBag()">💾 Save My Bag</button>
+        <div id="bagStatus"></div>
+    </div>
+
     <div class="bottom-nav">
         <button class="active" onclick="showScreen('home')"><span class="icon">🏠</span>Courses</button>
         <button onclick="showScreen('shot')"><span class="icon">🎯</span>Advisor</button>
+        <button onclick="showScreen('bag')"><span class="icon">🎒</span>My Bag</button>
     </div>
 </div>
 
@@ -411,6 +563,7 @@ function showScreen(name) {
     document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active'));
     if (name === 'home') document.querySelectorAll('.bottom-nav button')[0].classList.add('active');
     if (name === 'shot') document.querySelectorAll('.bottom-nav button')[1].classList.add('active');
+    if (name === 'bag') document.querySelectorAll('.bottom-nav button')[2].classList.add('active');
     document.getElementById('navBack').style.display = (name === 'home') ? 'none' : 'block';
     if (name !== navStack[navStack.length - 1]) navStack.push(name);
 }
@@ -869,6 +1022,7 @@ async function getRecommendation() {
                 wind_direction: document.getElementById('fWindDir').value,
                 lie: document.getElementById('fLie').value,
                 elevation_change: parseInt(document.getElementById('fElev').value) || 0,
+                player_id: localStorage.getItem('personalCaddie_playerId') || undefined,
             })
         });
 
@@ -940,8 +1094,265 @@ async function getRecommendation() {
     }
 }
 
+// ── MY BAG ──
+const ALL_CLUBS = [
+    { type: 'driver', name: 'Driver', category: 'Woods' },
+    { type: 'wood_3', name: '3 Wood', category: 'Woods' },
+    { type: 'wood_5', name: '5 Wood', category: 'Woods' },
+    { type: 'iron_2', name: '2 Iron', category: 'Irons' },
+    { type: 'iron_3', name: '3 Iron', category: 'Irons' },
+    { type: 'iron_4', name: '4 Iron', category: 'Irons' },
+    { type: 'iron_5', name: '5 Iron', category: 'Irons' },
+    { type: 'iron_6', name: '6 Iron', category: 'Irons' },
+    { type: 'iron_7', name: '7 Iron', category: 'Irons' },
+    { type: 'iron_8', name: '8 Iron', category: 'Irons' },
+    { type: 'iron_9', name: '9 Iron', category: 'Irons' },
+    { type: 'pitching_wedge', name: 'PW', category: 'Wedges' },
+    { type: 'gap_wedge', name: 'GW (52°)', category: 'Wedges' },
+    { type: 'sand_wedge', name: 'SW (56°)', category: 'Wedges' },
+    { type: 'lob_wedge', name: 'LW (60°)', category: 'Wedges' },
+];
+
+const PRESETS = {
+    beginner:  { driver:180, wood_3:170, wood_5:160, iron_5:140, iron_6:130, iron_7:120, iron_8:110, iron_9:100, pitching_wedge:85, sand_wedge:60, lob_wedge:45 },
+    average:   { driver:210, wood_3:200, wood_5:190, iron_4:170, iron_5:160, iron_6:150, iron_7:140, iron_8:130, iron_9:120, pitching_wedge:105, gap_wedge:90, sand_wedge:75, lob_wedge:58 },
+    advanced:  { driver:240, wood_3:225, wood_5:215, iron_3:200, iron_4:190, iron_5:180, iron_6:170, iron_7:160, iron_8:150, iron_9:140, pitching_wedge:125, gap_wedge:110, sand_wedge:95, lob_wedge:70 },
+    scratch:   { driver:270, wood_3:250, wood_5:240, iron_3:225, iron_4:215, iron_5:200, iron_6:190, iron_7:178, iron_8:165, iron_9:155, pitching_wedge:140, gap_wedge:125, sand_wedge:110, lob_wedge:85 },
+};
+
+let bagState = {}; // club_type -> { inBag: bool, carry: int, total: int }
+
+function initBag() {
+    // Load from localStorage
+    const saved = localStorage.getItem('personalCaddie_bag');
+    if (saved) {
+        try {
+            const data = JSON.parse(saved);
+            bagState = data.clubs || {};
+            document.getElementById('bagPlayerName').value = data.playerName || '';
+            document.getElementById('bagMiss').value = data.miss || '';
+            document.getElementById('bagShortGame').value = data.shortGame || '';
+            document.getElementById('bagMeasure').value = data.measure || 'estimated';
+            document.getElementById('bagSpeed').value = data.speed || '';
+        } catch(e) {}
+    }
+    renderBagClubs();
+}
+
+function renderBagClubs() {
+    const container = document.getElementById('bagClubList');
+    let html = '';
+    let currentCat = '';
+    ALL_CLUBS.forEach(club => {
+        if (club.category !== currentCat) {
+            currentCat = club.category;
+            html += `<div class="bag-section-title" style="margin-top:16px">${currentCat}</div>`;
+        }
+        const state = bagState[club.type] || { inBag: false, carry: '', total: '' };
+        const active = state.inBag;
+        html += `
+            <div class="club-row ${active ? 'in-bag' : ''}" id="clubRow_${club.type}">
+                <button class="club-toggle ${active ? 'active' : ''}" onclick="toggleClub('${club.type}')" id="clubTog_${club.type}">
+                    ${active ? '✓' : '+'}
+                </button>
+                <div class="club-name">${club.name}</div>
+                <div class="club-distance-inputs">
+                    <div class="club-dist-group">
+                        <input type="number" class="club-dist-input" id="carry_${club.type}" 
+                            value="${state.carry || ''}" placeholder="—" min="0" max="400"
+                            oninput="updateClubDist('${club.type}')" ${!active ? 'disabled' : ''}>
+                        <span class="club-dist-label">Carry</span>
+                    </div>
+                    <div class="club-dist-group">
+                        <input type="number" class="club-dist-input" id="total_${club.type}" 
+                            value="${state.total || ''}" placeholder="—" min="0" max="450"
+                            oninput="updateClubDist('${club.type}')" ${!active ? 'disabled' : ''}>
+                        <span class="club-dist-label">Total</span>
+                    </div>
+                </div>
+            </div>`;
+    });
+    container.innerHTML = html;
+    updateBagCount();
+}
+
+function toggleClub(type) {
+    if (!bagState[type]) bagState[type] = { inBag: false, carry: '', total: '' };
+    bagState[type].inBag = !bagState[type].inBag;
+    
+    const row = document.getElementById('clubRow_' + type);
+    const tog = document.getElementById('clubTog_' + type);
+    const carryInput = document.getElementById('carry_' + type);
+    const totalInput = document.getElementById('total_' + type);
+    
+    if (bagState[type].inBag) {
+        row.classList.add('in-bag');
+        tog.classList.add('active');
+        tog.textContent = '✓';
+        carryInput.disabled = false;
+        totalInput.disabled = false;
+        carryInput.focus();
+    } else {
+        row.classList.remove('in-bag');
+        tog.classList.remove('active');
+        tog.textContent = '+';
+        carryInput.disabled = true;
+        totalInput.disabled = true;
+    }
+    updateBagCount();
+}
+
+function updateClubDist(type) {
+    if (!bagState[type]) bagState[type] = { inBag: true, carry: '', total: '' };
+    const carry = parseInt(document.getElementById('carry_' + type).value) || '';
+    const total = parseInt(document.getElementById('total_' + type).value) || '';
+    bagState[type].carry = carry;
+    bagState[type].total = total;
+    // Auto-fill total if only carry entered (add ~5% roll)
+    if (carry && !total) {
+        const autoTotal = Math.round(carry * 1.05);
+        document.getElementById('total_' + type).value = autoTotal;
+        bagState[type].total = autoTotal;
+    }
+}
+
+function updateBagCount() {
+    const count = Object.values(bagState).filter(s => s.inBag).length;
+    const el = document.getElementById('bagClubCount');
+    el.textContent = count;
+    el.style.color = count > 14 ? 'var(--danger)' : 'var(--accent)';
+}
+
+function applyPreset(level) {
+    document.querySelectorAll('.bag-preset-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    const preset = PRESETS[level];
+    // Reset all
+    bagState = {};
+    ALL_CLUBS.forEach(club => {
+        if (preset[club.type] !== undefined) {
+            const carry = preset[club.type];
+            const total = Math.round(carry * 1.06);
+            bagState[club.type] = { inBag: true, carry, total };
+        } else {
+            bagState[club.type] = { inBag: false, carry: '', total: '' };
+        }
+    });
+    renderBagClubs();
+}
+
+async function saveBag() {
+    const btn = document.getElementById('bagSaveBtn');
+    const status = document.getElementById('bagStatus');
+    const playerName = document.getElementById('bagPlayerName').value.trim();
+    
+    if (!playerName) {
+        status.className = 'bag-status error';
+        status.textContent = 'Please enter your name';
+        return;
+    }
+    
+    const clubsInBag = Object.entries(bagState).filter(([_, s]) => s.inBag && s.carry);
+    if (clubsInBag.length === 0) {
+        status.className = 'bag-status error';
+        status.textContent = 'Add at least one club with a distance';
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+    
+    const measure = document.getElementById('bagMeasure').value;
+    const playerId = playerName.toLowerCase().replace(/[^a-z0-9]/g, '_').substring(0, 50);
+    
+    const payload = {
+        player_id: playerId,
+        player_name: playerName,
+        created_date: new Date().toISOString(),
+        club_distances: clubsInBag.map(([type, s]) => ({
+            club_type: type,
+            carry_distance: parseInt(s.carry),
+            total_distance: parseInt(s.total) || Math.round(parseInt(s.carry) * 1.05),
+            measurement_method: measure,
+        })),
+        general_characteristics: {},
+    };
+    
+    const miss = document.getElementById('bagMiss').value;
+    const shortGame = document.getElementById('bagShortGame').value;
+    const speed = document.getElementById('bagSpeed').value;
+    if (miss) payload.general_characteristics.miss_pattern = miss;
+    if (shortGame) payload.general_characteristics.short_game_strength = shortGame;
+    if (speed) payload.general_characteristics.typical_swing_speed = parseInt(speed);
+    
+    try {
+        const res = await fetch(`${API}/api/v1/players/baseline`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        
+        if (!res.ok) {
+            let detail = `HTTP ${res.status}`;
+            try { const err = await res.json(); detail = err.detail || JSON.stringify(err) ; } catch(e) {}
+            throw new Error(detail);
+        }
+        
+        const data = await res.json();
+        
+        // Save to localStorage
+        localStorage.setItem('personalCaddie_bag', JSON.stringify({
+            playerName,
+            playerId,
+            clubs: bagState,
+            miss: document.getElementById('bagMiss').value,
+            shortGame: document.getElementById('bagShortGame').value,
+            measure,
+            speed: document.getElementById('bagSpeed').value,
+        }));
+        
+        // Also store playerId for recommendations
+        localStorage.setItem('personalCaddie_playerId', playerId);
+        
+        status.className = 'bag-status success';
+        status.textContent = `✅ Bag saved! ${data.clubs_registered} clubs registered for ${playerName}`;
+    } catch(e) {
+        status.className = 'bag-status error';
+        status.textContent = `❌ ${e.message}`;
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '💾 Save My Bag';
+    }
+}
+
+// Load existing bag from server on init
+async function loadExistingBag() {
+    const playerId = localStorage.getItem('personalCaddie_playerId');
+    if (!playerId) return;
+    try {
+        const res = await fetch(`${API}/api/v1/players/${playerId}/baseline`);
+        if (res.ok) {
+            const data = await res.json();
+            document.getElementById('bagPlayerName').value = data.player_name || '';
+            bagState = {};
+            (data.club_distances || []).forEach(cd => {
+                bagState[cd.club_type] = { inBag: true, carry: cd.carry_distance, total: cd.total_distance };
+            });
+            if (data.general_characteristics) {
+                if (data.general_characteristics.miss_pattern) document.getElementById('bagMiss').value = data.general_characteristics.miss_pattern;
+                if (data.general_characteristics.short_game_strength) document.getElementById('bagShortGame').value = data.general_characteristics.short_game_strength;
+                if (data.general_characteristics.typical_swing_speed) document.getElementById('bagSpeed').value = data.general_characteristics.typical_swing_speed;
+            }
+            renderBagClubs();
+        }
+    } catch(e) { /* silent */ }
+}
+
 // ── INIT ──
 loadCourses();
+initBag();
+loadExistingBag();
 </script>
 </body>
 </html>
