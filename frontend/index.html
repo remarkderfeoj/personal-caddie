@@ -5,487 +5,691 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a1a2e">
     <title>Personal Caddie</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛳</text></svg>">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #0f1923;
+            --bg2: #1a2332;
+            --card: #1e2d3d;
+            --card-hover: #243447;
+            --accent: #00d4aa;
+            --accent2: #00b894;
+            --text: #e8e8e8;
+            --text2: #8899aa;
+            --danger: #ff6b6b;
+            --water: #4fc3f7;
+            --sand: #ffcc02;
+            --trees: #2d8a4e;
+            --ob: #ff4757;
+            --par3: #4fc3f7;
+            --par4: #00d4aa;
+            --par5: #ffd93d;
+            --radius: 16px;
         }
-
+        * { margin:0; padding:0; box-sizing:border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #1e5128 0%, #2d6a4f 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            color: #fff;
-            padding: 20px;
-            padding-bottom: 80px;
+            -webkit-font-smoothing: antialiased;
+        }
+        .app { max-width: 480px; margin: 0 auto; padding-bottom: 100px; }
+
+        /* ── NAV ── */
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(15,25,35,.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 16px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+        }
+        .logo { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .logo span { color: var(--accent); }
+        .nav-back { background:none; border:none; color:var(--accent); font-size:16px; cursor:pointer; display:none; padding:4px 8px; }
+
+        /* ── SCREENS ── */
+        .screen { display: none; padding: 20px; }
+        .screen.active { display: block; }
+
+        /* ── FEATURED COURSES ── */
+        .section-title {
+            font-size: 13px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 2px; color: var(--text2); margin: 24px 0 12px; padding: 0 4px;
+        }
+        .search-box {
+            width: 100%; padding: 14px 18px; padding-left: 44px;
+            background: var(--card); border: 1px solid rgba(255,255,255,.08);
+            border-radius: var(--radius); color: var(--text); font-size: 16px;
+            outline: none; transition: all .2s;
+        }
+        .search-box:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,212,170,.15); }
+        .search-wrap { position: relative; margin-bottom: 8px; }
+        .search-icon {
+            position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+            color: var(--text2); font-size: 16px; pointer-events: none;
         }
 
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
+        .course-grid { display: flex; flex-direction: column; gap: 12px; }
+        .course-card {
+            background: var(--card); border-radius: var(--radius);
+            padding: 20px; cursor: pointer; transition: all .2s;
+            border: 1px solid transparent; position: relative; overflow: hidden;
         }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-top: 20px;
+        .course-card:active { transform: scale(.98); }
+        .course-card:hover { border-color: rgba(0,212,170,.3); background: var(--card-hover); }
+        .course-card-name { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+        .course-card-meta { display: flex; gap: 16px; color: var(--text2); font-size: 13px; }
+        .course-card-meta span { display: flex; align-items: center; gap: 4px; }
+        .course-card-badge {
+            position: absolute; top: 16px; right: 16px;
+            background: rgba(0,212,170,.15); color: var(--accent);
+            padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
         }
+        .featured-badge { background: rgba(255,217,61,.15); color: #ffd93d; }
 
-        h1 {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 5px;
+        /* ── COURSE DETAIL / HOLE VIEW ── */
+        .course-header {
+            background: linear-gradient(135deg, #1a3a2a 0%, #0f2b1f 100%);
+            border-radius: var(--radius); padding: 24px; margin-bottom: 20px;
+            border: 1px solid rgba(0,212,170,.15);
         }
+        .course-header h2 { font-size: 22px; margin-bottom: 8px; }
+        .course-header-stats { display: flex; gap: 20px; color: var(--text2); font-size: 13px; }
 
-        .subtitle {
-            font-size: 14px;
-            opacity: 0.8;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+        .holes-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        .hole-chip {
+            width: 48px; height: 48px; border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: var(--card); cursor: pointer; transition: all .2s;
+            border: 2px solid transparent; font-size: 14px; font-weight: 600;
         }
-
-        .card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            color: #333;
+        .hole-chip:active { transform: scale(.95); }
+        .hole-chip.active { border-color: var(--accent); background: rgba(0,212,170,.1); }
+        .hole-chip .par-dot {
+            width: 6px; height: 6px; border-radius: 50%; margin-top: 3px;
         }
+        .par3-dot { background: var(--par3); }
+        .par4-dot { background: var(--par4); }
+        .par5-dot { background: var(--par5); }
 
-        .form-group {
-            margin-bottom: 20px;
+        /* ── HOLE VISUALIZATION ── */
+        .hole-viz {
+            background: var(--card); border-radius: var(--radius);
+            padding: 20px; margin-bottom: 16px;
+            border: 1px solid rgba(255,255,255,.06);
         }
-
-        label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #2d6a4f;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .hole-viz-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
         }
-
-        input, select {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #d8f3dc;
-            border-radius: 12px;
-            font-size: 16px;
-            background: #fff;
-            transition: all 0.3s;
+        .hole-viz-header h3 { font-size: 18px; }
+        .hole-viz-badges { display: flex; gap: 8px; }
+        .badge {
+            padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
         }
+        .badge-par3 { background: rgba(79,195,247,.15); color: var(--par3); }
+        .badge-par4 { background: rgba(0,212,170,.15); color: var(--par4); }
+        .badge-par5 { background: rgba(255,217,61,.15); color: var(--par5); }
 
-        input:focus, select:focus {
-            outline: none;
-            border-color: #2d6a4f;
-            box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);
-        }
-
-        .btn {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, #2d6a4f 0%, #1e5128 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 4px 15px rgba(45, 106, 79, 0.4);
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        .recommendation {
-            background: linear-gradient(135deg, #1e5128 0%, #2d6a4f 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 20px;
-            margin-top: 20px;
-        }
-
-        .caddie-call {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 15px;
-            text-align: center;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-        }
-
-        .club-display {
-            font-size: 48px;
-            text-align: center;
-            margin: 25px 0;
-            font-weight: 700;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        .detail {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            font-size: 15px;
-        }
-
-        .detail:last-child {
-            border-bottom: none;
-        }
-
-        .detail-label {
-            opacity: 0.8;
-        }
-
-        .detail-value {
-            font-weight: 600;
-        }
-
-        .notes {
-            margin-top: 20px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 30px;
-            font-size: 18px;
-        }
-
-        .error {
-            background: #dc3545;
-            color: white;
-            padding: 15px;
-            border-radius: 12px;
-            margin-top: 15px;
-        }
-
-        .course-search {
+        .hole-svg-container {
+            width: 100%; aspect-ratio: 1/1.8; background: #0a1510;
+            border-radius: 12px; overflow: hidden; margin-bottom: 12px;
             position: relative;
         }
+        .hole-svg-container svg { width: 100%; height: 100%; }
 
-        .course-results {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 2px solid #2d6a4f;
-            border-radius: 12px;
-            margin-top: 5px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        .hole-info-row {
+            display: flex; justify-content: space-between; padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,.06); font-size: 14px;
+        }
+        .hole-info-row:last-child { border-bottom: none; }
+        .hole-info-label { color: var(--text2); }
+        .hole-info-value { font-weight: 600; }
+
+        .hazard-list { margin-top: 12px; }
+        .hazard-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 12px; border-radius: 20px; font-size: 12px;
+            margin: 4px 4px 4px 0;
+        }
+        .hazard-water { background: rgba(79,195,247,.15); color: var(--water); }
+        .hazard-bunker { background: rgba(255,204,2,.15); color: var(--sand); }
+        .hazard-ob { background: rgba(255,71,87,.15); color: var(--ob); }
+        .hazard-trees { background: rgba(45,138,78,.15); color: var(--trees); }
+
+        /* ── SHOT FORM ── */
+        .shot-form {
+            background: var(--card); border-radius: var(--radius);
+            padding: 24px; border: 1px solid rgba(255,255,255,.06);
+        }
+        .shot-form h3 { font-size: 16px; margin-bottom: 20px; color: var(--accent); }
+        .form-row { display: flex; gap: 12px; margin-bottom: 16px; }
+        .form-group { flex: 1; }
+        .form-group label {
+            display: block; font-size: 11px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text2); margin-bottom: 6px;
+        }
+        .form-group input, .form-group select {
+            width: 100%; padding: 12px 14px;
+            background: var(--bg); border: 1px solid rgba(255,255,255,.1);
+            border-radius: 10px; color: var(--text); font-size: 15px;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none; border-color: var(--accent);
+        }
+        .form-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%238899aa' stroke-width='1.5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+
+        .btn-recommend {
+            width: 100%; padding: 16px; margin-top: 8px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            color: #000; border: none; border-radius: 12px;
+            font-size: 16px; font-weight: 700; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 1px;
+            transition: all .2s; box-shadow: 0 4px 20px rgba(0,212,170,.3);
+        }
+        .btn-recommend:active { transform: scale(.98); opacity: .9; }
+        .btn-recommend:disabled { opacity: .4; cursor: not-allowed; }
+
+        /* ── RECOMMENDATION RESULT ── */
+        .rec-card {
+            background: linear-gradient(135deg, #0a2a1a 0%, #1a3a2a 100%);
+            border-radius: var(--radius); padding: 24px;
+            border: 1px solid rgba(0,212,170,.2); margin-top: 16px;
+        }
+        .rec-club { font-size: 36px; font-weight: 800; text-align: center; color: var(--accent); margin-bottom: 4px; }
+        .rec-call { text-align: center; font-size: 16px; color: var(--text2); margin-bottom: 20px; font-style: italic; }
+        .rec-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .rec-stat { text-align: center; }
+        .rec-stat-val { font-size: 22px; font-weight: 700; color: var(--accent); }
+        .rec-stat-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+        .rec-detail {
+            background: rgba(0,0,0,.2); border-radius: 12px; padding: 16px; margin-bottom: 12px;
+        }
+        .rec-detail h4 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 8px; }
+        .rec-detail p { font-size: 14px; line-height: 1.5; color: var(--text2); }
+        .rec-risk {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;
+        }
+        .rec-risk-item { font-size: 12px; padding: 10px; border-radius: 10px; }
+        .risk-agg { background: rgba(255,217,61,.08); border: 1px solid rgba(255,217,61,.15); }
+        .risk-con { background: rgba(79,195,247,.08); border: 1px solid rgba(79,195,247,.15); }
+        .risk-label { font-weight: 600; margin-bottom: 4px; }
+        .risk-agg .risk-label { color: #ffd93d; }
+        .risk-con .risk-label { color: #4fc3f7; }
+
+        .rec-alts { margin-top: 16px; }
+        .rec-alt {
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(0,0,0,.2); border-radius: 10px; padding: 12px; margin-top: 8px;
+        }
+        .rec-alt-club { font-weight: 700; color: var(--text); min-width: 80px; }
+        .rec-alt-scenario { font-size: 12px; color: var(--text2); }
+
+        .caddie-note {
+            text-align: center; padding: 16px; margin-top: 12px;
+            font-style: italic; color: var(--text2); font-size: 14px;
+            border-top: 1px solid rgba(255,255,255,.06);
         }
 
-        .course-result {
-            padding: 15px;
-            cursor: pointer;
-            border-bottom: 1px solid #e9ecef;
-            transition: background 0.2s;
+        /* ── ERROR ── */
+        .error-msg {
+            background: rgba(255,107,107,.1); border: 1px solid rgba(255,107,107,.2);
+            border-radius: 12px; padding: 16px; color: var(--danger);
+            text-align: center; font-size: 14px; margin-top: 16px;
         }
 
-        .course-result:hover {
-            background: #d8f3dc;
+        /* ── LOADING ── */
+        .loading { text-align: center; padding: 40px; color: var(--text2); }
+        .spinner {
+            width: 40px; height: 40px; border: 3px solid var(--card);
+            border-top-color: var(--accent); border-radius: 50%;
+            animation: spin 1s linear infinite; margin: 0 auto 12px;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .course-result:last-child {
-            border-bottom: none;
+        /* ── BOTTOM NAV ── */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(15,25,35,.95); backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex; justify-content: center; gap: 40px;
+            padding: 12px 20px; padding-bottom: max(12px, env(safe-area-inset-bottom));
+            border-top: 1px solid rgba(255,255,255,.06);
+            z-index: 100;
         }
-
-        .course-name {
-            font-weight: 600;
-            color: #2d6a4f;
+        .bottom-nav button {
+            background: none; border: none; color: var(--text2);
+            font-size: 11px; cursor: pointer; display: flex;
+            flex-direction: column; align-items: center; gap: 4px;
+            transition: color .2s;
         }
-
-        .course-location {
-            font-size: 12px;
-            color: #666;
-            margin-top: 3px;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 15px;
-            }
-
-            h1 {
-                font-size: 28px;
-            }
-
-            .card {
-                padding: 20px;
-            }
-        }
+        .bottom-nav button.active { color: var(--accent); }
+        .bottom-nav button .icon { font-size: 22px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>⛳️ Personal Caddie</h1>
-            <div class="subtitle">Your Smart Golf Assistant</div>
-        </header>
+<div class="app">
+    <nav>
+        <button class="nav-back" id="navBack" onclick="goBack()">← Back</button>
+        <div class="logo">⛳ <span>Personal Caddie</span></div>
+        <div style="width:60px"></div>
+    </nav>
 
-        <div class="card">
-            <form id="shotForm">
-                <div class="form-group course-search">
-                    <label>Course</label>
-                    <input type="text" id="courseSearch" placeholder="Search for a course..." autocomplete="off">
-                    <div id="courseResults" class="course-results hidden"></div>
-                    <input type="hidden" id="courseId">
-                </div>
+    <!-- SCREEN: HOME / FEATURED COURSES -->
+    <div class="screen active" id="screenHome">
+        <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input class="search-box" id="courseSearch" placeholder="Search courses..." autocomplete="off">
+        </div>
+        <div class="section-title">Featured Courses</div>
+        <div class="course-grid" id="courseGrid">
+            <div class="loading"><div class="spinner"></div>Loading courses...</div>
+        </div>
+    </div>
 
+    <!-- SCREEN: COURSE DETAIL -->
+    <div class="screen" id="screenCourse">
+        <div class="course-header" id="courseHeader"></div>
+        <div class="section-title">Select a Hole</div>
+        <div class="holes-grid" id="holesGrid"></div>
+        <div id="holeDetail"></div>
+    </div>
+
+    <!-- SCREEN: SHOT ADVISOR -->
+    <div class="screen" id="screenShot">
+        <div id="shotHoleViz"></div>
+        <div class="shot-form">
+            <h3>🎯 Shot Advisor</h3>
+            <div class="form-row">
                 <div class="form-group">
-                    <label>Hole Number</label>
-                    <input type="number" id="holeNumber" min="1" max="18" value="1">
+                    <label>Distance (yds)</label>
+                    <input type="number" id="fDistance" value="150" min="1">
                 </div>
-
                 <div class="form-group">
-                    <label>Distance to Pin (yards)</label>
-                    <input type="number" id="distance" min="1" value="150">
+                    <label>Lie</label>
+                    <select id="fLie">
+                        <option value="tee">Tee</option>
+                        <option value="fairway" selected>Fairway</option>
+                        <option value="rough">Rough</option>
+                        <option value="sand">Bunker</option>
+                    </select>
                 </div>
-
+            </div>
+            <div class="form-row">
                 <div class="form-group">
-                    <label>Wind Speed (mph)</label>
-                    <input type="number" id="windSpeed" min="0" max="50" value="0">
+                    <label>Wind (mph)</label>
+                    <input type="number" id="fWind" value="0" min="0" max="50">
                 </div>
-
                 <div class="form-group">
-                    <label>Wind Direction</label>
-                    <select id="windDirection">
+                    <label>Wind Dir</label>
+                    <select id="fWindDir">
                         <option value="calm">Calm</option>
                         <option value="headwind">Headwind</option>
                         <option value="tailwind">Tailwind</option>
-                        <option value="left-to-right">Left to Right</option>
-                        <option value="right-to-left">Right to Left</option>
+                        <option value="left-to-right">L→R</option>
+                        <option value="right-to-left">R→L</option>
                     </select>
                 </div>
-
+            </div>
+            <div class="form-row">
                 <div class="form-group">
-                    <label>Lie</label>
-                    <select id="lie">
-                        <option value="fairway">Fairway</option>
-                        <option value="rough">Rough</option>
-                        <option value="tee">Tee</option>
-                        <option value="sand">Sand</option>
-                    </select>
+                    <label>Elevation Δ (ft)</label>
+                    <input type="number" id="fElev" value="0" step="5">
                 </div>
-
-                <div class="form-group">
-                    <label>Elevation Change (feet)</label>
-                    <input type="number" id="elevation" value="0" step="5">
+                <div class="form-group" style="display:flex;align-items:flex-end;">
+                    <button class="btn-recommend" id="btnRecommend" onclick="getRecommendation()">
+                        Get Club
+                    </button>
                 </div>
-
-                <button type="submit" class="btn" id="submitBtn">Get Recommendation</button>
-            </form>
+            </div>
         </div>
-
-        <div id="result"></div>
+        <div id="recResult"></div>
     </div>
 
-    <script>
-        const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:8000' 
-            : window.location.origin;
+    <div class="bottom-nav">
+        <button class="active" onclick="showScreen('home')"><span class="icon">🏠</span>Courses</button>
+        <button onclick="showScreen('shot')"><span class="icon">🎯</span>Advisor</button>
+    </div>
+</div>
 
-        console.log('API_URL:', API_URL);
-        console.log('Current origin:', window.location.origin);
-        console.log('Hostname:', window.location.hostname);
+<script>
+const API = window.location.origin;
+let allCourses = [];
+let currentCourse = null;
+let currentHoles = [];
+let selectedHole = null;
+let navStack = ['home'];
 
-        let selectedCourse = null;
-        let searchTimeout = null;
+// ── NAVIGATION ──
+function showScreen(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+    document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active'));
+    if (name === 'home') document.querySelectorAll('.bottom-nav button')[0].classList.add('active');
+    if (name === 'shot') document.querySelectorAll('.bottom-nav button')[1].classList.add('active');
+    document.getElementById('navBack').style.display = (name === 'home') ? 'none' : 'block';
+    if (name !== navStack[navStack.length - 1]) navStack.push(name);
+}
 
-        // Course search
-        document.getElementById('courseSearch').addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            const query = e.target.value.trim();
-            
-            if (query.length < 2) {
-                document.getElementById('courseResults').classList.add('hidden');
-                return;
-            }
+function goBack() {
+    navStack.pop();
+    const prev = navStack[navStack.length - 1] || 'home';
+    showScreen(prev);
+}
 
-            searchTimeout = setTimeout(async () => {
-                try {
-                    const response = await fetch(`${API_URL}/api/v1/courses?search=${encodeURIComponent(query)}`);
-                    const data = await response.json();
-                    
-                    const resultsDiv = document.getElementById('courseResults');
-                    
-                    if (data.courses && data.courses.length > 0) {
-                        resultsDiv.innerHTML = data.courses.map(course => `
-                            <div class="course-result" data-id="${course.id}">
-                                <div class="course-name">${course.name}</div>
-                                <div class="course-location">${course.location || 'Unknown location'}</div>
-                            </div>
-                        `).join('');
-                        resultsDiv.classList.remove('hidden');
-                        
-                        // Add click handlers
-                        resultsDiv.querySelectorAll('.course-result').forEach(el => {
-                            el.addEventListener('click', () => {
-                                const courseId = el.dataset.id;
-                                const courseName = el.querySelector('.course-name').textContent;
-                                
-                                selectedCourse = data.courses.find(c => c.id === courseId);
-                                document.getElementById('courseSearch').value = courseName;
-                                document.getElementById('courseId').value = courseId;
-                                resultsDiv.classList.add('hidden');
-                            });
-                        });
-                    } else {
-                        resultsDiv.innerHTML = '<div class="course-result">No courses found</div>';
-                        resultsDiv.classList.remove('hidden');
-                    }
-                } catch (error) {
-                    console.error('Course search error:', error);
-                }
-            }, 300);
+// ── LOAD COURSES ──
+async function loadCourses() {
+    try {
+        const res = await fetch(`${API}/api/v1/courses`);
+        const data = await res.json();
+        allCourses = data.courses || [];
+        renderCourseGrid(allCourses);
+    } catch (e) {
+        document.getElementById('courseGrid').innerHTML = '<div class="error-msg">Could not load courses</div>';
+    }
+}
+
+function renderCourseGrid(courses) {
+    const grid = document.getElementById('courseGrid');
+    if (!courses.length) { grid.innerHTML = '<div style="color:var(--text2);text-align:center;padding:20px">No courses found</div>'; return; }
+
+    const featured = ['augusta_national', 'tpc_sawgrass', 'st_andrews_old', 'pebble_beach', 'pine_valley'];
+    grid.innerHTML = courses.map(c => {
+        const isFeatured = featured.includes(c.id);
+        return `<div class="course-card" onclick="openCourse('${c.id}')">
+            ${isFeatured ? '<span class="course-card-badge featured-badge">⭐ Featured</span>' : ''}
+            <div class="course-card-name">${c.name}</div>
+            <div class="course-card-meta">
+                <span>⛳ ${c.holes} holes</span>
+                <span>📍 ${c.elevation_feet} ft</span>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ── SEARCH ──
+document.getElementById('courseSearch').addEventListener('input', (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    if (!q) { renderCourseGrid(allCourses); return; }
+    renderCourseGrid(allCourses.filter(c => c.name.toLowerCase().includes(q)));
+});
+
+// ── COURSE DETAIL ──
+async function openCourse(courseId) {
+    showScreen('course');
+    currentCourse = allCourses.find(c => c.id === courseId);
+
+    document.getElementById('courseHeader').innerHTML = `
+        <h2>${currentCourse.name}</h2>
+        <div class="course-header-stats">
+            <span>⛳ ${currentCourse.holes} holes</span>
+            <span>📍 ${currentCourse.elevation_feet} ft elevation</span>
+        </div>
+    `;
+
+    // Load holes
+    try {
+        const res = await fetch(`${API}/api/v1/courses/${courseId}/holes`);
+        const data = await res.json();
+        currentHoles = data.holes || [];
+        renderHoleChips();
+        if (currentHoles.length > 0) selectHole(currentHoles[0]);
+    } catch (e) {
+        document.getElementById('holesGrid').innerHTML = '<div class="error-msg">Could not load holes</div>';
+    }
+}
+
+function renderHoleChips() {
+    document.getElementById('holesGrid').innerHTML = currentHoles.map(h => {
+        const parClass = h.par === 3 ? 'par3' : h.par === 5 ? 'par5' : 'par4';
+        return `<div class="hole-chip" id="chip${h.hole_number}" onclick="selectHole(currentHoles.find(x=>x.hole_number===${h.hole_number}))">
+            ${h.hole_number}
+            <div class="par-dot ${parClass}-dot"></div>
+        </div>`;
+    }).join('');
+}
+
+function selectHole(hole) {
+    selectedHole = hole;
+    document.querySelectorAll('.hole-chip').forEach(c => c.classList.remove('active'));
+    const chip = document.getElementById('chip' + hole.hole_number);
+    if (chip) chip.classList.add('active');
+    renderHoleDetail(hole);
+}
+
+function renderHoleDetail(hole) {
+    const parClass = hole.par === 3 ? 'par3' : hole.par === 5 ? 'par5' : 'par4';
+    const parBadge = `badge-${parClass}`;
+    const hazardChips = (hole.hazards || []).map(h => {
+        const cls = h.type === 'water' ? 'hazard-water' : h.type === 'bunker' ? 'hazard-bunker' : h.type === 'out_of_bounds' ? 'hazard-ob' : 'hazard-trees';
+        const icon = h.type === 'water' ? '💧' : h.type === 'bunker' ? '⏳' : h.type === 'out_of_bounds' ? '🚫' : '🌲';
+        return `<span class="hazard-chip ${cls}">${icon} ${h.description || h.type} (${h.location})</span>`;
+    }).join('');
+
+    document.getElementById('holeDetail').innerHTML = `
+        <div class="hole-viz">
+            <div class="hole-viz-header">
+                <h3>Hole ${hole.hole_number}</h3>
+                <div class="hole-viz-badges">
+                    <span class="badge ${parBadge}">Par ${hole.par}</span>
+                    <span class="badge" style="background:rgba(255,255,255,.06);color:var(--text2)">${hole.distance} yds</span>
+                </div>
+            </div>
+            <div class="hole-svg-container">${generateHoleSVG(hole)}</div>
+            <div class="hole-info-row"><span class="hole-info-label">Distance</span><span class="hole-info-value">${hole.distance} yards</span></div>
+            <div class="hole-info-row"><span class="hole-info-label">Par</span><span class="hole-info-value">${hole.par}</span></div>
+            <div class="hole-info-row"><span class="hole-info-label">Handicap</span><span class="hole-info-value">${hole.handicap_index}</span></div>
+            <div class="hole-info-row"><span class="hole-info-label">Elevation</span><span class="hole-info-value">${hole.elevation_change > 0 ? '+' : ''}${hole.elevation_change} ft</span></div>
+            <div class="hole-info-row"><span class="hole-info-label">Green</span><span class="hole-info-value">${(hole.green_shape || 'medium').replace('_',' ')}</span></div>
+            ${hazardChips ? `<div class="hazard-list">${hazardChips}</div>` : ''}
+            ${hole.notes ? `<div style="margin-top:12px;font-size:13px;color:var(--text2);font-style:italic">📝 ${hole.notes}</div>` : ''}
+        </div>
+        <button class="btn-recommend" onclick="startShot()" style="margin-top:0">🎯 Get Club Recommendation</button>
+    `;
+}
+
+// ── HOLE SVG VISUALIZATION ──
+function generateHoleSVG(hole) {
+    const w = 300, h = 540;
+    const isPar3 = hole.par === 3;
+    const isPar5 = hole.par === 5;
+
+    // Fairway dimensions based on par
+    const fwTop = isPar3 ? 180 : 100;
+    const fwBottom = h - 100;
+    const fwWidth = isPar3 ? 60 : isPar5 ? 80 : 70;
+    const greenY = fwTop - 10;
+    const greenRx = isPar3 ? 30 : 35;
+    const greenRy = isPar3 ? 22 : 25;
+    const teeY = fwBottom + 30;
+
+    let hazardsSVG = '';
+    (hole.hazards || []).forEach(hz => {
+        const hzColor = hz.type === 'water' ? '#4fc3f7' : hz.type === 'bunker' ? '#ffcc02' : hz.type === 'out_of_bounds' ? '#ff4757' : '#2d8a4e';
+        const hzOpacity = hz.type === 'water' ? 0.4 : hz.type === 'bunker' ? 0.5 : 0.3;
+        let hzX = w / 2, hzY = fwBottom - ((hz.distance / hole.distance) * (fwBottom - fwTop));
+        if (hz.distance === 0) hzY = greenY;
+
+        if (hz.location === 'left') hzX = w / 2 - fwWidth - 15;
+        else if (hz.location === 'right') hzX = w / 2 + fwWidth + 15;
+        else if (hz.location === 'short') { hzX = w / 2; hzY = greenY + 30; }
+        else if (hz.location === 'long') { hzX = w / 2; hzY = greenY - 30; }
+        else hzX = w / 2;
+
+        if (hz.type === 'water') {
+            hazardsSVG += `<ellipse cx="${hzX}" cy="${hzY}" rx="25" ry="15" fill="${hzColor}" opacity="${hzOpacity}"/>`;
+            hazardsSVG += `<text x="${hzX}" y="${hzY + 4}" text-anchor="middle" font-size="10" fill="${hzColor}">💧</text>`;
+        } else if (hz.type === 'bunker') {
+            hazardsSVG += `<ellipse cx="${hzX}" cy="${hzY}" rx="18" ry="10" fill="${hzColor}" opacity="${hzOpacity}"/>`;
+        } else if (hz.type === 'out_of_bounds') {
+            const x1 = hz.location === 'left' ? 10 : w - 10;
+            hazardsSVG += `<line x1="${x1}" y1="${fwTop}" x2="${x1}" y2="${fwBottom}" stroke="${hzColor}" stroke-width="3" stroke-dasharray="8,4" opacity="0.6"/>`;
+            hazardsSVG += `<text x="${x1}" y="${(fwTop+fwBottom)/2}" text-anchor="middle" font-size="9" fill="${hzColor}" transform="rotate(-90,${x1},${(fwTop+fwBottom)/2})">OB</text>`;
+        } else {
+            hazardsSVG += `<rect x="${hzX-15}" y="${hzY-15}" width="30" height="30" rx="8" fill="${hzColor}" opacity="${hzOpacity}"/>`;
+            hazardsSVG += `<text x="${hzX}" y="${hzY + 4}" text-anchor="middle" font-size="10" fill="${hzColor}">🌲</text>`;
+        }
+    });
+
+    // Yardage markers
+    const markers = [];
+    if (!isPar3) {
+        const m150 = fwBottom - ((150 / hole.distance) * (fwBottom - fwTop));
+        const m200 = fwBottom - ((200 / hole.distance) * (fwBottom - fwTop));
+        markers.push({ y: m150, label: '150' });
+        if (hole.distance > 250) markers.push({ y: m200, label: '200' });
+    }
+
+    const markersSVG = markers.map(m => `
+        <line x1="${w/2-fwWidth+10}" y1="${m.y}" x2="${w/2+fwWidth-10}" y2="${m.y}" stroke="rgba(255,255,255,.15)" stroke-width="1" stroke-dasharray="4,4"/>
+        <text x="${w/2+fwWidth+8}" y="${m.y+4}" font-size="9" fill="rgba(255,255,255,.3)">${m.label}</text>
+    `).join('');
+
+    return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+        <!-- Rough -->
+        <rect width="${w}" height="${h}" fill="#0a1510"/>
+        <!-- Fairway -->
+        <path d="M ${w/2-fwWidth} ${fwBottom}
+                 Q ${w/2-fwWidth-10} ${(fwTop+fwBottom)/2} ${w/2-fwWidth+5} ${fwTop+20}
+                 Q ${w/2-15} ${fwTop} ${w/2} ${fwTop}
+                 Q ${w/2+15} ${fwTop} ${w/2+fwWidth-5} ${fwTop+20}
+                 Q ${w/2+fwWidth+10} ${(fwTop+fwBottom)/2} ${w/2+fwWidth} ${fwBottom} Z"
+              fill="#1a4d2e" stroke="#2a6b3e" stroke-width="1"/>
+        <!-- Green -->
+        <ellipse cx="${w/2}" cy="${greenY}" rx="${greenRx}" ry="${greenRy}" fill="#2d8a4e" stroke="#3da65e" stroke-width="1.5"/>
+        <!-- Pin -->
+        <line x1="${w/2}" y1="${greenY-18}" x2="${w/2}" y2="${greenY-2}" stroke="white" stroke-width="1.5"/>
+        <polygon points="${w/2},${greenY-18} ${w/2+10},${greenY-13} ${w/2},${greenY-8}" fill="#ff4757"/>
+        <!-- Tee box -->
+        <rect x="${w/2-20}" y="${teeY-6}" width="40" height="12" rx="3" fill="#4a7c59" stroke="#5a9c6a" stroke-width="1"/>
+        <!-- Distance label -->
+        <text x="${w/2}" y="${teeY+22}" text-anchor="middle" font-size="12" font-weight="bold" fill="white">${hole.distance} yds</text>
+        ${markersSVG}
+        ${hazardsSVG}
+        <!-- Hole number -->
+        <text x="16" y="30" font-size="14" font-weight="bold" fill="rgba(255,255,255,.5)">#${hole.hole_number}</text>
+        <text x="${w-16}" y="30" text-anchor="end" font-size="12" fill="rgba(255,255,255,.3)">Par ${hole.par}</text>
+    </svg>`;
+}
+
+// ── SHOT ADVISOR ──
+function startShot() {
+    showScreen('shot');
+    if (selectedHole) {
+        document.getElementById('fDistance').value = selectedHole.distance;
+        document.getElementById('fElev').value = selectedHole.elevation_change || 0;
+        document.getElementById('shotHoleViz').innerHTML = `
+            <div class="hole-viz" style="margin-bottom:16px">
+                <div class="hole-viz-header">
+                    <h3>${currentCourse?.name || 'Course'} — Hole ${selectedHole.hole_number}</h3>
+                    <span class="badge badge-par${selectedHole.par === 3 ? '3' : selectedHole.par === 5 ? '5' : '4'}">Par ${selectedHole.par}</span>
+                </div>
+                <div class="hole-svg-container">${generateHoleSVG(selectedHole)}</div>
+            </div>
+        `;
+    }
+}
+
+async function getRecommendation() {
+    const btn = document.getElementById('btnRecommend');
+    const result = document.getElementById('recResult');
+    btn.disabled = true;
+    btn.textContent = 'Analyzing...';
+    result.innerHTML = '<div class="loading"><div class="spinner"></div>Your caddie is thinking...</div>';
+
+    const courseId = currentCourse?.id || (allCourses[0]?.id);
+    const holeNum = selectedHole?.hole_number || 1;
+
+    try {
+        const res = await fetch(`${API}/api/v1/recommendation/simple`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                course_id: courseId,
+                hole_number: holeNum,
+                distance_to_pin: parseInt(document.getElementById('fDistance').value) || 150,
+                wind_speed: parseInt(document.getElementById('fWind').value) || 0,
+                wind_direction: document.getElementById('fWindDir').value,
+                lie: document.getElementById('fLie').value,
+                elevation_change: parseInt(document.getElementById('fElev').value) || 0,
+            })
         });
 
-        // Close results when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.course-search')) {
-                document.getElementById('courseResults').classList.add('hidden');
-            }
-        });
+        if (!res.ok) {
+            let detail = `HTTP ${res.status}`;
+            try { const err = await res.json(); detail = err.detail || detail; } catch(e) {}
+            throw new Error(detail);
+        }
 
-        // Form submission
-        document.getElementById('shotForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            if (!selectedCourse) {
-                alert('Please select a course');
-                return;
-            }
-
-            const btn = document.getElementById('submitBtn');
-            const resultDiv = document.getElementById('result');
-            
-            btn.disabled = true;
-            btn.textContent = 'Analyzing...';
-            resultDiv.innerHTML = '<div class="card loading">🔄 Calculating optimal shot...</div>';
-
-            try {
-                const requestData = {
-                    course_id: document.getElementById('courseId').value,
-                    hole_number: parseInt(document.getElementById('holeNumber').value),
-                    distance_to_pin: parseInt(document.getElementById('distance').value),
-                    wind_speed: parseInt(document.getElementById('windSpeed').value),
-                    wind_direction: document.getElementById('windDirection').value,
-                    lie: document.getElementById('lie').value,
-                    elevation_change: parseInt(document.getElementById('elevation').value)
-                };
-
-                const response = await fetch(`${API_URL}/api/v1/recommendation/simple`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(requestData)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                const data = await response.json();
-                
-                resultDiv.innerHTML = `
-                    <div class="recommendation">
-                        <div class="caddie-call">${data.caddie_call}</div>
-                        <div class="club-display">${data.primary_club}</div>
-                        
-                        <div class="detail">
-                            <span class="detail-label">Adjusted Distance</span>
-                            <span class="detail-value">${data.adjusted_distance} yds</span>
-                        </div>
-                        <div class="detail">
-                            <span class="detail-label">Shot Shape</span>
-                            <span class="detail-value">${data.shot_shape}</span>
-                        </div>
-                        <div class="detail">
-                            <span class="detail-label">Confidence</span>
-                            <span class="detail-value">${Math.round(data.confidence * 100)}%</span>
-                        </div>
-                        
-                        ${data.notes ? `<div class="notes">${data.notes}</div>` : ''}
+        const rec = await res.json();
+        result.innerHTML = `
+            <div class="rec-card">
+                <div class="rec-club">${rec.primary_club}</div>
+                <div class="rec-call">"${rec.caddie_call}"</div>
+                <div class="rec-stats">
+                    <div class="rec-stat">
+                        <div class="rec-stat-val">${rec.adjusted_distance}</div>
+                        <div class="rec-stat-label">Yards</div>
                     </div>
-                `;
-
-            } catch (error) {
-                console.error('Error:', error);
-                let errorMessage = '❌ Error getting recommendation.';
-                let errorDetails = '';
-                
-                if (error.message.includes('HTTP')) {
-                    errorMessage += ` Server returned ${error.message}`;
-                    // Try to get error details from response
-                    try {
-                        const errorData = await response.json();
-                        if (errorData.detail) {
-                            errorDetails = `<br><br><strong>Server says:</strong> ${errorData.detail}`;
-                        }
-                    } catch (e) {
-                        errorDetails = '<br><br>Server response was not JSON.';
-                    }
-                } else if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
-                    errorMessage += ' <strong>Cannot connect to server.</strong>';
-                    errorDetails = `<br><br>Trying to reach: ${API_URL}<br>Check if the server is running.`;
-                } else {
-                    errorMessage += ` ${error.message}`;
-                }
-                
-                resultDiv.innerHTML = `
-                    <div class="error">
-                        ${errorMessage}
-                        ${errorDetails}
+                    <div class="rec-stat">
+                        <div class="rec-stat-val">${rec.confidence}%</div>
+                        <div class="rec-stat-label">Confidence</div>
                     </div>
-                `;
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Get Recommendation';
-            }
-        });
+                    <div class="rec-stat">
+                        <div class="rec-stat-val">${rec.optimal_miss?.split(' ')[1] || '—'}</div>
+                        <div class="rec-stat-label">Miss To</div>
+                    </div>
+                </div>
+                <div class="rec-detail">
+                    <h4>Why This Club</h4>
+                    <p>${rec.why || ''}</p>
+                </div>
+                <div class="rec-detail">
+                    <h4>Target</h4>
+                    <p>${rec.primary_target || ''}</p>
+                </div>
+                ${rec.danger_zone ? `<div class="rec-detail"><h4>⚠️ Danger Zone</h4><p style="color:var(--danger)">${rec.danger_zone}</p></div>` : ''}
+                ${rec.risk_reward ? `
+                <div class="rec-risk">
+                    <div class="rec-risk-item risk-agg">
+                        <div class="risk-label">🔥 Aggressive</div>
+                        <div>↑ ${rec.risk_reward.aggressive_upside}</div>
+                        <div>↓ ${rec.risk_reward.aggressive_downside}</div>
+                    </div>
+                    <div class="rec-risk-item risk-con">
+                        <div class="risk-label">🛡️ Conservative</div>
+                        <div>↑ ${rec.risk_reward.conservative_upside}</div>
+                        <div>↓ ${rec.risk_reward.conservative_downside}</div>
+                    </div>
+                </div>` : ''}
+                ${rec.alternatives?.length ? `
+                <div class="rec-alts">
+                    <div class="section-title" style="margin-top:16px;margin-bottom:8px">Alternatives</div>
+                    ${rec.alternatives.map(a => `
+                        <div class="rec-alt">
+                            <div class="rec-alt-club">${a.club}</div>
+                            <div class="rec-alt-scenario">${a.scenario}</div>
+                        </div>
+                    `).join('')}
+                </div>` : ''}
+                ${rec.caddie_note ? `<div class="caddie-note">🧢 ${rec.caddie_note}</div>` : ''}
+            </div>
+        `;
+    } catch (e) {
+        result.innerHTML = `<div class="error-msg">❌ ${e.message}</div>`;
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Get Club';
+    }
+}
 
-        // Load a default course on startup
-        window.addEventListener('load', async () => {
-            try {
-                const response = await fetch(`${API_URL}/api/v1/courses?search=Augusta`);
-                const data = await response.json();
-                if (data.courses && data.courses.length > 0) {
-                    selectedCourse = data.courses[0];
-                    document.getElementById('courseSearch').value = selectedCourse.name;
-                    document.getElementById('courseId').value = selectedCourse.id;
-                }
-            } catch (error) {
-                console.log('Could not load default course');
-            }
-        });
-    </script>
+// ── INIT ──
+loadCourses();
+</script>
 </body>
 </html>

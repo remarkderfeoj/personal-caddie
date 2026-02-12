@@ -264,6 +264,45 @@ def get_course(request: Request, course_id: str) -> CourseHoles:
     return course
 
 
+@app.get("/api/v1/courses/{course_id}/holes")
+@limiter.limit("100/minute")
+def get_holes(request: Request, course_id: str):
+    """Get all holes for a course"""
+    course = data_store.get_course_by_id(course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail=f"Course {course_id} not found")
+    
+    holes = []
+    for h in sorted(course.holes, key=lambda x: x.hole_number):
+        holes.append({
+            "hole_id": h.hole_id,
+            "hole_number": h.hole_number,
+            "par": h.par,
+            "handicap_index": h.handicap_index,
+            "distance": h.distance_to_pin_yards,
+            "elevation_change": h.elevation_change_feet or 0,
+            "fairway_type": h.fairway_type.value if hasattr(h.fairway_type, 'value') else h.fairway_type,
+            "green_shape": h.green_shape.value if h.green_shape and hasattr(h.green_shape, 'value') else (h.green_shape or "medium"),
+            "hazards": [
+                {
+                    "type": hz.hazard_type.value if hasattr(hz.hazard_type, 'value') else hz.hazard_type,
+                    "location": hz.location.value if hasattr(hz.location, 'value') else hz.location,
+                    "distance": hz.distance_from_tee_yards,
+                    "description": hz.description or ""
+                }
+                for hz in (h.hazards or [])
+            ],
+            "notes": h.notes or ""
+        })
+    
+    return {
+        "course_id": course_id,
+        "course_name": course.course_name,
+        "elevation": course.course_elevation_feet,
+        "holes": holes
+    }
+
+
 @app.get("/api/v1/courses/{course_id}/holes/{hole_number}")
 @limiter.limit("100/minute")
 def get_hole(request: Request, course_id: str, hole_number: int):
@@ -344,46 +383,62 @@ async def get_simple_recommendation(request: Request):
         # Get course and hole
         course = data_store.get_course_by_id(course_id)
         if not course:
-            logger.error(f"Course not found: {course_id}")
             raise HTTPException(status_code=404, detail=f"Course {course_id} not found")
         
         hole = next((h for h in course.holes if h.hole_number == hole_number), None)
         if not hole:
-            logger.error(f"Hole {hole_number} not found on course {course_id}")
             raise HTTPException(status_code=404, detail=f"Hole {hole_number} not found")
         
-        # Use default player for now (could be parameterized later)
+        # Use default player
         players = data_store.list_all_players()
         if not players:
-            logger.error("No players configured in data store")
             raise HTTPException(status_code=404, detail="No players configured")
         player_baseline = players[0]
         
-        logger.info(f"Using player: {player_baseline.player_name}")
+        # Map frontend wind direction to WindRelativeToShot enum values
+        wind_map = {
+            "calm": "calm",
+            "headwind": "headwind",
+            "tailwind": "tailwind",
+            "left-to-right": "crosswind_left",
+            "right-to-left": "crosswind_right",
+        }
+        mapped_wind = wind_map.get(wind_direction, "calm")
         
-        # Create simplified weather
+        # Map frontend lie to PlayerLie enum values
+        lie_map = {
+            "fairway": "fairway",
+            "rough": "rough",
+            "tee": "tee",
+            "sand": "bunker",
+            "bunker": "bunker",
+        }
+        mapped_lie = lie_map.get(lie, "fairway")
+        
+        # Create weather with compass direction (use calm/N since we use relative wind)
         weather = WeatherConditions(
             condition_id="current",
             timestamp=datetime.now(),
             temperature_fahrenheit=70.0,
             wind_speed_mph=float(wind_speed),
-            wind_direction_compass=wind_direction,
+            wind_direction_compass="calm",
             humidity_percent=50,
             rain=False,
             ground_conditions="dry"
         )
         
-        # Create shot analysis
+        # Create shot analysis with correct field names
+        import time
         analysis = ShotAnalysis(
-            shot_id=f"shot_{datetime.now().timestamp()}",
+            analysis_id=f"shot-{int(time.time())}",
             player_id=player_baseline.player_id,
             hole_id=hole.hole_id,
-            distance_to_pin=distance_to_pin,
-            lie=lie,
-            pin_location="center",
             weather_condition_id="current",
-            wind_relative_to_shot=wind_direction,
-            player_strategy_preference="balanced",
+            pin_location="center",
+            current_distance_to_pin_yards=int(distance_to_pin),
+            player_lie=mapped_lie,
+            wind_relative_to_shot=mapped_wind if mapped_wind != "calm" else None,
+            pin_placement_strategy="balanced",
             timestamp=datetime.now()
         )
         
@@ -398,15 +453,36 @@ async def get_simple_recommendation(request: Request):
             round_context=None
         )
         
-        logger.info(f"Recommendation generated: {recommendation.primary_club}")
+        # Map ClubType enum to display name
+        club_val = recommendation.primary_club.value if hasattr(recommendation.primary_club, 'value') else str(recommendation.primary_club)
+        club_display = club_val.replace("_", " ").title()
+        
+        logger.info(f"Recommendation generated: {club_display}")
         
         return {
             "caddie_call": recommendation.caddie_call,
-            "primary_club": recommendation.primary_club,
+            "primary_club": club_display,
+            "primary_target": recommendation.primary_target,
             "adjusted_distance": recommendation.adjusted_distance,
-            "shot_shape": recommendation.shot_shape or "straight",
-            "confidence": recommendation.confidence_level,
-            "notes": recommendation.notes
+            "why": recommendation.why,
+            "optimal_miss": recommendation.optimal_miss,
+            "danger_zone": recommendation.danger_zone,
+            "caddie_note": recommendation.caddie_note,
+            "confidence": recommendation.confidence_percent or 75,
+            "risk_reward": {
+                "aggressive_upside": recommendation.risk_reward.aggressive_upside,
+                "aggressive_downside": recommendation.risk_reward.aggressive_downside,
+                "conservative_upside": recommendation.risk_reward.conservative_upside,
+                "conservative_downside": recommendation.risk_reward.conservative_downside,
+            },
+            "alternatives": [
+                {
+                    "club": alt.club.value.replace("_", " ").title() if hasattr(alt.club, 'value') else str(alt.club),
+                    "target": alt.target,
+                    "scenario": alt.scenario,
+                }
+                for alt in (recommendation.alternatives or [])
+            ]
         }
         
     except HTTPException:
