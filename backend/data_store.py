@@ -21,7 +21,25 @@ class DataStore:
     
     def _load_examples(self):
         """Load example data from files"""
-        examples_dir = Path(__file__).parent.parent / "examples"
+        # Try multiple possible locations for examples directory
+        possible_dirs = [
+            Path(__file__).parent.parent / "examples",  # Local development
+            Path(__file__).parent / "../examples",  # Alternative
+            Path("examples"),  # When run from root
+            Path("../examples"),  # When run from backend/
+        ]
+        
+        examples_dir = None
+        for dir_path in possible_dirs:
+            if dir_path.exists() and dir_path.is_dir():
+                examples_dir = dir_path
+                print(f"Found examples directory at: {dir_path.absolute()}")
+                break
+        
+        if not examples_dir:
+            print("WARNING: No examples directory found! No courses will be loaded.")
+            print(f"Searched locations: {[str(p.absolute()) for p in possible_dirs]}")
+            return
         
         # Load all course JSON files
         for course_file in examples_dir.glob("*.json"):

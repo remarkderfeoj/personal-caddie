@@ -114,7 +114,25 @@ def read_root(request: Request):
 @limiter.limit("100/minute")
 def health_check(request: Request):
     """Health check endpoint"""
-    return {"status": "healthy"}
+    courses_loaded = len(data_store.courses)
+    players_loaded = len(data_store.players)
+    return {
+        "status": "healthy",
+        "courses_loaded": courses_loaded,
+        "players_loaded": players_loaded,
+        "ready": courses_loaded > 0 and players_loaded > 0
+    }
+
+
+@app.get("/debug/courses")
+@limiter.limit("100/minute")
+def debug_courses(request: Request):
+    """Debug endpoint to see what courses are loaded"""
+    return {
+        "total_courses": len(data_store.courses),
+        "course_ids": list(data_store.courses.keys()),
+        "course_names": [c.course_name for c in data_store.courses.values()]
+    }
 
 
 # ============================================================================
