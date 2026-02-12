@@ -20,6 +20,8 @@ from models import (
     HazardAnalysis,
     HazardInPlay,
     AlternativeClub,
+    AlternativePlay,
+    RiskReward,
 )
 from .physics import (
     calculate_temperature_adjustment,

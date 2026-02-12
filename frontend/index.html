@@ -8,7 +8,8 @@
     <meta name="theme-color" content="#1a1a2e">
     <title>Personal Caddie</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛳</text></svg>">
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDLClsHAdDDsePIwDuQ4UfhhboAuN1wfY" async defer></script>
+    <!-- Google Maps satellite view - disabled until accurate GPS coords are added -->
+    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=GOOGLE_MAPS_KEY" async defer></script> -->
     <style>
         :root {
             --bg: #0f1923;
@@ -526,7 +527,7 @@ function renderHoleDetail(hole) {
         return `<span class="hazard-chip ${cls}">${icon} ${h.description || h.type} (${h.location})</span>`;
     }).join('');
 
-    const hasCoords = currentCourse?.center_lat || hole.tee_lat;
+    const hasCoords = false; // Disabled until accurate GPS coords are sourced
 
     document.getElementById('holeDetail').innerHTML = `
         <div class="hole-viz">
