@@ -417,8 +417,6 @@ def generate_recommendation(
     )
     
     # 8. Return conviction-first recommendation
-    from models import AlternativePlay, RiskReward
-    
     return CaddieRecommendation(
         recommendation_id=f"rec_{shot_analysis.analysis_id}",
         shot_analysis_id=shot_analysis.analysis_id,
