@@ -80,5 +80,7 @@
       "green_shape": "medium",
       "notes": "Alister MacKenzie masterpiece on Monterey Peninsula"
     }
-  ]
+  ],
+  "center_lat": 36.579,
+  "center_lng": -121.966
 }

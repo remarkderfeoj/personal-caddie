@@ -22,7 +22,11 @@
         }
       ],
       "green_shape": "wide",
-      "notes": "Iconic opener with Swilcan Burn and town backdrop"
+      "notes": "Iconic opener with Swilcan Burn and town backdrop",
+      "tee_lat": 56.3428,
+      "tee_lng": -2.802,
+      "green_lat": 56.344,
+      "green_lng": -2.7975
     },
     {
       "hole_id": "st_andrews_17",
@@ -50,7 +54,11 @@
         }
       ],
       "green_shape": "narrow",
-      "notes": "Famous Road Hole - most difficult par 4 in golf"
+      "notes": "Famous Road Hole - most difficult par 4 in golf",
+      "tee_lat": 56.344,
+      "tee_lng": -2.797,
+      "green_lat": 56.343,
+      "green_lng": -2.801
     },
     {
       "hole_id": "st_andrews_18",
@@ -71,7 +79,13 @@
         }
       ],
       "green_shape": "wide",
-      "notes": "Home of Golf - Swilcan Bridge and finishing green"
+      "notes": "Home of Golf - Swilcan Bridge and finishing green",
+      "tee_lat": 56.343,
+      "tee_lng": -2.8012,
+      "green_lat": 56.3428,
+      "green_lng": -2.8025
     }
-  ]
+  ],
+  "center_lat": 56.343,
+  "center_lng": -2.802
 }

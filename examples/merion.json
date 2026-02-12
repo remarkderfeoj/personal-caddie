@@ -129,5 +129,7 @@
       "green_shape": "medium",
       "notes": "Tough finishing hole at Merion Golf Club"
     }
-  ]
+  ],
+  "center_lat": 40.004,
+  "center_lng": -75.312
 }

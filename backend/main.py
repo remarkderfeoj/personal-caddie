@@ -197,37 +197,22 @@ def list_courses(request: Request, search: Optional[str] = None):
     Returns:
         List of matching courses
     """
+    def course_summary(c):
+        return {
+            "id": c.course_id,
+            "name": c.course_name,
+            "elevation_feet": c.course_elevation_feet,
+            "holes": len(c.holes),
+            "center_lat": getattr(c, 'center_lat', None),
+            "center_lng": getattr(c, 'center_lng', None),
+        }
+    
     if search:
         courses = data_store.search_courses(search)
-        return {
-            "count": len(courses),
-            "query": search,
-            "courses": [
-                {
-                    "id": c.course_id,
-                    "name": c.course_name,
-                    "location": getattr(c, 'location', 'Unknown'),
-                    "elevation_feet": c.course_elevation_feet,
-                    "holes": len(c.holes)
-                }
-                for c in courses
-            ]
-        }
+        return {"count": len(courses), "query": search, "courses": [course_summary(c) for c in courses]}
     else:
         courses = data_store.list_all_courses()
-        return {
-            "count": len(courses),
-            "courses": [
-                {
-                    "id": c.course_id,
-                    "name": c.course_name,
-                    "location": getattr(c, 'location', 'Unknown'),
-                    "elevation_feet": c.course_elevation_feet,
-                    "holes": len(c.holes)
-                }
-                for c in courses
-            ]
-        }
+        return {"count": len(courses), "courses": [course_summary(c) for c in courses]}
 
 
 @app.post("/api/v1/courses")
@@ -274,7 +259,7 @@ def get_holes(request: Request, course_id: str):
     
     holes = []
     for h in sorted(course.holes, key=lambda x: x.hole_number):
-        holes.append({
+        hole_data = {
             "hole_id": h.hole_id,
             "hole_number": h.hole_number,
             "par": h.par,
@@ -292,13 +277,22 @@ def get_holes(request: Request, course_id: str):
                 }
                 for hz in (h.hazards or [])
             ],
-            "notes": h.notes or ""
-        })
+            "notes": h.notes or "",
+        }
+        # Add GPS coords if available
+        if h.tee_lat is not None:
+            hole_data["tee_lat"] = h.tee_lat
+            hole_data["tee_lng"] = h.tee_lng
+            hole_data["green_lat"] = h.green_lat
+            hole_data["green_lng"] = h.green_lng
+        holes.append(hole_data)
     
     return {
         "course_id": course_id,
         "course_name": course.course_name,
         "elevation": course.course_elevation_feet,
+        "center_lat": getattr(course, 'center_lat', None),
+        "center_lng": getattr(course, 'center_lng', None),
         "holes": holes
     }
 

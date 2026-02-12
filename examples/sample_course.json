@@ -57,7 +57,11 @@
         }
       ],
       "green_shape": "narrow",
-      "notes": "Iconic short par 3. Water guards entire left side. Conservative play is safest."
+      "notes": "Iconic short par 3. Water guards entire left side. Conservative play is safest.",
+      "tee_lat": 36.565,
+      "tee_lng": -121.953,
+      "green_lat": 36.5645,
+      "green_lng": -121.9535
     },
     {
       "hole_id": "pebble_18",
@@ -92,7 +96,13 @@
         }
       ],
       "green_shape": "large",
-      "notes": "Finishing hole plays uphill. Water entire right side. Most players lay up short, go for birdie with approach."
+      "notes": "Finishing hole plays uphill. Water entire right side. Most players lay up short, go for birdie with approach.",
+      "tee_lat": 36.568,
+      "tee_lng": -121.947,
+      "green_lat": 36.567,
+      "green_lng": -121.949
     }
-  ]
+  ],
+  "center_lat": 36.5668,
+  "center_lng": -121.9487
 }

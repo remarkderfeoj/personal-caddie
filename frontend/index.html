@@ -8,6 +8,7 @@
     <meta name="theme-color" content="#1a1a2e">
     <title>Personal Caddie</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛳</text></svg>">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDLClsHAdDDsePIwDuQ4UfhhboAuN1wfY" async defer></script>
     <style>
         :root {
             --bg: #0f1923;
@@ -144,6 +145,26 @@
         .tap-hint {
             font-size: 11px; color: var(--text2); text-align: center;
             margin-top: -8px; margin-bottom: 12px; opacity: .6;
+        }
+
+        /* View toggle */
+        .view-toggle {
+            display: flex; gap: 4px; background: var(--bg);
+            border-radius: 10px; padding: 3px; margin-bottom: 12px;
+        }
+        .view-toggle button {
+            flex: 1; padding: 8px; border: none; border-radius: 8px;
+            background: transparent; color: var(--text2); font-size: 12px;
+            font-weight: 600; cursor: pointer; transition: all .2s;
+        }
+        .view-toggle button.active {
+            background: var(--accent); color: #000;
+        }
+
+        /* Satellite map */
+        .satellite-map {
+            width: 100%; aspect-ratio: 1/1.2; border-radius: 12px;
+            overflow: hidden; margin-bottom: 12px;
         }
 
         /* Wind compass */
@@ -470,6 +491,7 @@ async function openCourse(courseId) {
         const res = await fetch(`${API}/api/v1/courses/${courseId}/holes`);
         const data = await res.json();
         currentHoles = data.holes || [];
+        currentCourseData = data; // Store full data with coords
         renderHoleChips();
         if (currentHoles.length > 0) selectHole(currentHoles[0]);
     } catch (e) {
@@ -504,6 +526,8 @@ function renderHoleDetail(hole) {
         return `<span class="hazard-chip ${cls}">${icon} ${h.description || h.type} (${h.location})</span>`;
     }).join('');
 
+    const hasCoords = currentCourse?.center_lat || hole.tee_lat;
+
     document.getElementById('holeDetail').innerHTML = `
         <div class="hole-viz">
             <div class="hole-viz-header">
@@ -513,8 +537,17 @@ function renderHoleDetail(hole) {
                     <span class="badge" style="background:rgba(255,255,255,.06);color:var(--text2)">${hole.distance} yds</span>
                 </div>
             </div>
-            <div class="hole-svg-container" onclick="handleHoleTap(event, ${hole.hole_number})" id="holeVizSvg">${generateHoleSVG(hole)}</div>
-            <div class="tap-hint">👆 Tap the hole to set your position and get distance to pin</div>
+            ${hasCoords ? `<div class="view-toggle">
+                <button class="active" onclick="switchView('diagram', ${hole.hole_number})">📐 Diagram</button>
+                <button onclick="switchView('satellite', ${hole.hole_number})">🛰️ Satellite</button>
+            </div>` : ''}
+            <div id="diagramView">
+                <div class="hole-svg-container" onclick="handleHoleTap(event, ${hole.hole_number})" id="holeVizSvg">${generateHoleSVG(hole)}</div>
+                <div class="tap-hint">👆 Tap the hole to set your position and get distance to pin</div>
+            </div>
+            <div id="satelliteView" style="display:none">
+                <div class="satellite-map" id="satMap"></div>
+            </div>
             <div class="hole-info-row"><span class="hole-info-label">Distance</span><span class="hole-info-value">${hole.distance} yards</span></div>
             <div class="hole-info-row"><span class="hole-info-label">Par</span><span class="hole-info-value">${hole.par}</span></div>
             <div class="hole-info-row"><span class="hole-info-label">Handicap</span><span class="hole-info-value">${hole.handicap_index}</span></div>
@@ -620,6 +653,108 @@ function generateHoleSVG(hole, interactive) {
         <text x="${w-16}" y="30" text-anchor="end" font-size="12" fill="rgba(255,255,255,.3)">Par ${hole.par}</text>
     </svg>`;
 }
+
+// ── SATELLITE VIEW ──
+let satMapInstance = null;
+
+function switchView(view, holeNum) {
+    const btns = document.querySelectorAll('.view-toggle button');
+    btns.forEach(b => b.classList.remove('active'));
+    if (view === 'diagram') {
+        btns[0].classList.add('active');
+        document.getElementById('diagramView').style.display = 'block';
+        document.getElementById('satelliteView').style.display = 'none';
+    } else {
+        btns[1].classList.add('active');
+        document.getElementById('diagramView').style.display = 'none';
+        document.getElementById('satelliteView').style.display = 'block';
+        initSatelliteMap(holeNum);
+    }
+}
+
+function initSatelliteMap(holeNum) {
+    const hole = currentHoles.find(h => h.hole_number === holeNum);
+    if (!hole || !window.google) return;
+
+    const mapDiv = document.getElementById('satMap');
+    if (!mapDiv) return;
+
+    // Use hole-specific coords if available, otherwise course center
+    const centerLat = hole.green_lat || currentCourseData?.center_lat || 33.5;
+    const centerLng = hole.green_lng || currentCourseData?.center_lng || -81.85;
+
+    satMapInstance = new google.maps.Map(mapDiv, {
+        center: { lat: centerLat, lng: centerLng },
+        zoom: 18,
+        mapTypeId: 'satellite',
+        tilt: 0,
+        disableDefaultUI: true,
+        zoomControl: true,
+        gestureHandling: 'greedy',
+    });
+
+    // Add green marker
+    new google.maps.Marker({
+        position: { lat: centerLat, lng: centerLng },
+        map: satMapInstance,
+        icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 10,
+            fillColor: '#00d4aa',
+            fillOpacity: 0.8,
+            strokeColor: '#fff',
+            strokeWeight: 2,
+        },
+        title: `Hole ${holeNum} Green`,
+    });
+
+    // Add tee marker if coords available
+    if (hole.tee_lat) {
+        new google.maps.Marker({
+            position: { lat: hole.tee_lat, lng: hole.tee_lng },
+            map: satMapInstance,
+            icon: {
+                path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                scale: 6,
+                fillColor: '#fff',
+                fillOpacity: 0.9,
+                strokeColor: '#000',
+                strokeWeight: 1,
+                rotation: 0,
+            },
+            title: `Hole ${holeNum} Tee`,
+        });
+
+        // Draw line from tee to green
+        new google.maps.Polyline({
+            path: [
+                { lat: hole.tee_lat, lng: hole.tee_lng },
+                { lat: centerLat, lng: centerLng },
+            ],
+            geodesic: true,
+            strokeColor: '#00d4aa',
+            strokeOpacity: 0.6,
+            strokeWeight: 2,
+            strokeDashArray: [10, 5],
+            map: satMapInstance,
+        });
+
+        // Fit bounds to show both tee and green
+        const bounds = new google.maps.LatLngBounds();
+        bounds.extend({ lat: hole.tee_lat, lng: hole.tee_lng });
+        bounds.extend({ lat: centerLat, lng: centerLng });
+        satMapInstance.fitBounds(bounds, 60);
+    }
+
+    // Add distance label
+    const infoWindow = new google.maps.InfoWindow({
+        position: { lat: centerLat, lng: centerLng },
+        content: `<div style="color:#000;font-weight:bold;font-size:14px;padding:4px">⛳ ${hole.distance} yds • Par ${hole.par}</div>`,
+    });
+    infoWindow.open(satMapInstance);
+}
+
+let currentCourseData = null;
 
 // ── INTERACTIVE HOLE TAP ──
 let playerPosition = null;

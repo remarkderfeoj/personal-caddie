@@ -395,5 +395,7 @@
       "green_shape": "medium",
       "notes": ""
     }
-  ]
+  ],
+  "center_lat": 34.988,
+  "center_lng": -80.368
 }

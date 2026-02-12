@@ -187,6 +187,11 @@ class Hole(BaseModel):
     hazards: Optional[List[Hazard]] = None
     green_shape: Optional[GreenShape] = None
     notes: Optional[str] = Field(None, max_length=1000)
+    # GPS coordinates (optional)
+    tee_lat: Optional[float] = Field(None, ge=-90, le=90)
+    tee_lng: Optional[float] = Field(None, ge=-180, le=180)
+    green_lat: Optional[float] = Field(None, ge=-90, le=90)
+    green_lng: Optional[float] = Field(None, ge=-180, le=180)
 
 
 class CourseHoles(BaseModel):
@@ -195,6 +200,9 @@ class CourseHoles(BaseModel):
     course_name: str = Field(max_length=200)
     course_elevation_feet: int = Field(ge=-1000, le=15000)
     holes: List[Hole]
+    # GPS coordinates (optional)
+    center_lat: Optional[float] = Field(None, ge=-90, le=90)
+    center_lng: Optional[float] = Field(None, ge=-180, le=180)
     
     @field_validator('course_name')
     @classmethod

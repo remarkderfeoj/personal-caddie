@@ -3,10 +3,148 @@
   "course_name": "TPC Sawgrass - Stadium Course",
   "course_elevation_feet": 20,
   "holes": [
-    {"hole_id": "sawgrass_1", "hole_number": 1, "par": 4, "handicap_index": 5, "distance_to_pin_yards": 423, "shot_bearing_degrees": 180, "elevation_change_feet": 0, "fairway_type": "fairway", "hazards": [{"hazard_type": "water", "location": "left", "distance_from_tee_yards": 280, "severity": "water", "description": "Lake left"}], "green_shape": "medium", "notes": "Strong opening hole with water left"},
-    {"hole_id": "sawgrass_8", "hole_number": 8, "par": 3, "handicap_index": 15, "distance_to_pin_yards": 219, "shot_bearing_degrees": 90, "elevation_change_feet": 0, "fairway_type": "fairway", "hazards": [{"hazard_type": "water", "location": "short", "distance_from_tee_yards": 200, "severity": "water", "description": "Pond short of green"}, {"hazard_type": "bunker", "location": "right", "distance_from_tee_yards": 0, "severity": "bunker", "description": "Right bunker"}], "green_shape": "medium", "notes": "Long par 3 over water"},
-    {"hole_id": "sawgrass_16", "hole_number": 16, "par": 5, "handicap_index": 9, "distance_to_pin_yards": 523, "shot_bearing_degrees": 0, "elevation_change_feet": 0, "fairway_type": "fairway", "hazards": [{"hazard_type": "water", "location": "left", "distance_from_tee_yards": 300, "severity": "water", "description": "Water left of fairway"}, {"hazard_type": "bunker", "location": "right", "distance_from_tee_yards": 480, "severity": "bunker", "description": "Greenside bunker"}], "green_shape": "medium", "notes": "Scoring opportunity before the finish"},
-    {"hole_id": "sawgrass_17", "hole_number": 17, "par": 3, "handicap_index": 17, "distance_to_pin_yards": 137, "shot_bearing_degrees": 180, "elevation_change_feet": 0, "fairway_type": "fairway", "hazards": [{"hazard_type": "water", "location": "short", "distance_from_tee_yards": 0, "severity": "water", "description": "Water surrounding island green"}, {"hazard_type": "water", "location": "left", "distance_from_tee_yards": 0, "severity": "water", "description": "Water surrounding island green"}, {"hazard_type": "water", "location": "right", "distance_from_tee_yards": 0, "severity": "water", "description": "Water surrounding island green"}], "green_shape": "small", "notes": "The Island Hole - most famous par 3 in golf"},
-    {"hole_id": "sawgrass_18", "hole_number": 18, "par": 4, "handicap_index": 1, "distance_to_pin_yards": 462, "shot_bearing_degrees": 270, "elevation_change_feet": 0, "fairway_type": "fairway", "hazards": [{"hazard_type": "water", "location": "left", "distance_from_tee_yards": 280, "severity": "water", "description": "Lake along entire left side"}], "green_shape": "medium", "notes": "Dramatic finishing hole with water left"}
-  ]
+    {
+      "hole_id": "sawgrass_1",
+      "hole_number": 1,
+      "par": 4,
+      "handicap_index": 5,
+      "distance_to_pin_yards": 423,
+      "shot_bearing_degrees": 180,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 280,
+          "severity": "water",
+          "description": "Lake left"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Strong opening hole with water left"
+    },
+    {
+      "hole_id": "sawgrass_8",
+      "hole_number": 8,
+      "par": 3,
+      "handicap_index": 15,
+      "distance_to_pin_yards": 219,
+      "shot_bearing_degrees": 90,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "short",
+          "distance_from_tee_yards": 200,
+          "severity": "water",
+          "description": "Pond short of green"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 0,
+          "severity": "bunker",
+          "description": "Right bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Long par 3 over water"
+    },
+    {
+      "hole_id": "sawgrass_16",
+      "hole_number": 16,
+      "par": 5,
+      "handicap_index": 9,
+      "distance_to_pin_yards": 523,
+      "shot_bearing_degrees": 0,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 300,
+          "severity": "water",
+          "description": "Water left of fairway"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 480,
+          "severity": "bunker",
+          "description": "Greenside bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Scoring opportunity before the finish"
+    },
+    {
+      "hole_id": "sawgrass_17",
+      "hole_number": 17,
+      "par": 3,
+      "handicap_index": 17,
+      "distance_to_pin_yards": 137,
+      "shot_bearing_degrees": 180,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "short",
+          "distance_from_tee_yards": 0,
+          "severity": "water",
+          "description": "Water surrounding island green"
+        },
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 0,
+          "severity": "water",
+          "description": "Water surrounding island green"
+        },
+        {
+          "hazard_type": "water",
+          "location": "right",
+          "distance_from_tee_yards": 0,
+          "severity": "water",
+          "description": "Water surrounding island green"
+        }
+      ],
+      "green_shape": "small",
+      "notes": "The Island Hole - most famous par 3 in golf",
+      "tee_lat": 30.196,
+      "tee_lng": -81.395,
+      "green_lat": 30.1955,
+      "green_lng": -81.394
+    },
+    {
+      "hole_id": "sawgrass_18",
+      "hole_number": 18,
+      "par": 4,
+      "handicap_index": 1,
+      "distance_to_pin_yards": 462,
+      "shot_bearing_degrees": 270,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 280,
+          "severity": "water",
+          "description": "Lake along entire left side"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Dramatic finishing hole with water left",
+      "tee_lat": 30.1958,
+      "tee_lng": -81.3935,
+      "green_lat": 30.1975,
+      "green_lng": -81.3945
+    }
+  ],
+  "center_lat": 30.1975,
+  "center_lng": -81.3946
 }

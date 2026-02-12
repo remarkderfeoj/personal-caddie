@@ -395,5 +395,7 @@
       "green_shape": "medium",
       "notes": "Finishing par 5 along Rocky River"
     }
-  ]
+  ],
+  "center_lat": 35.361,
+  "center_lng": -80.573
 }
