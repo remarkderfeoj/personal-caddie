@@ -30,9 +30,17 @@ from models import (
     ShotAnalysis,
     CaddieRecommendation,
 )
-from services import generate_recommendation
 from auth import get_current_user, get_optional_user, User
 from data_store import data_store
+
+# Import recommendation service
+try:
+    from services import generate_recommendation
+    SERVICES_AVAILABLE = True
+except Exception as e:
+    logger.warning(f"Could not import services: {e}")
+    SERVICES_AVAILABLE = False
+    generate_recommendation = None
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -116,11 +124,13 @@ def health_check(request: Request):
     """Health check endpoint"""
     courses_loaded = len(data_store.courses)
     players_loaded = len(data_store.players)
+    ready = courses_loaded > 0 and players_loaded > 0 and SERVICES_AVAILABLE
     return {
-        "status": "healthy",
+        "status": "healthy" if ready else "degraded",
         "courses_loaded": courses_loaded,
         "players_loaded": players_loaded,
-        "ready": courses_loaded > 0 and players_loaded > 0
+        "services_available": SERVICES_AVAILABLE,
+        "ready": ready
     }
 
 
@@ -311,6 +321,12 @@ async def get_simple_recommendation(request: Request):
     Simplified recommendation endpoint for web app.
     Accepts basic shot parameters and returns recommendation.
     """
+    if not SERVICES_AVAILABLE or generate_recommendation is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Recommendation service unavailable - check server logs for import errors"
+        )
+    
     try:
         data = await request.json()
         
@@ -323,20 +339,27 @@ async def get_simple_recommendation(request: Request):
         lie = data.get("lie", "fairway")
         elevation_change = data.get("elevation_change", 0)
         
+        logger.info(f"Recommendation request: course={course_id}, hole={hole_number}, distance={distance_to_pin}")
+        
         # Get course and hole
         course = data_store.get_course_by_id(course_id)
         if not course:
+            logger.error(f"Course not found: {course_id}")
             raise HTTPException(status_code=404, detail=f"Course {course_id} not found")
         
         hole = next((h for h in course.holes if h.hole_number == hole_number), None)
         if not hole:
+            logger.error(f"Hole {hole_number} not found on course {course_id}")
             raise HTTPException(status_code=404, detail=f"Hole {hole_number} not found")
         
         # Use default player for now (could be parameterized later)
         players = data_store.list_all_players()
         if not players:
+            logger.error("No players configured in data store")
             raise HTTPException(status_code=404, detail="No players configured")
         player_baseline = players[0]
+        
+        logger.info(f"Using player: {player_baseline.player_name}")
         
         # Create simplified weather
         weather = WeatherConditions(
@@ -365,7 +388,7 @@ async def get_simple_recommendation(request: Request):
         )
         
         # Generate recommendation
-        from services import generate_recommendation
+        logger.info("Generating recommendation...")
         recommendation = generate_recommendation(
             shot_analysis=analysis,
             player_baseline=player_baseline,
@@ -374,6 +397,8 @@ async def get_simple_recommendation(request: Request):
             course_elevation_feet=course.course_elevation_feet + elevation_change,
             round_context=None
         )
+        
+        logger.info(f"Recommendation generated: {recommendation.primary_club}")
         
         return {
             "caddie_call": recommendation.caddie_call,
@@ -384,9 +409,11 @@ async def get_simple_recommendation(request: Request):
             "notes": recommendation.notes
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error in simple recommendation: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
 
 @app.post("/api/v1/recommendation")
