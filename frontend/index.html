@@ -665,6 +665,7 @@ function renderHoleChips() {
 
 function selectHole(hole) {
     selectedHole = hole;
+    playerPosition = null; // Clear player position when switching holes
     document.querySelectorAll('.hole-chip').forEach(c => c.classList.remove('active'));
     const chip = document.getElementById('chip' + hole.hole_number);
     if (chip) chip.classList.add('active');
@@ -913,6 +914,34 @@ let currentCourseData = null;
 // ── INTERACTIVE HOLE TAP ──
 let playerPosition = null;
 
+function redrawPlayerMarker() {
+    if (!playerPosition) return;
+    
+    const svgContainer = document.getElementById('holeVizSvg');
+    if (!svgContainer) return;
+    
+    const svg = svgContainer.querySelector('svg');
+    if (!svg) return;
+    
+    // Remove old marker
+    const old = svg.querySelector('#playerMarker');
+    if (old) old.remove();
+    
+    const svgW = 300, svgH = 540;
+    const px = playerPosition.relX * svgW;
+    const py = playerPosition.relY * svgH;
+    
+    const marker = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    marker.id = 'playerMarker';
+    marker.innerHTML = `
+        <circle cx="${px}" cy="${py}" r="8" fill="var(--accent,#00d4aa)" opacity="0.9" stroke="white" stroke-width="2"/>
+        <circle cx="${px}" cy="${py}" r="3" fill="white"/>
+        <rect x="${px-35}" y="${py+14}" width="70" height="22" rx="6" fill="rgba(0,0,0,.8)"/>
+        <text x="${px}" y="${py+29}" text-anchor="middle" font-size="12" font-weight="bold" fill="#00d4aa">${playerPosition.distToPin} yds</text>
+    `;
+    svg.appendChild(marker);
+}
+
 function handleHoleTap(event, holeNum) {
     const container = event.currentTarget;
     const rect = container.getBoundingClientRect();
@@ -985,8 +1014,15 @@ function handleHoleTap(event, holeNum) {
 function startShot() {
     showScreen('shot');
     if (selectedHole) {
-        document.getElementById('fDistance').value = selectedHole.distance;
+        // Preserve playerPosition if it exists, otherwise use full hole distance
+        if (playerPosition && playerPosition.distToPin) {
+            document.getElementById('fDistance').value = playerPosition.distToPin;
+            document.getElementById('fLie').value = playerPosition.lie || 'fairway';
+        } else {
+            document.getElementById('fDistance').value = selectedHole.distance;
+        }
         document.getElementById('fElev').value = selectedHole.elevation_change || 0;
+        
         document.getElementById('shotHoleViz').innerHTML = `
             <div class="hole-viz" style="margin-bottom:16px">
                 <div class="hole-viz-header">
@@ -997,6 +1033,11 @@ function startShot() {
                 <div class="tap-hint">👆 Tap your position on the hole to auto-calculate distance</div>
             </div>
         `;
+        
+        // Redraw player marker if position exists
+        if (playerPosition) {
+            redrawPlayerMarker();
+        }
     }
 }
 

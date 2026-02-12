@@ -34,7 +34,7 @@ def calculate_temperature_adjustment(temp_f: float, baseline_distance: int) -> i
 
 def calculate_elevation_adjustment(elevation_feet: int, baseline_distance: int) -> int:
     """
-    Elevation adjustment: +0.116% distance per foot above sea level.
+    Elevation adjustment: ~2% distance per 1000 feet above sea level.
 
     Physics: Higher elevation → thinner air → less drag → longer flight
 
@@ -48,7 +48,8 @@ def calculate_elevation_adjustment(elevation_feet: int, baseline_distance: int) 
     if elevation_feet <= 0:
         return 0
 
-    elevation_multiplier = 1 + (elevation_feet * 0.00116)
+    # Rule of thumb: 2% per 1000 ft elevation = 0.00002 per foot
+    elevation_multiplier = 1 + (elevation_feet * 0.00002)
     adjusted_distance = baseline_distance * elevation_multiplier
 
     return round(adjusted_distance - baseline_distance)
