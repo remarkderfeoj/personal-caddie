@@ -370,7 +370,7 @@ async def get_simple_recommendation(request: Request):
         wind_speed = data.get("wind_speed", 0)
         wind_direction = data.get("wind_direction", "calm")
         lie = data.get("lie", "fairway")
-        elevation_change = data.get("elevation_change", 0)
+        elevation_change = data.get("elevation_change", 0)  # TODO: Implement uphill/downhill adjustment in physics.py
         
         logger.info(f"Recommendation request: course={course_id}, hole={hole_number}, distance={distance_to_pin}")
         
@@ -453,7 +453,7 @@ async def get_simple_recommendation(request: Request):
             player_baseline=player_baseline,
             hole=hole,
             weather=weather,
-            course_elevation_feet=course.course_elevation_feet + elevation_change,
+            course_elevation_feet=course.course_elevation_feet,
             round_context=None
         )
         
