@@ -30,9 +30,9 @@
       ],
       "green_shape": "medium",
       "notes": "Tea Olive - Downhill opener. Switchback hole with opposing bunkers tests shot-shaping ability",
-      "tee_lat": 33.5070,
+      "tee_lat": 33.507,
       "tee_lng": -82.0199,
-      "green_lat": 33.5040,
+      "green_lat": 33.504,
       "green_lng": -82.0199
     },
     {
@@ -72,7 +72,7 @@
       "tee_lat": 33.5035,
       "tee_lng": -82.0195,
       "green_lat": 33.5005,
-      "green_lng": -82.0220
+      "green_lng": -82.022
     },
     {
       "hole_id": "augusta_3",
@@ -134,9 +134,9 @@
       "green_shape": "wide",
       "notes": "Flowering Crab Apple - Longest par 3. Downhill to L-shaped green with tricky pins",
       "tee_lat": 33.4992,
-      "tee_lng": -82.0240,
-      "green_lat": 33.4980,
-      "green_lng": -82.0260
+      "tee_lng": -82.024,
+      "green_lat": 33.498,
+      "green_lng": -82.026
     },
     {
       "hole_id": "augusta_5",
@@ -199,7 +199,7 @@
       "notes": "Juniper - Downhill par 3. Multi-tiered green plays dramatically different day-to-day",
       "tee_lat": 33.4988,
       "tee_lng": -82.0308,
-      "green_lat": 33.5000,
+      "green_lat": 33.5,
       "green_lng": -82.0323
     },
     {
@@ -261,7 +261,7 @@
       ],
       "green_shape": "medium",
       "notes": "Yellow Jasmine - Uphill par 5. Avoiding fairway bunker sets up right-to-left approach to mounded green",
-      "tee_lat": 33.5030,
+      "tee_lat": 33.503,
       "tee_lng": -82.0348,
       "green_lat": 33.5075,
       "green_lng": -82.0345
@@ -286,7 +286,7 @@
       ],
       "green_shape": "elevated",
       "notes": "Carolina Cherry - Famous stair-stepped green. Length and angle crucial for proper position",
-      "tee_lat": 33.5080,
+      "tee_lat": 33.508,
       "tee_lng": -82.0342,
       "green_lat": 33.5095,
       "green_lng": -82.0315
@@ -312,9 +312,9 @@
       "green_shape": "narrow",
       "notes": "Camellia - Hardest hole in Masters history. Severe downhill dogleg left. Green tilts dramatically",
       "tee_lat": 33.5098,
-      "tee_lng": -82.0310,
+      "tee_lng": -82.031,
       "green_lat": 33.5085,
-      "green_lng": -82.0270
+      "green_lng": -82.027
     },
     {
       "hole_id": "augusta_11",
@@ -345,7 +345,7 @@
       "hole_id": "augusta_12",
       "hole_number": 12,
       "par": 3,
-      "handicap_index": 13,
+      "handicap_index": 18,
       "distance_to_pin_yards": 155,
       "shot_bearing_degrees": 90,
       "elevation_change_feet": -10,
@@ -383,7 +383,7 @@
       "green_shape": "narrow",
       "notes": "Golden Bell - Most famous hole. Amen Corner par 3 with swirling winds over Rae's Creek",
       "tee_lat": 33.5053,
-      "tee_lng": -82.0230,
+      "tee_lng": -82.023,
       "green_lat": 33.5051,
       "green_lng": -82.0215
     },
@@ -415,7 +415,7 @@
       "green_shape": "wide",
       "notes": "Azalea - One of world's best par 5s. Reachable with risk/reward over creek. Hanging lies on approach",
       "tee_lat": 33.5048,
-      "tee_lng": -82.0210,
+      "tee_lng": -82.021,
       "green_lat": 33.5005,
       "green_lng": -82.0205
     },
@@ -431,16 +431,16 @@
       "hazards": [],
       "green_shape": "medium",
       "notes": "Chinese Fir - Only bunkerless hole. Heaving green with massive false front provides all the challenge",
-      "tee_lat": 33.5000,
-      "tee_lng": -82.0200,
-      "green_lat": 33.4970,
+      "tee_lat": 33.5,
+      "tee_lng": -82.02,
+      "green_lat": 33.497,
       "green_lng": -82.0215
     },
     {
       "hole_id": "augusta_15",
       "hole_number": 15,
       "par": 5,
-      "handicap_index": 5,
+      "handicap_index": 6,
       "distance_to_pin_yards": 550,
       "shot_bearing_degrees": 250,
       "elevation_change_feet": -40,
@@ -464,9 +464,9 @@
       "green_shape": "wide",
       "notes": "Firethorn - Last great par 5. Downhill to shallow crowned green. Water front and back. Eagle hole",
       "tee_lat": 33.4972,
-      "tee_lng": -82.0220,
+      "tee_lng": -82.022,
       "green_lat": 33.4965,
-      "green_lng": -82.0260
+      "green_lng": -82.026
     },
     {
       "hole_id": "augusta_16",
@@ -498,7 +498,7 @@
       "tee_lat": 33.4968,
       "tee_lng": -82.0265,
       "green_lat": 33.4975,
-      "green_lng": -82.0280
+      "green_lng": -82.028
     },
     {
       "hole_id": "augusta_17",
@@ -553,7 +553,7 @@
       "green_shape": "medium",
       "notes": "Holly - Iconic uphill finishing hole. Two-level green. Dozens of championships settled here",
       "tee_lat": 33.5008,
-      "tee_lng": -82.0300,
+      "tee_lng": -82.03,
       "green_lat": 33.5045,
       "green_lng": -82.0295
     }
