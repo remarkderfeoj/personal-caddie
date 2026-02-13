@@ -8,8 +8,10 @@
     <meta name="theme-color" content="#1a1a2e">
     <title>Personal Caddie</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛳</text></svg>">
-    <!-- Google Maps satellite view - disabled until accurate GPS coords are added -->
-    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=GOOGLE_MAPS_KEY" async defer></script> -->
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
             --bg: #0f1923;
@@ -164,8 +166,102 @@
 
         /* Satellite map */
         .satellite-map {
-            width: 100%; aspect-ratio: 1/1.2; border-radius: 12px;
-            overflow: hidden; margin-bottom: 12px;
+            width: 100%; height: 500px; border-radius: 12px;
+            overflow: hidden; margin-bottom: 12px; position: relative;
+        }
+        
+        /* Map overlay controls */
+        .map-controls {
+            position: absolute; top: 12px; left: 12px; right: 12px;
+            display: flex; justify-content: space-between; align-items: flex-start;
+            z-index: 1000; pointer-events: none;
+        }
+        .map-controls > * { pointer-events: auto; }
+        
+        .map-hole-badge {
+            background: rgba(0,0,0,.85); backdrop-filter: blur(10px);
+            padding: 10px 16px; border-radius: 12px;
+            display: flex; flex-direction: column; gap: 2px;
+            border: 1px solid rgba(255,255,255,.1);
+        }
+        .map-hole-badge .hole-num {
+            font-size: 18px; font-weight: 700; color: var(--accent);
+        }
+        .map-hole-badge .hole-par {
+            font-size: 11px; color: var(--text2); text-transform: uppercase;
+        }
+        
+        .map-nav-arrows {
+            display: flex; gap: 8px;
+        }
+        .map-nav-btn {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: rgba(0,0,0,.85); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,.1); color: var(--text);
+            font-size: 18px; cursor: pointer; transition: all .2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .map-nav-btn:active { transform: scale(.95); background: rgba(0,212,170,.2); }
+        .map-nav-btn:disabled { opacity: .3; cursor: not-allowed; }
+        
+        .map-gps-btn {
+            position: absolute; bottom: 80px; right: 12px; z-index: 1000;
+            width: 48px; height: 48px; border-radius: 50%;
+            background: var(--accent); color: #000; border: none;
+            font-size: 20px; cursor: pointer; transition: all .2s;
+            box-shadow: 0 4px 12px rgba(0,212,170,.4);
+        }
+        .map-gps-btn:active { transform: scale(.95); }
+        
+        .map-distance-label {
+            position: absolute; bottom: 20px; left: 50%;
+            transform: translateX(-50%); z-index: 1000;
+            background: rgba(0,0,0,.9); backdrop-filter: blur(10px);
+            padding: 12px 24px; border-radius: 20px;
+            font-size: 16px; font-weight: 700; color: var(--accent);
+            border: 1px solid rgba(0,212,170,.3);
+            display: none;
+        }
+        .map-distance-label.visible { display: block; }
+
+        /* Leaflet custom marker styles */
+        .leaflet-marker-icon.ball-marker {
+            background: var(--accent);
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,.4);
+        }
+
+        /* Map unavailable notice */
+        .map-unavailable {
+            padding: 12px; background: rgba(255,217,61,.1);
+            border: 1px solid rgba(255,217,61,.2); border-radius: 10px;
+            text-align: center; font-size: 12px; color: #ffd93d;
+            margin-bottom: 12px;
+        }
+
+        /* Recommendation card below map */
+        .map-rec-card {
+            background: linear-gradient(135deg, #0a2a1a 0%, #1a3a2a 100%);
+            border-radius: var(--radius); padding: 16px;
+            border: 1px solid rgba(0,212,170,.2); margin-top: 12px;
+            display: none;
+        }
+        .map-rec-card.visible { display: block; }
+        .map-rec-card .rec-club-name {
+            font-size: 24px; font-weight: 700; color: var(--accent);
+            margin-bottom: 4px;
+        }
+        .map-rec-card .rec-distance {
+            font-size: 14px; color: var(--text2); margin-bottom: 8px;
+        }
+        .map-rec-card .rec-confidence {
+            font-size: 12px; color: var(--accent);
+        }
+        .map-rec-card .rec-expand {
+            margin-top: 12px; padding: 8px; text-align: center;
+            background: rgba(0,212,170,.1); border-radius: 8px;
+            font-size: 11px; color: var(--accent); cursor: pointer;
         }
 
         /* Wind compass */
@@ -555,6 +651,17 @@ let currentCourse = null;
 let currentHoles = [];
 let selectedHole = null;
 let navStack = ['home'];
+let currentCourseData = null;
+let satMapInstance = null;
+let ballMarker = null;
+let pinMarker = null;
+let teeMarker = null;
+let greenMarker = null;
+let distanceLine = null;
+let teeGreenLine = null;
+let ballPosition = null;
+let gpsCircle = null;
+let recDebounceTimer = null;
 
 // ── NAVIGATION ──
 function showScreen(name) {
@@ -572,6 +679,17 @@ function goBack() {
     navStack.pop();
     const prev = navStack[navStack.length - 1] || 'home';
     showScreen(prev);
+}
+
+// ── HAVERSINE DISTANCE ──
+function haversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 3958.8; // Earth radius in miles
+    const toRad = (deg) => deg * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c * 1760; // Convert miles to yards
 }
 
 // ── LOAD COURSES ──
@@ -645,7 +763,7 @@ async function openCourse(courseId) {
         const res = await fetch(`${API}/api/v1/courses/${courseId}/holes`);
         const data = await res.json();
         currentHoles = data.holes || [];
-        currentCourseData = data; // Store full data with coords
+        currentCourseData = data;
         renderHoleChips();
         if (currentHoles.length > 0) selectHole(currentHoles[0]);
     } catch (e) {
@@ -665,7 +783,7 @@ function renderHoleChips() {
 
 function selectHole(hole) {
     selectedHole = hole;
-    playerPosition = null; // Clear player position when switching holes
+    ballPosition = null;
     document.querySelectorAll('.hole-chip').forEach(c => c.classList.remove('active'));
     const chip = document.getElementById('chip' + hole.hole_number);
     if (chip) chip.classList.add('active');
@@ -681,7 +799,7 @@ function renderHoleDetail(hole) {
         return `<span class="hazard-chip ${cls}">${icon} ${h.description || h.type} (${h.location})</span>`;
     }).join('');
 
-    const hasCoords = false; // Disabled until accurate GPS coords are sourced
+    const hasCoords = hole.tee_lat && hole.tee_lng && hole.green_lat && hole.green_lng;
 
     document.getElementById('holeDetail').innerHTML = `
         <div class="hole-viz">
@@ -692,17 +810,25 @@ function renderHoleDetail(hole) {
                     <span class="badge" style="background:rgba(255,255,255,.06);color:var(--text2)">${hole.distance} yds</span>
                 </div>
             </div>
-            ${hasCoords ? `<div class="view-toggle">
-                <button class="active" onclick="switchView('diagram', ${hole.hole_number})">📐 Diagram</button>
-                <button onclick="switchView('satellite', ${hole.hole_number})">🛰️ Satellite</button>
-            </div>` : ''}
-            <div id="diagramView">
-                <div class="hole-svg-container" onclick="handleHoleTap(event, ${hole.hole_number})" id="holeVizSvg">${generateHoleSVG(hole)}</div>
-                <div class="tap-hint">👆 Tap the hole to set your position and get distance to pin</div>
-            </div>
-            <div id="satelliteView" style="display:none">
-                <div class="satellite-map" id="satMap"></div>
-            </div>
+            ${hasCoords ? `
+                <div class="view-toggle">
+                    <button class="active" id="viewToggleSat" onclick="switchView('satellite', ${hole.hole_number})">🛰️ Satellite</button>
+                    <button id="viewToggleDiag" onclick="switchView('diagram', ${hole.hole_number})">📐 Diagram</button>
+                </div>
+                <div id="satelliteView">
+                    <div class="satellite-map" id="satMap"></div>
+                </div>
+                <div id="diagramView" style="display:none">
+                    <div class="hole-svg-container" onclick="handleHoleTap(event, ${hole.hole_number})" id="holeVizSvg">${generateHoleSVG(hole)}</div>
+                    <div class="tap-hint">👆 Tap the hole to set your position and get distance to pin</div>
+                </div>
+            ` : `
+                <div class="map-unavailable">📍 Satellite view unavailable for this hole • Using diagram</div>
+                <div id="diagramView">
+                    <div class="hole-svg-container" onclick="handleHoleTap(event, ${hole.hole_number})" id="holeVizSvg">${generateHoleSVG(hole)}</div>
+                    <div class="tap-hint">👆 Tap the hole to set your position and get distance to pin</div>
+                </div>
+            `}
             <div class="hole-info-row"><span class="hole-info-label">Distance</span><span class="hole-info-value">${hole.distance} yards</span></div>
             <div class="hole-info-row"><span class="hole-info-label">Par</span><span class="hole-info-value">${hole.par}</span></div>
             <div class="hole-info-row"><span class="hole-info-label">Handicap</span><span class="hole-info-value">${hole.handicap_index}</span></div>
@@ -713,6 +839,366 @@ function renderHoleDetail(hole) {
         </div>
         <button class="btn-recommend" onclick="startShot()" style="margin-top:0">🎯 Get Club Recommendation</button>
     `;
+
+    // Initialize satellite map if has coords
+    if (hasCoords) {
+        setTimeout(() => initSatelliteMap(hole), 100);
+    }
+}
+
+// ── SATELLITE MAP WITH LEAFLET ──
+function initSatelliteMap(hole) {
+    if (!hole.tee_lat || !hole.green_lat) return;
+
+    const mapDiv = document.getElementById('satMap');
+    if (!mapDiv) return;
+
+    // Clean up existing map
+    if (satMapInstance) {
+        satMapInstance.remove();
+        satMapInstance = null;
+    }
+
+    // Create map centered on green
+    satMapInstance = L.map(mapDiv, {
+        zoomControl: false,
+        attributionControl: false,
+    });
+
+    // Add ESRI World Imagery satellite tiles (free, no API key needed)
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 20,
+        attribution: 'ESRI',
+    }).addTo(satMapInstance);
+
+    // Add zoom control in bottom left
+    L.control.zoom({ position: 'bottomleft' }).addTo(satMapInstance);
+
+    // Tee marker (yellow square)
+    teeMarker = L.marker([hole.tee_lat, hole.tee_lng], {
+        icon: L.divIcon({
+            className: 'custom-marker',
+            html: '<div style="width:16px;height:16px;background:#ffd93d;border:2px solid white;transform:translate(-8px,-8px);"></div>',
+            iconSize: [0, 0],
+        }),
+    }).addTo(satMapInstance);
+
+    // Green marker (green circle)
+    greenMarker = L.circle([hole.green_lat, hole.green_lng], {
+        color: '#00d4aa',
+        fillColor: '#2d8a4e',
+        fillOpacity: 0.5,
+        radius: 10,
+    }).addTo(satMapInstance);
+
+    // Pin marker (flag)
+    pinMarker = L.marker([hole.green_lat, hole.green_lng], {
+        icon: L.divIcon({
+            className: 'custom-marker',
+            html: '<div style="font-size:24px;transform:translate(-12px,-24px);">⛳</div>',
+            iconSize: [0, 0],
+        }),
+    }).addTo(satMapInstance);
+
+    // Tee to green reference line
+    teeGreenLine = L.polyline(
+        [[hole.tee_lat, hole.tee_lng], [hole.green_lat, hole.green_lng]],
+        {
+            color: '#8899aa',
+            weight: 2,
+            opacity: 0.4,
+            dashArray: '8, 8',
+        }
+    ).addTo(satMapInstance);
+
+    // Ball marker (draggable)
+    ballMarker = L.marker([hole.tee_lat, hole.tee_lng], {
+        icon: L.divIcon({
+            className: 'custom-marker',
+            html: '<div style="width:20px;height:20px;background:var(--accent);border:3px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.5);transform:translate(-10px,-10px);"></div>',
+            iconSize: [0, 0],
+        }),
+        draggable: true,
+    }).addTo(satMapInstance);
+
+    // Ball marker drag handlers
+    ballMarker.on('drag', () => {
+        const pos = ballMarker.getLatLng();
+        ballPosition = pos;
+        updateMapDistance(hole);
+    });
+
+    ballMarker.on('dragend', () => {
+        const pos = ballMarker.getLatLng();
+        ballPosition = pos;
+        updateMapDistance(hole);
+        updateShotForm(hole);
+        // Debounced recommendation update
+        clearTimeout(recDebounceTimer);
+        recDebounceTimer = setTimeout(() => {
+            fetchQuickRecommendation(hole);
+        }, 300);
+    });
+
+    // Fit bounds to show tee and green
+    const bounds = L.latLngBounds([
+        [hole.tee_lat, hole.tee_lng],
+        [hole.green_lat, hole.green_lng],
+    ]);
+    satMapInstance.fitBounds(bounds, { padding: [60, 60] });
+
+    // Add map overlay controls
+    addMapControls(hole);
+}
+
+function addMapControls(hole) {
+    const mapDiv = document.getElementById('satMap');
+    if (!mapDiv) return;
+
+    // Remove existing controls
+    const existing = mapDiv.querySelector('.map-controls');
+    if (existing) existing.remove();
+
+    const controls = document.createElement('div');
+    controls.className = 'map-controls';
+    controls.innerHTML = `
+        <div class="map-hole-badge">
+            <div class="hole-num">#${hole.hole_number}</div>
+            <div class="hole-par">Par ${hole.par} • ${hole.distance}yd</div>
+        </div>
+        <div class="map-nav-arrows">
+            <button class="map-nav-btn" id="prevHoleBtn" onclick="navigateToPrevHole()">◀</button>
+            <button class="map-nav-btn" id="nextHoleBtn" onclick="navigateToNextHole()">▶</button>
+        </div>
+    `;
+    mapDiv.appendChild(controls);
+
+    // Add GPS button
+    const gpsBtn = document.createElement('button');
+    gpsBtn.className = 'map-gps-btn';
+    gpsBtn.innerHTML = '📍';
+    gpsBtn.title = 'Use My GPS';
+    gpsBtn.onclick = () => useMyGPS(hole);
+    mapDiv.appendChild(gpsBtn);
+
+    // Add distance label
+    const distLabel = document.createElement('div');
+    distLabel.className = 'map-distance-label';
+    distLabel.id = 'mapDistLabel';
+    mapDiv.appendChild(distLabel);
+
+    // Disable prev/next buttons if at edges
+    const holeIndex = currentHoles.findIndex(h => h.hole_number === hole.hole_number);
+    if (holeIndex === 0) document.getElementById('prevHoleBtn').disabled = true;
+    if (holeIndex === currentHoles.length - 1) document.getElementById('nextHoleBtn').disabled = true;
+}
+
+function updateMapDistance(hole) {
+    if (!ballPosition || !satMapInstance) return;
+    
+    const dist = Math.round(haversineDistance(
+        ballPosition.lat, ballPosition.lng,
+        hole.green_lat, hole.green_lng
+    ));
+
+    // Update distance label
+    const label = document.getElementById('mapDistLabel');
+    if (label) {
+        label.textContent = `${dist} yds to pin`;
+        label.classList.add('visible');
+    }
+
+    // Update line from ball to pin
+    if (distanceLine) {
+        satMapInstance.removeLayer(distanceLine);
+    }
+    distanceLine = L.polyline(
+        [[ballPosition.lat, ballPosition.lng], [hole.green_lat, hole.green_lng]],
+        {
+            color: '#00d4aa',
+            weight: 3,
+            opacity: 0.8,
+            dashArray: '10, 10',
+        }
+    ).addTo(satMapInstance);
+}
+
+function updateShotForm(hole) {
+    if (!ballPosition) return;
+    
+    const dist = Math.round(haversineDistance(
+        ballPosition.lat, ballPosition.lng,
+        hole.green_lat, hole.green_lng
+    ));
+
+    // Estimate lie based on distance from tee-green line
+    // Simple approach: calculate perpendicular distance from ball to tee-green line
+    const teeLat = hole.tee_lat;
+    const teeLng = hole.tee_lng;
+    const greenLat = hole.green_lat;
+    const greenLng = hole.green_lng;
+    
+    // Calculate if ball is far from center line (rough estimate)
+    const centerLat = (teeLat + greenLat) / 2;
+    const centerLng = (teeLng + greenLng) / 2;
+    const distFromCenter = haversineDistance(ballPosition.lat, ballPosition.lng, centerLat, centerLng);
+    const fairwayWidth = 30; // yards, rough estimate
+    
+    let lie = 'fairway';
+    if (distFromCenter > fairwayWidth) {
+        lie = 'rough';
+    }
+    
+    // Check if on tee (within 10 yards of tee)
+    const distFromTee = haversineDistance(ballPosition.lat, ballPosition.lng, teeLat, teeLng);
+    if (distFromTee < 10) {
+        lie = 'tee';
+    }
+
+    // Update form (if in shot screen)
+    const distInput = document.getElementById('fDistance');
+    const lieInput = document.getElementById('fLie');
+    if (distInput) distInput.value = dist;
+    if (lieInput) lieInput.value = lie;
+}
+
+function useMyGPS(hole) {
+    if (!navigator.geolocation) {
+        alert('GPS not available on this device');
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition((position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const accuracy = position.coords.accuracy; // in meters
+
+        // Move ball marker to GPS position
+        ballPosition = L.latLng(lat, lng);
+        if (ballMarker) {
+            ballMarker.setLatLng(ballPosition);
+        }
+
+        // Draw accuracy circle
+        if (gpsCircle) {
+            satMapInstance.removeLayer(gpsCircle);
+        }
+        gpsCircle = L.circle([lat, lng], {
+            color: '#00d4aa',
+            fillColor: '#00d4aa',
+            fillOpacity: 0.15,
+            radius: accuracy,
+        }).addTo(satMapInstance);
+
+        // Update distance and form
+        updateMapDistance(hole);
+        updateShotForm(hole);
+        
+        // Pan to GPS position
+        satMapInstance.panTo([lat, lng]);
+        
+        // Fetch recommendation
+        setTimeout(() => fetchQuickRecommendation(hole), 300);
+    }, (error) => {
+        alert('Could not get GPS location: ' + error.message);
+    }, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+    });
+}
+
+function navigateToPrevHole() {
+    const idx = currentHoles.findIndex(h => h.hole_number === selectedHole.hole_number);
+    if (idx > 0) {
+        selectHole(currentHoles[idx - 1]);
+    }
+}
+
+function navigateToNextHole() {
+    const idx = currentHoles.findIndex(h => h.hole_number === selectedHole.hole_number);
+    if (idx < currentHoles.length - 1) {
+        selectHole(currentHoles[idx + 1]);
+    }
+}
+
+async function fetchQuickRecommendation(hole) {
+    if (!ballPosition) return;
+    
+    const dist = Math.round(haversineDistance(
+        ballPosition.lat, ballPosition.lng,
+        hole.green_lat, hole.green_lng
+    ));
+
+    try {
+        const res = await fetch(`${API}/api/v1/recommendation/simple`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                course_id: currentCourse?.id,
+                hole_number: hole.hole_number,
+                distance_to_pin: dist,
+                wind_speed: 0,
+                wind_direction: 'calm',
+                lie: 'fairway',
+                elevation_change: 0,
+                player_id: localStorage.getItem('personalCaddie_playerId') || undefined,
+            })
+        });
+
+        if (res.ok) {
+            const rec = await res.json();
+            showMapRecommendation(rec);
+        }
+    } catch (e) {
+        // Silent fail for quick recs
+    }
+}
+
+function showMapRecommendation(rec) {
+    const mapDiv = document.getElementById('satMap');
+    if (!mapDiv) return;
+
+    let recCard = mapDiv.querySelector('.map-rec-card');
+    if (!recCard) {
+        recCard = document.createElement('div');
+        recCard.className = 'map-rec-card';
+        mapDiv.parentElement.appendChild(recCard);
+    }
+
+    recCard.innerHTML = `
+        <div class="rec-club-name">${rec.primary_club}</div>
+        <div class="rec-distance">${rec.adjusted_distance} yards • ${rec.caddie_call}</div>
+        <div class="rec-confidence">${rec.confidence}% confidence</div>
+        <div class="rec-expand" onclick="startShot()">See full recommendation →</div>
+    `;
+    recCard.classList.add('visible');
+}
+
+function switchView(view, holeNum) {
+    const satBtn = document.getElementById('viewToggleSat');
+    const diagBtn = document.getElementById('viewToggleDiag');
+    const satView = document.getElementById('satelliteView');
+    const diagView = document.getElementById('diagramView');
+    
+    if (!satBtn || !diagBtn) return;
+    
+    if (view === 'satellite') {
+        satBtn.classList.add('active');
+        diagBtn.classList.remove('active');
+        if (satView) satView.style.display = 'block';
+        if (diagView) diagView.style.display = 'none';
+        
+        // Reinitialize map if needed
+        if (satMapInstance) {
+            setTimeout(() => satMapInstance.invalidateSize(), 100);
+        }
+    } else {
+        diagBtn.classList.add('active');
+        satBtn.classList.remove('active');
+        if (satView) satView.style.display = 'none';
+        if (diagView) diagView.style.display = 'block';
+    }
 }
 
 // ── WIND SELECTOR ──
@@ -728,7 +1214,6 @@ function generateHoleSVG(hole, interactive) {
     const isPar3 = hole.par === 3;
     const isPar5 = hole.par === 5;
 
-    // Fairway dimensions based on par
     const fwTop = isPar3 ? 180 : 100;
     const fwBottom = h - 100;
     const fwWidth = isPar3 ? 60 : isPar5 ? 80 : 70;
@@ -765,7 +1250,6 @@ function generateHoleSVG(hole, interactive) {
         }
     });
 
-    // Distance reference lines from pin (100, 150, 200, 250)
     const distLines = [100, 150, 200];
     if (hole.distance > 350) distLines.push(250);
     if (hole.distance > 500) distLines.push(300);
@@ -783,135 +1267,26 @@ function generateHoleSVG(hole, interactive) {
     }).join('');
 
     return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
-        <!-- Rough -->
         <rect width="${w}" height="${h}" fill="#0a1510"/>
-        <!-- Fairway -->
         <path d="M ${w/2-fwWidth} ${fwBottom}
                  Q ${w/2-fwWidth-10} ${(fwTop+fwBottom)/2} ${w/2-fwWidth+5} ${fwTop+20}
                  Q ${w/2-15} ${fwTop} ${w/2} ${fwTop}
                  Q ${w/2+15} ${fwTop} ${w/2+fwWidth-5} ${fwTop+20}
                  Q ${w/2+fwWidth+10} ${(fwTop+fwBottom)/2} ${w/2+fwWidth} ${fwBottom} Z"
               fill="#1a4d2e" stroke="#2a6b3e" stroke-width="1"/>
-        <!-- Green -->
         <ellipse cx="${w/2}" cy="${greenY}" rx="${greenRx}" ry="${greenRy}" fill="#2d8a4e" stroke="#3da65e" stroke-width="1.5"/>
-        <!-- Pin -->
         <line x1="${w/2}" y1="${greenY-18}" x2="${w/2}" y2="${greenY-2}" stroke="white" stroke-width="1.5"/>
         <polygon points="${w/2},${greenY-18} ${w/2+10},${greenY-13} ${w/2},${greenY-8}" fill="#ff4757"/>
-        <!-- Tee box -->
         <rect x="${w/2-20}" y="${teeY-6}" width="40" height="12" rx="3" fill="#4a7c59" stroke="#5a9c6a" stroke-width="1"/>
-        <!-- Distance label -->
         <text x="${w/2}" y="${teeY+22}" text-anchor="middle" font-size="12" font-weight="bold" fill="white">${hole.distance} yds</text>
         ${markersSVG}
         ${hazardsSVG}
-        <!-- Hole number -->
         <text x="16" y="30" font-size="14" font-weight="bold" fill="rgba(255,255,255,.5)">#${hole.hole_number}</text>
         <text x="${w-16}" y="30" text-anchor="end" font-size="12" fill="rgba(255,255,255,.3)">Par ${hole.par}</text>
     </svg>`;
 }
 
-// ── SATELLITE VIEW ──
-let satMapInstance = null;
-
-function switchView(view, holeNum) {
-    const btns = document.querySelectorAll('.view-toggle button');
-    btns.forEach(b => b.classList.remove('active'));
-    if (view === 'diagram') {
-        btns[0].classList.add('active');
-        document.getElementById('diagramView').style.display = 'block';
-        document.getElementById('satelliteView').style.display = 'none';
-    } else {
-        btns[1].classList.add('active');
-        document.getElementById('diagramView').style.display = 'none';
-        document.getElementById('satelliteView').style.display = 'block';
-        initSatelliteMap(holeNum);
-    }
-}
-
-function initSatelliteMap(holeNum) {
-    const hole = currentHoles.find(h => h.hole_number === holeNum);
-    if (!hole || !window.google) return;
-
-    const mapDiv = document.getElementById('satMap');
-    if (!mapDiv) return;
-
-    // Use hole-specific coords if available, otherwise course center
-    const centerLat = hole.green_lat || currentCourseData?.center_lat || 33.5;
-    const centerLng = hole.green_lng || currentCourseData?.center_lng || -81.85;
-
-    satMapInstance = new google.maps.Map(mapDiv, {
-        center: { lat: centerLat, lng: centerLng },
-        zoom: 18,
-        mapTypeId: 'satellite',
-        tilt: 0,
-        disableDefaultUI: true,
-        zoomControl: true,
-        gestureHandling: 'greedy',
-    });
-
-    // Add green marker
-    new google.maps.Marker({
-        position: { lat: centerLat, lng: centerLng },
-        map: satMapInstance,
-        icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 10,
-            fillColor: '#00d4aa',
-            fillOpacity: 0.8,
-            strokeColor: '#fff',
-            strokeWeight: 2,
-        },
-        title: `Hole ${holeNum} Green`,
-    });
-
-    // Add tee marker if coords available
-    if (hole.tee_lat) {
-        new google.maps.Marker({
-            position: { lat: hole.tee_lat, lng: hole.tee_lng },
-            map: satMapInstance,
-            icon: {
-                path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-                scale: 6,
-                fillColor: '#fff',
-                fillOpacity: 0.9,
-                strokeColor: '#000',
-                strokeWeight: 1,
-                rotation: 0,
-            },
-            title: `Hole ${holeNum} Tee`,
-        });
-
-        // Draw line from tee to green
-        new google.maps.Polyline({
-            path: [
-                { lat: hole.tee_lat, lng: hole.tee_lng },
-                { lat: centerLat, lng: centerLng },
-            ],
-            geodesic: true,
-            strokeColor: '#00d4aa',
-            strokeOpacity: 0.6,
-            strokeWeight: 2,
-            strokeDashArray: [10, 5],
-            map: satMapInstance,
-        });
-
-        // Fit bounds to show both tee and green
-        const bounds = new google.maps.LatLngBounds();
-        bounds.extend({ lat: hole.tee_lat, lng: hole.tee_lng });
-        bounds.extend({ lat: centerLat, lng: centerLng });
-        satMapInstance.fitBounds(bounds, 60);
-    }
-
-    // Add distance label
-    const infoWindow = new google.maps.InfoWindow({
-        position: { lat: centerLat, lng: centerLng },
-        content: `<div style="color:#000;font-weight:bold;font-size:14px;padding:4px">⛳ ${hole.distance} yds • Par ${hole.par}</div>`,
-    });
-    infoWindow.open(satMapInstance);
-}
-
-let currentCourseData = null;
-
-// ── INTERACTIVE HOLE TAP ──
+// ── INTERACTIVE HOLE TAP (for SVG diagram) ──
 let playerPosition = null;
 
 function redrawPlayerMarker() {
@@ -923,7 +1298,6 @@ function redrawPlayerMarker() {
     const svg = svgContainer.querySelector('svg');
     if (!svg) return;
     
-    // Remove old marker
     const old = svg.querySelector('#playerMarker');
     if (old) old.remove();
     
@@ -953,31 +1327,25 @@ function handleHoleTap(event, holeNum) {
     const hole = selectedHole || currentHoles.find(h => h.hole_number === holeNum);
     if (!hole) return;
 
-    // Map click position to distance from pin
-    // Top of SVG = pin (greenY), bottom = tee
-    // SVG layout: green ~top 20%, tee ~bottom 85%
-    const greenFrac = 0.15;  // green is at ~15% from top
-    const teeFrac = 0.85;    // tee is at ~85% from top
+    const greenFrac = 0.15;
+    const teeFrac = 0.85;
 
-    if (relY < greenFrac || relY > teeFrac + 0.05) return; // Outside playable area
+    if (relY < greenFrac || relY > teeFrac + 0.05) return;
 
     const distFrac = (relY - greenFrac) / (teeFrac - greenFrac);
     const distToPin = Math.round(distFrac * hole.distance);
     
-    // Determine lie based on X position
     const centerFrac = 0.5;
-    const fwHalf = 0.15; // fairway is ~30% of width
+    const fwHalf = 0.15;
     let lie = 'fairway';
     if (Math.abs(relX - centerFrac) > fwHalf + 0.05) lie = 'rough';
     
     playerPosition = { distToPin, lie, relX, relY };
 
-    // Update the SVG with player marker
     const svgContainer = document.getElementById('holeVizSvg');
     if (svgContainer) {
         const svg = svgContainer.querySelector('svg');
         if (svg) {
-            // Remove old marker
             const old = svg.querySelector('#playerMarker');
             if (old) old.remove();
             
@@ -997,11 +1365,9 @@ function handleHoleTap(event, holeNum) {
         }
     }
 
-    // Update the distance input in shot form
     document.getElementById('fDistance').value = distToPin;
     document.getElementById('fLie').value = lie === 'rough' ? 'rough' : 'fairway';
     
-    // Show mini toast
     const hint = document.querySelector('.tap-hint');
     if (hint) {
         hint.textContent = `📍 ${distToPin} yards to pin • ${lie} • Tap "Get Club" below`;
@@ -1014,13 +1380,22 @@ function handleHoleTap(event, holeNum) {
 function startShot() {
     showScreen('shot');
     if (selectedHole) {
-        // Preserve playerPosition if it exists, otherwise use full hole distance
-        if (playerPosition && playerPosition.distToPin) {
-            document.getElementById('fDistance').value = playerPosition.distToPin;
-            document.getElementById('fLie').value = playerPosition.lie || 'fairway';
-        } else {
-            document.getElementById('fDistance').value = selectedHole.distance;
+        // Use ballPosition from map if exists, else playerPosition from SVG, else full hole distance
+        let dist = selectedHole.distance;
+        let lie = 'fairway';
+        
+        if (ballPosition) {
+            dist = Math.round(haversineDistance(
+                ballPosition.lat, ballPosition.lng,
+                selectedHole.green_lat, selectedHole.green_lng
+            ));
+        } else if (playerPosition && playerPosition.distToPin) {
+            dist = playerPosition.distToPin;
+            lie = playerPosition.lie || 'fairway';
         }
+        
+        document.getElementById('fDistance').value = dist;
+        document.getElementById('fLie').value = lie;
         document.getElementById('fElev').value = selectedHole.elevation_change || 0;
         
         document.getElementById('shotHoleViz').innerHTML = `
@@ -1034,7 +1409,6 @@ function startShot() {
             </div>
         `;
         
-        // Redraw player marker if position exists
         if (playerPosition) {
             redrawPlayerMarker();
         }
@@ -1167,22 +1541,19 @@ const PRESETS = {
     scratch:   { driver:270, wood_3:250, wood_5:240, hybrid_2:232, hybrid_3:225, iron_4:215, iron_5:200, iron_6:190, iron_7:178, iron_8:165, iron_9:155, pitching_wedge:140, gap_wedge:125, sand_wedge:110, lob_wedge:85 },
 };
 
-let bagState = {}; // club_type -> { inBag: bool, carry: int, total: int }
+let bagState = {};
 
 function initBag() {
-    // Initialize bagState with default degrees for all clubs
     ALL_CLUBS.forEach(club => {
         if (!bagState[club.type]) {
             bagState[club.type] = { inBag: false, carry: '', total: '', degree: club.degree || null };
         }
     });
     
-    // Load from localStorage
     const saved = localStorage.getItem('personalCaddie_bag');
     if (saved) {
         try {
             const data = JSON.parse(saved);
-            // Merge saved clubs with defaults
             Object.entries(data.clubs || {}).forEach(([type, state]) => {
                 if (bagState[type]) {
                     bagState[type] = { ...bagState[type], ...state };
@@ -1281,7 +1652,6 @@ function updateClubDist(type) {
     const total = parseInt(document.getElementById('total_' + type).value) || '';
     bagState[type].carry = carry;
     bagState[type].total = total;
-    // Auto-fill total if only carry entered (add ~5% roll)
     if (carry && !total) {
         const autoTotal = Math.round(carry * 1.05);
         document.getElementById('total_' + type).value = autoTotal;
@@ -1293,7 +1663,6 @@ function updateClubDegree(type) {
     if (!bagState[type]) bagState[type] = { inBag: true, carry: '', total: '', degree: null };
     const degree = parseInt(document.getElementById('degree_' + type).value) || null;
     bagState[type].degree = degree;
-    // Update the display name in the club row
     const club = ALL_CLUBS.find(c => c.type === type);
     const displayName = degree ? `${club.name} (${degree}°)` : club.name;
     const nameDiv = document.querySelector(`#clubRow_${type} .club-name`);
@@ -1312,7 +1681,6 @@ function applyPreset(level) {
     event.target.classList.add('active');
     
     const preset = PRESETS[level];
-    // Reset all
     bagState = {};
     ALL_CLUBS.forEach(club => {
         if (preset[club.type] !== undefined) {
@@ -1385,7 +1753,6 @@ async function saveBag() {
         
         const data = await res.json();
         
-        // Save to localStorage
         localStorage.setItem('personalCaddie_bag', JSON.stringify({
             playerName,
             playerId,
@@ -1396,7 +1763,6 @@ async function saveBag() {
             speed: document.getElementById('bagSpeed').value,
         }));
         
-        // Also store playerId for recommendations
         localStorage.setItem('personalCaddie_playerId', playerId);
         
         status.className = 'bag-status success';
@@ -1410,7 +1776,6 @@ async function saveBag() {
     }
 }
 
-// Load existing bag from server on init
 async function loadExistingBag() {
     const playerId = localStorage.getItem('personalCaddie_playerId');
     if (!playerId) return;
@@ -1419,13 +1784,11 @@ async function loadExistingBag() {
         if (res.ok) {
             const data = await res.json();
             document.getElementById('bagPlayerName').value = data.player_name || '';
-            // Initialize with defaults first
             ALL_CLUBS.forEach(club => {
                 if (!bagState[club.type]) {
                     bagState[club.type] = { inBag: false, carry: '', total: '', degree: club.degree || null };
                 }
             });
-            // Load saved clubs
             (data.club_distances || []).forEach(cd => {
                 const club = ALL_CLUBS.find(c => c.type === cd.club_type);
                 bagState[cd.club_type] = { 
