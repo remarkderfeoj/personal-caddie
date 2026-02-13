@@ -940,12 +940,12 @@ function initSatelliteMap(hole) {
         }, 300);
     });
 
-    // Fit bounds to show tee and green
+    // Fit bounds to show tee and green with appropriate padding
     const bounds = L.latLngBounds([
         [hole.tee_lat, hole.tee_lng],
         [hole.green_lat, hole.green_lng],
     ]);
-    satMapInstance.fitBounds(bounds, { padding: [60, 60] });
+    satMapInstance.fitBounds(bounds, { padding: [60, 40] });
 
     // Add map overlay controls
     addMapControls(hole);
@@ -1216,11 +1216,107 @@ function generateHoleSVG(hole, interactive) {
 
     const fwTop = isPar3 ? 180 : 100;
     const fwBottom = h - 100;
-    const fwWidth = isPar3 ? 60 : isPar5 ? 80 : 70;
+    // Varied fairway width by par
+    const fwWidth = isPar3 ? 50 : isPar5 ? 85 : 70;
     const greenY = fwTop - 10;
     const greenRx = isPar3 ? 30 : 35;
     const greenRy = isPar3 ? 22 : 25;
     const teeY = fwBottom + 30;
+
+    // Detect hole shape from notes
+    const notes = (hole.notes || '').toLowerCase();
+    let holeShape = 'straight';
+    
+    if (isPar3) {
+        holeShape = 'straight'; // Par 3s are always straight
+    } else if (notes.includes('sharp left') || notes.includes('severe dogleg left')) {
+        holeShape = 'dogleg_left';
+    } else if (notes.includes('sharp right') || notes.includes('severe dogleg right')) {
+        holeShape = 'dogleg_right';
+    } else if (notes.includes('dogleg left')) {
+        holeShape = 'dogleg_left';
+    } else if (notes.includes('dogleg right')) {
+        holeShape = 'dogleg_right';
+    } else if (notes.includes('slight dogleg left')) {
+        holeShape = 'slight_dogleg_left';
+    } else if (notes.includes('slight dogleg right')) {
+        holeShape = 'slight_dogleg_right';
+    }
+
+    // Generate fairway path based on hole shape
+    let fairwayPath = '';
+    const doglegPoint = fwBottom - ((fwBottom - fwTop) * 0.6); // Dogleg turn at 60% of hole
+    
+    if (holeShape === 'straight') {
+        // Original straight fairway
+        fairwayPath = `M ${w/2-fwWidth} ${fwBottom}
+                 Q ${w/2-fwWidth-10} ${(fwTop+fwBottom)/2} ${w/2-fwWidth+5} ${fwTop+20}
+                 Q ${w/2-15} ${fwTop} ${w/2} ${fwTop}
+                 Q ${w/2+15} ${fwTop} ${w/2+fwWidth-5} ${fwTop+20}
+                 Q ${w/2+fwWidth+10} ${(fwTop+fwBottom)/2} ${w/2+fwWidth} ${fwBottom} Z`;
+    } else if (holeShape === 'dogleg_left') {
+        // Strong left dogleg - shifts left at 60%
+        const shift = 60;
+        fairwayPath = `M ${w/2-fwWidth} ${fwBottom}
+                 L ${w/2-fwWidth} ${doglegPoint+40}
+                 Q ${w/2-fwWidth-20} ${doglegPoint} ${w/2-fwWidth-shift} ${doglegPoint-30}
+                 L ${w/2-fwWidth-shift+5} ${fwTop+20}
+                 Q ${w/2-shift-15} ${fwTop} ${w/2-shift} ${fwTop}
+                 Q ${w/2-shift+15} ${fwTop} ${w/2+fwWidth-shift-5} ${fwTop+20}
+                 L ${w/2+fwWidth-shift} ${doglegPoint-30}
+                 Q ${w/2+fwWidth-20} ${doglegPoint} ${w/2+fwWidth} ${doglegPoint+40}
+                 L ${w/2+fwWidth} ${fwBottom} Z`;
+    } else if (holeShape === 'dogleg_right') {
+        // Strong right dogleg - shifts right at 60%
+        const shift = 60;
+        fairwayPath = `M ${w/2-fwWidth} ${fwBottom}
+                 L ${w/2-fwWidth} ${doglegPoint+40}
+                 Q ${w/2-fwWidth+20} ${doglegPoint} ${w/2-fwWidth+shift} ${doglegPoint-30}
+                 L ${w/2-fwWidth+shift-5} ${fwTop+20}
+                 Q ${w/2+shift-15} ${fwTop} ${w/2+shift} ${fwTop}
+                 Q ${w/2+shift+15} ${fwTop} ${w/2+fwWidth+shift+5} ${fwTop+20}
+                 L ${w/2+fwWidth+shift} ${doglegPoint-30}
+                 Q ${w/2+fwWidth+20} ${doglegPoint} ${w/2+fwWidth} ${doglegPoint+40}
+                 L ${w/2+fwWidth} ${fwBottom} Z`;
+    } else if (holeShape === 'slight_dogleg_left') {
+        // Gentle left curve
+        const shift = 30;
+        fairwayPath = `M ${w/2-fwWidth} ${fwBottom}
+                 Q ${w/2-fwWidth-15} ${(fwTop+fwBottom)/2} ${w/2-fwWidth-shift+5} ${fwTop+20}
+                 Q ${w/2-shift-15} ${fwTop} ${w/2-shift} ${fwTop}
+                 Q ${w/2-shift+15} ${fwTop} ${w/2+fwWidth-shift-5} ${fwTop+20}
+                 Q ${w/2+fwWidth-5} ${(fwTop+fwBottom)/2} ${w/2+fwWidth} ${fwBottom} Z`;
+    } else if (holeShape === 'slight_dogleg_right') {
+        // Gentle right curve
+        const shift = 30;
+        fairwayPath = `M ${w/2-fwWidth} ${fwBottom}
+                 Q ${w/2-fwWidth+5} ${(fwTop+fwBottom)/2} ${w/2-fwWidth+shift-5} ${fwTop+20}
+                 Q ${w/2+shift-15} ${fwTop} ${w/2+shift} ${fwTop}
+                 Q ${w/2+shift+15} ${fwTop} ${w/2+fwWidth+shift+5} ${fwTop+20}
+                 Q ${w/2+fwWidth+15} ${(fwTop+fwBottom)/2} ${w/2+fwWidth} ${fwBottom} Z`;
+    }
+
+    // Landing zone circle for par 4s and 5s (where the drive should land)
+    let landingZoneSVG = '';
+    if (!isPar3) {
+        const driverDistance = isPar5 ? 250 : 220; // Typical drive distance
+        const landingFrac = Math.min(driverDistance / hole.distance, 0.7); // Don't go past 70%
+        const landingY = fwBottom - ((fwBottom - fwTop) * landingFrac);
+        
+        // Position landing zone accounting for dogleg
+        let landingX = w / 2;
+        if (holeShape === 'dogleg_left' || holeShape === 'slight_dogleg_left') {
+            if (landingFrac > 0.6) landingX -= (holeShape === 'dogleg_left' ? 60 : 30) * (landingFrac - 0.6) / 0.4;
+        } else if (holeShape === 'dogleg_right' || holeShape === 'slight_dogleg_right') {
+            if (landingFrac > 0.6) landingX += (holeShape === 'dogleg_right' ? 60 : 30) * (landingFrac - 0.6) / 0.4;
+        }
+        
+        landingZoneSVG = `
+            <circle cx="${landingX}" cy="${landingY}" r="18" fill="none" stroke="rgba(255,217,61,.5)" stroke-width="2" stroke-dasharray="4,3"/>
+            <circle cx="${landingX}" cy="${landingY}" r="3" fill="rgba(255,217,61,.7)"/>
+            <text x="${landingX}" y="${landingY+28}" text-anchor="middle" font-size="10" fill="rgba(255,217,61,.8)">${Math.round(driverDistance)}yd</text>
+        `;
+    }
 
     let hazardsSVG = '';
     (hole.hazards || []).forEach(hz => {
@@ -1229,11 +1325,24 @@ function generateHoleSVG(hole, interactive) {
         let hzX = w / 2, hzY = fwBottom - ((hz.distance / hole.distance) * (fwBottom - fwTop));
         if (hz.distance === 0) hzY = greenY;
 
-        if (hz.location === 'left') hzX = w / 2 - fwWidth - 15;
-        else if (hz.location === 'right') hzX = w / 2 + fwWidth + 15;
-        else if (hz.location === 'short') { hzX = w / 2; hzY = greenY + 30; }
-        else if (hz.location === 'long') { hzX = w / 2; hzY = greenY - 30; }
-        else hzX = w / 2;
+        // Adjust hazard position for doglegs
+        const hazardFrac = hz.distance / hole.distance;
+        if (holeShape === 'dogleg_left' || holeShape === 'slight_dogleg_left') {
+            if (hazardFrac > 0.6) {
+                const shift = (holeShape === 'dogleg_left' ? 60 : 30) * (hazardFrac - 0.6) / 0.4;
+                hzX -= shift;
+            }
+        } else if (holeShape === 'dogleg_right' || holeShape === 'slight_dogleg_right') {
+            if (hazardFrac > 0.6) {
+                const shift = (holeShape === 'dogleg_right' ? 60 : 30) * (hazardFrac - 0.6) / 0.4;
+                hzX += shift;
+            }
+        }
+
+        if (hz.location === 'left') hzX = hzX - fwWidth - 15;
+        else if (hz.location === 'right') hzX = hzX + fwWidth + 15;
+        else if (hz.location === 'short') { hzY = greenY + 30; }
+        else if (hz.location === 'long') { hzY = greenY - 30; }
 
         if (hz.type === 'water') {
             hazardsSVG += `<ellipse cx="${hzX}" cy="${hzY}" rx="25" ry="15" fill="${hzColor}" opacity="${hzOpacity}"/>`;
@@ -1255,28 +1364,47 @@ function generateHoleSVG(hole, interactive) {
     if (hole.distance > 500) distLines.push(300);
 
     const markersSVG = distLines.filter(d => d < hole.distance - 30).map(d => {
-        const y = greenY + ((d / hole.distance) * (fwBottom - fwTop));
+        const distFrac = d / hole.distance;
+        const y = fwBottom - ((fwBottom - fwTop) * distFrac);
+        
+        // Adjust distance markers for doglegs
+        let markerCenterX = w / 2;
+        if (holeShape === 'dogleg_left' || holeShape === 'slight_dogleg_left') {
+            if (distFrac > 0.6) {
+                const shift = (holeShape === 'dogleg_left' ? 60 : 30) * (distFrac - 0.6) / 0.4;
+                markerCenterX -= shift;
+            }
+        } else if (holeShape === 'dogleg_right' || holeShape === 'slight_dogleg_right') {
+            if (distFrac > 0.6) {
+                const shift = (holeShape === 'dogleg_right' ? 60 : 30) * (distFrac - 0.6) / 0.4;
+                markerCenterX += shift;
+            }
+        }
+        
         const color = d === 150 ? 'rgba(0,212,170,.4)' : 'rgba(255,255,255,.15)';
         const textColor = d === 150 ? 'rgba(0,212,170,.6)' : 'rgba(255,255,255,.3)';
         const sw = d === 150 ? '1.5' : '1';
         return `
-            <line x1="${w/2-fwWidth+10}" y1="${y}" x2="${w/2+fwWidth-10}" y2="${y}" stroke="${color}" stroke-width="${sw}" stroke-dasharray="4,4"/>
-            <text x="${w/2+fwWidth+5}" y="${y+4}" font-size="9" fill="${textColor}" font-weight="${d===150?'bold':'normal'}">${d}</text>
-            <text x="${w/2-fwWidth-2}" y="${y+4}" font-size="9" fill="${textColor}" text-anchor="end">${d}</text>
+            <line x1="${markerCenterX-fwWidth+10}" y1="${y}" x2="${markerCenterX+fwWidth-10}" y2="${y}" stroke="${color}" stroke-width="${sw}" stroke-dasharray="4,4"/>
+            <text x="${markerCenterX+fwWidth+5}" y="${y+4}" font-size="9" fill="${textColor}" font-weight="${d===150?'bold':'normal'}">${d}</text>
+            <text x="${markerCenterX-fwWidth-2}" y="${y+4}" font-size="9" fill="${textColor}" text-anchor="end">${d}</text>
         `;
     }).join('');
 
+    // Adjust green position for doglegs
+    let greenX = w / 2;
+    if (holeShape === 'dogleg_left') greenX -= 60;
+    else if (holeShape === 'dogleg_right') greenX += 60;
+    else if (holeShape === 'slight_dogleg_left') greenX -= 30;
+    else if (holeShape === 'slight_dogleg_right') greenX += 30;
+
     return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
         <rect width="${w}" height="${h}" fill="#0a1510"/>
-        <path d="M ${w/2-fwWidth} ${fwBottom}
-                 Q ${w/2-fwWidth-10} ${(fwTop+fwBottom)/2} ${w/2-fwWidth+5} ${fwTop+20}
-                 Q ${w/2-15} ${fwTop} ${w/2} ${fwTop}
-                 Q ${w/2+15} ${fwTop} ${w/2+fwWidth-5} ${fwTop+20}
-                 Q ${w/2+fwWidth+10} ${(fwTop+fwBottom)/2} ${w/2+fwWidth} ${fwBottom} Z"
-              fill="#1a4d2e" stroke="#2a6b3e" stroke-width="1"/>
-        <ellipse cx="${w/2}" cy="${greenY}" rx="${greenRx}" ry="${greenRy}" fill="#2d8a4e" stroke="#3da65e" stroke-width="1.5"/>
-        <line x1="${w/2}" y1="${greenY-18}" x2="${w/2}" y2="${greenY-2}" stroke="white" stroke-width="1.5"/>
-        <polygon points="${w/2},${greenY-18} ${w/2+10},${greenY-13} ${w/2},${greenY-8}" fill="#ff4757"/>
+        <path d="${fairwayPath}" fill="#1a4d2e" stroke="#2a6b3e" stroke-width="1"/>
+        ${landingZoneSVG}
+        <ellipse cx="${greenX}" cy="${greenY}" rx="${greenRx}" ry="${greenRy}" fill="#2d8a4e" stroke="#3da65e" stroke-width="1.5"/>
+        <line x1="${greenX}" y1="${greenY-18}" x2="${greenX}" y2="${greenY-2}" stroke="white" stroke-width="1.5"/>
+        <polygon points="${greenX},${greenY-18} ${greenX+10},${greenY-13} ${greenX},${greenY-8}" fill="#ff4757"/>
         <rect x="${w/2-20}" y="${teeY-6}" width="40" height="12" rx="3" fill="#4a7c59" stroke="#5a9c6a" stroke-width="1"/>
         <text x="${w/2}" y="${teeY+22}" text-anchor="middle" font-size="12" font-weight="bold" fill="white">${hole.distance} yds</text>
         ${markersSVG}
