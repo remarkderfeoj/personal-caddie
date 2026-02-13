@@ -359,6 +359,27 @@ class ShotAnalysis(BaseModel):
 # CADDIE RECOMMENDATION CONTRACT MODELS (Task 4: Conviction-First Format)
 # ============================================================================
 
+class ConfidenceScore(BaseModel):
+    """
+    Calibrated confidence scoring (0.0-1.0) for recommendations.
+    
+    Each factor represents certainty in a specific aspect:
+    - distance_certainty: How well the club matches the required distance
+    - elevation_certainty: Quality of elevation data (known vs estimated)
+    - wind_certainty: Quality of wind data (measured vs calm assumption)
+    - lie_certainty: Predictability of the lie (tee/fairway = high, rough/sand = low)
+    - player_data_quality: Real player data vs generic defaults
+    
+    Overall confidence = weighted geometric mean of factors
+    """
+    distance_certainty: float = Field(ge=0.0, le=1.0, description="How well club matches distance")
+    elevation_certainty: float = Field(ge=0.0, le=1.0, description="Quality of elevation data")
+    wind_certainty: float = Field(ge=0.0, le=1.0, description="Quality of wind data")
+    lie_certainty: float = Field(ge=0.0, le=1.0, description="Predictability of lie")
+    player_data_quality: float = Field(ge=0.0, le=1.0, description="Real vs default player data")
+    overall_confidence: float = Field(ge=0.0, le=1.0, description="Weighted geometric mean")
+
+
 class SafeMissDirection(str, Enum):
     """Safe miss direction given hazards"""
     LEFT = "left"
@@ -420,6 +441,10 @@ class CaddieRecommendation(BaseModel):
     adjusted_distance: int = Field(ge=0, le=450, description="Expected total distance")
     optimal_miss: str = Field(max_length=200, description="Where to miss if you miss")
     danger_zone: str = Field(max_length=200, description="Where you absolutely cannot go")
+    
+    # CONFIDENCE SCORING (calibrated)
+    confidence: Optional[ConfidenceScore] = Field(None, description="Calibrated confidence factors")
+    confidence_explanation: Optional[str] = Field(None, max_length=300, description="Why this confidence level")
     
     # ALTERNATIVES — max 2, clearly secondary
     alternatives: Optional[List[AlternativePlay]] = Field(None, max_length=2)

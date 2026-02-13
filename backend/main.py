@@ -454,6 +454,7 @@ async def get_simple_recommendation(request: Request):
             hole=hole,
             weather=weather,
             course_elevation_feet=course.course_elevation_feet,
+            elevation_change_feet=elevation_change,
             round_context=None
         )
         
@@ -473,6 +474,15 @@ async def get_simple_recommendation(request: Request):
             "danger_zone": recommendation.danger_zone,
             "caddie_note": recommendation.caddie_note,
             "confidence": recommendation.confidence_percent or 75,
+            "confidence_factors": {
+                "distance_certainty": recommendation.confidence.distance_certainty if recommendation.confidence else None,
+                "elevation_certainty": recommendation.confidence.elevation_certainty if recommendation.confidence else None,
+                "wind_certainty": recommendation.confidence.wind_certainty if recommendation.confidence else None,
+                "lie_certainty": recommendation.confidence.lie_certainty if recommendation.confidence else None,
+                "player_data_quality": recommendation.confidence.player_data_quality if recommendation.confidence else None,
+                "overall_confidence": recommendation.confidence.overall_confidence if recommendation.confidence else None,
+            } if recommendation.confidence else None,
+            "confidence_explanation": recommendation.confidence_explanation,
             "risk_reward": {
                 "aggressive_upside": recommendation.risk_reward.aggressive_upside,
                 "aggressive_downside": recommendation.risk_reward.aggressive_downside,

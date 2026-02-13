@@ -55,6 +55,55 @@ def calculate_elevation_adjustment(elevation_feet: int, baseline_distance: int) 
     return round(adjusted_distance - baseline_distance)
 
 
+def calculate_shot_elevation_adjustment(
+    elevation_change_feet: int,
+    baseline_distance: int
+) -> int:
+    """
+    Calculate uphill/downhill shot elevation adjustment.
+    
+    Rule of thumb: 1 yard per 3 feet of elevation change
+    - Uphill (positive elevation_change): ball plays LONGER (add distance)
+    - Downhill (negative elevation_change): ball plays SHORTER (subtract distance)
+    
+    Distance-dependent scaling:
+    - Longer shots (>200y): elevation matters more (100% adjustment)
+    - Mid-range (150-200y): moderate effect (80% adjustment)
+    - Short shots (<150y): less effect (60% adjustment)
+    
+    Clamped to ±15% of baseline distance for realism.
+    
+    Args:
+        elevation_change_feet: Elevation change from ball to target (feet)
+                              Positive = uphill, Negative = downhill
+        baseline_distance: Shot distance in yards
+    
+    Returns:
+        Adjustment in yards (positive = add, negative = subtract)
+    """
+    if elevation_change_feet == 0:
+        return 0
+    
+    # Base adjustment: 1 yard per 3 feet
+    base_adjustment = elevation_change_feet / 3.0
+    
+    # Distance-dependent scaling
+    if baseline_distance >= 200:
+        scaling_factor = 1.0  # 100% effect for long shots
+    elif baseline_distance >= 150:
+        scaling_factor = 0.8  # 80% effect for mid-range
+    else:
+        scaling_factor = 0.6  # 60% effect for short shots
+    
+    adjusted_yards = base_adjustment * scaling_factor
+    
+    # Clamp to ±15% of baseline distance
+    max_adjustment = baseline_distance * 0.15
+    adjusted_yards = max(-max_adjustment, min(max_adjustment, adjusted_yards))
+    
+    return round(adjusted_yards)
+
+
 def calculate_wind_adjustment(
     wind_relative: str,
     wind_speed_mph: float,

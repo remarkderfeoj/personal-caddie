@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
 from services.physics import (
     calculate_temperature_adjustment,
     calculate_elevation_adjustment,
+    calculate_shot_elevation_adjustment,
     calculate_wind_adjustment,
     calculate_rain_adjustment,
     calculate_lie_adjustment,
@@ -44,8 +45,55 @@ def test_elevation_adjustment_sea_level():
 def test_elevation_adjustment_high_altitude():
     """Test elevation adjustment at 5000 feet"""
     result = calculate_elevation_adjustment(5000, 150)
-    # 5000 * 0.00116 = 5.8% increase = 8.7 yards, rounds to 9
-    assert result == 9, "5000 feet should add ~9 yards"
+    # 5000 * 0.00002 = 0.1 = 10% increase = 15 yards
+    assert result == 15, "5000 feet should add 15 yards"
+
+
+def test_shot_elevation_adjustment_flat():
+    """Test shot elevation adjustment on flat ground"""
+    result = calculate_shot_elevation_adjustment(0, 150)
+    assert result == 0, "Flat shot should have no adjustment"
+
+
+def test_shot_elevation_adjustment_uphill():
+    """Test shot elevation adjustment uphill"""
+    # 30 feet uphill at 150 yards
+    result = calculate_shot_elevation_adjustment(30, 150)
+    # Base: 30 / 3 = 10 yards, scaling 0.8 for 150y = 8 yards
+    assert result == 8, "30 feet uphill at 150y should add 8 yards"
+
+
+def test_shot_elevation_adjustment_downhill():
+    """Test shot elevation adjustment downhill"""
+    # 30 feet downhill at 150 yards
+    result = calculate_shot_elevation_adjustment(-30, 150)
+    # Base: -30 / 3 = -10 yards, scaling 0.8 for 150y = -8 yards
+    assert result == -8, "30 feet downhill at 150y should subtract 8 yards"
+
+
+def test_shot_elevation_adjustment_long_shot():
+    """Test shot elevation adjustment for long shot"""
+    # 30 feet uphill at 220 yards (long shot, 100% scaling)
+    result = calculate_shot_elevation_adjustment(30, 220)
+    # Base: 30 / 3 = 10 yards, scaling 1.0 for 220y = 10 yards
+    assert result == 10, "30 feet uphill at 220y should add 10 yards"
+
+
+def test_shot_elevation_adjustment_short_shot():
+    """Test shot elevation adjustment for short shot"""
+    # 30 feet uphill at 100 yards (short shot, 60% scaling)
+    result = calculate_shot_elevation_adjustment(30, 100)
+    # Base: 30 / 3 = 10 yards, scaling 0.6 for 100y = 6 yards
+    assert result == 6, "30 feet uphill at 100y should add 6 yards"
+
+
+def test_shot_elevation_adjustment_clamped():
+    """Test shot elevation adjustment is clamped to ±15%"""
+    # Extreme uphill: 150 feet at 150 yards
+    result = calculate_shot_elevation_adjustment(150, 150)
+    # Base: 150 / 3 = 50 yards, but clamped to 15% = 22.5 yards, rounds to 23
+    max_adjustment = int(150 * 0.15)
+    assert result == max_adjustment, f"Extreme uphill should be clamped to {max_adjustment} yards"
 
 
 def test_wind_adjustment_calm():
@@ -104,6 +152,18 @@ def test_lie_adjustment_thick_rough():
     assert result == 0.25, "Thick rough should have 25% penalty"
 
 
+def test_lie_adjustment_bunker():
+    """Test lie adjustment from bunker"""
+    result = calculate_lie_adjustment("bunker", None)
+    assert result == 0.20, "Bunker should have 20% penalty"
+
+
+def test_lie_adjustment_semi_rough():
+    """Test lie adjustment from semi rough"""
+    result = calculate_lie_adjustment("semi_rough", None)
+    assert result == 0.05, "Semi rough should have 5% penalty"
+
+
 def test_compass_to_degrees():
     """Test compass direction conversion"""
     assert compass_to_degrees("N") == 0
@@ -139,6 +199,12 @@ def run_all_tests():
         test_temperature_adjustment_cold,
         test_elevation_adjustment_sea_level,
         test_elevation_adjustment_high_altitude,
+        test_shot_elevation_adjustment_flat,
+        test_shot_elevation_adjustment_uphill,
+        test_shot_elevation_adjustment_downhill,
+        test_shot_elevation_adjustment_long_shot,
+        test_shot_elevation_adjustment_short_shot,
+        test_shot_elevation_adjustment_clamped,
         test_wind_adjustment_calm,
         test_wind_adjustment_headwind,
         test_wind_adjustment_tailwind,
@@ -148,6 +214,8 @@ def run_all_tests():
         test_lie_adjustment_tee,
         test_lie_adjustment_rough,
         test_lie_adjustment_thick_rough,
+        test_lie_adjustment_bunker,
+        test_lie_adjustment_semi_rough,
         test_compass_to_degrees,
         test_wind_relative_to_shot_headwind,
         test_wind_relative_to_shot_tailwind,

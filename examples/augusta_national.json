@@ -19,14 +19,60 @@
           "distance_from_tee_yards": 300,
           "severity": "bunker",
           "description": "Right fairway bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 440,
+          "severity": "bunker",
+          "description": "Left greenside bunker"
         }
       ],
       "green_shape": "medium",
-      "notes": "Tea Olive - Downhill opener",
-      "tee_lat": 33.507,
-      "tee_lng": -81.8505,
-      "green_lat": 33.504,
-      "green_lng": -81.8505
+      "notes": "Tea Olive - Downhill opener. Switchback hole with opposing bunkers tests shot-shaping ability",
+      "tee_lat": 33.5070,
+      "tee_lng": -82.0199,
+      "green_lat": 33.5040,
+      "green_lng": -82.0199
+    },
+    {
+      "hole_id": "augusta_2",
+      "hole_number": 2,
+      "par": 5,
+      "handicap_index": 13,
+      "distance_to_pin_yards": 575,
+      "shot_bearing_degrees": 200,
+      "elevation_change_feet": -40,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 290,
+          "severity": "bunker",
+          "description": "Lone fairway bunker right"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 550,
+          "severity": "bunker",
+          "description": "Left greenside bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 550,
+          "severity": "bunker",
+          "description": "Right greenside bunker"
+        }
+      ],
+      "green_shape": "large",
+      "notes": "Pink Dogwood - Downhill dogleg left. T-shaped green tilts back-right. Great birdie opportunity",
+      "tee_lat": 33.5035,
+      "tee_lng": -82.0195,
+      "green_lat": 33.5005,
+      "green_lng": -82.0220
     },
     {
       "hole_id": "augusta_3",
@@ -40,14 +86,25 @@
       "hazards": [
         {
           "hazard_type": "bunker",
+          "location": "center",
+          "distance_from_tee_yards": 240,
+          "severity": "bunker",
+          "description": "Nest of four fairway bunkers"
+        },
+        {
+          "hazard_type": "bunker",
           "location": "left",
-          "distance_from_tee_yards": 280,
+          "distance_from_tee_yards": 340,
           "severity": "bunker",
           "description": "Left greenside bunker"
         }
       ],
       "green_shape": "narrow",
-      "notes": "Flowering Peach - Dramatic downhill"
+      "notes": "Flowering Peach - Short but tricky. Can drive near green but delicate uphill pitch remains",
+      "tee_lat": 33.5008,
+      "tee_lng": -82.0223,
+      "green_lat": 33.4988,
+      "green_lng": -82.0238
     },
     {
       "hole_id": "augusta_4",
@@ -55,27 +112,209 @@
       "par": 3,
       "handicap_index": 15,
       "distance_to_pin_yards": 240,
-      "shot_bearing_degrees": 270,
-      "elevation_change_feet": -10,
+      "shot_bearing_degrees": 240,
+      "elevation_change_feet": -15,
       "fairway_type": "fairway",
       "hazards": [
         {
           "hazard_type": "bunker",
           "location": "right",
-          "distance_from_tee_yards": 0,
+          "distance_from_tee_yards": 235,
           "severity": "bunker",
-          "description": "Deep right bunker"
+          "description": "Large right bunker"
         },
         {
           "hazard_type": "bunker",
           "location": "left",
-          "distance_from_tee_yards": 0,
+          "distance_from_tee_yards": 235,
           "severity": "bunker",
           "description": "Left bunker"
         }
       ],
       "green_shape": "wide",
-      "notes": "Flowering Crab Apple - Longest par 3"
+      "notes": "Flowering Crab Apple - Longest par 3. Downhill to L-shaped green with tricky pins",
+      "tee_lat": 33.4992,
+      "tee_lng": -82.0240,
+      "green_lat": 33.4980,
+      "green_lng": -82.0260
+    },
+    {
+      "hole_id": "augusta_5",
+      "hole_number": 5,
+      "par": 4,
+      "handicap_index": 5,
+      "distance_to_pin_yards": 495,
+      "shot_bearing_degrees": 270,
+      "elevation_change_feet": 20,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 280,
+          "severity": "bunker",
+          "description": "Cavernous left fairway bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 320,
+          "severity": "bunker",
+          "description": "Second left fairway bunker"
+        }
+      ],
+      "green_shape": "narrow",
+      "notes": "Magnolia - Long and difficult. Green inspired by Road Hole at St Andrews. Massive false front",
+      "tee_lat": 33.4982,
+      "tee_lng": -82.0265,
+      "green_lat": 33.4985,
+      "green_lng": -82.0305
+    },
+    {
+      "hole_id": "augusta_6",
+      "hole_number": 6,
+      "par": 3,
+      "handicap_index": 16,
+      "distance_to_pin_yards": 180,
+      "shot_bearing_degrees": 300,
+      "elevation_change_feet": -20,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 175,
+          "severity": "bunker",
+          "description": "Left bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 175,
+          "severity": "bunker",
+          "description": "Right bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Juniper - Downhill par 3. Multi-tiered green plays dramatically different day-to-day",
+      "tee_lat": 33.4988,
+      "tee_lng": -82.0308,
+      "green_lat": 33.5000,
+      "green_lng": -82.0323
+    },
+    {
+      "hole_id": "augusta_7",
+      "hole_number": 7,
+      "par": 4,
+      "handicap_index": 4,
+      "distance_to_pin_yards": 450,
+      "shot_bearing_degrees": 330,
+      "elevation_change_feet": 30,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 440,
+          "severity": "bunker",
+          "description": "Left greenside bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 440,
+          "severity": "bunker",
+          "description": "Right greenside bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "center",
+          "distance_from_tee_yards": 445,
+          "severity": "bunker",
+          "description": "Back bunker"
+        }
+      ],
+      "green_shape": "elevated",
+      "notes": "Pampas - Lengthened to 450 yards. Uphill middle-iron to elevated green surrounded by bunkers",
+      "tee_lat": 33.5002,
+      "tee_lng": -82.0325,
+      "green_lat": 33.5025,
+      "green_lng": -82.0345
+    },
+    {
+      "hole_id": "augusta_8",
+      "hole_number": 8,
+      "par": 5,
+      "handicap_index": 10,
+      "distance_to_pin_yards": 570,
+      "shot_bearing_degrees": 0,
+      "elevation_change_feet": 40,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 280,
+          "severity": "bunker",
+          "description": "Left fairway bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Yellow Jasmine - Uphill par 5. Avoiding fairway bunker sets up right-to-left approach to mounded green",
+      "tee_lat": 33.5030,
+      "tee_lng": -82.0348,
+      "green_lat": 33.5075,
+      "green_lng": -82.0345
+    },
+    {
+      "hole_id": "augusta_9",
+      "hole_number": 9,
+      "par": 4,
+      "handicap_index": 2,
+      "distance_to_pin_yards": 460,
+      "shot_bearing_degrees": 30,
+      "elevation_change_feet": 20,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 450,
+          "severity": "bunker",
+          "description": "Left greenside bunkers"
+        }
+      ],
+      "green_shape": "elevated",
+      "notes": "Carolina Cherry - Famous stair-stepped green. Length and angle crucial for proper position",
+      "tee_lat": 33.5080,
+      "tee_lng": -82.0342,
+      "green_lat": 33.5095,
+      "green_lng": -82.0315
+    },
+    {
+      "hole_id": "augusta_10",
+      "hole_number": 10,
+      "par": 4,
+      "handicap_index": 1,
+      "distance_to_pin_yards": 495,
+      "shot_bearing_degrees": 80,
+      "elevation_change_feet": -50,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 485,
+          "severity": "bunker",
+          "description": "Famous L-shaped greenside bunker"
+        }
+      ],
+      "green_shape": "narrow",
+      "notes": "Camellia - Hardest hole in Masters history. Severe downhill dogleg left. Green tilts dramatically",
+      "tee_lat": 33.5098,
+      "tee_lng": -82.0310,
+      "green_lat": 33.5085,
+      "green_lng": -82.0270
     },
     {
       "hole_id": "augusta_11",
@@ -83,20 +322,24 @@
       "par": 4,
       "handicap_index": 3,
       "distance_to_pin_yards": 520,
-      "shot_bearing_degrees": 200,
+      "shot_bearing_degrees": 120,
       "elevation_change_feet": -20,
       "fairway_type": "fairway",
       "hazards": [
         {
           "hazard_type": "water",
           "location": "left",
-          "distance_from_tee_yards": 400,
+          "distance_from_tee_yards": 500,
           "severity": "water",
-          "description": "Pond guarding left of green"
+          "description": "Pond left of green - start of Amen Corner"
         }
       ],
       "green_shape": "narrow",
-      "notes": "White Dogwood - Start of Amen Corner"
+      "notes": "White Dogwood - Start of Amen Corner. Green tilts toward pond with fronting mounds",
+      "tee_lat": 33.5088,
+      "tee_lng": -82.0265,
+      "green_lat": 33.5055,
+      "green_lng": -82.0235
     },
     {
       "hole_id": "augusta_12",
@@ -111,9 +354,23 @@
         {
           "hazard_type": "water",
           "location": "short",
-          "distance_from_tee_yards": 0,
+          "distance_from_tee_yards": 145,
           "severity": "water",
-          "description": "Rae's Creek"
+          "description": "Rae's Creek in front"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 155,
+          "severity": "bunker",
+          "description": "Left bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 155,
+          "severity": "bunker",
+          "description": "Right bunker"
         },
         {
           "hazard_type": "bunker",
@@ -124,18 +381,18 @@
         }
       ],
       "green_shape": "narrow",
-      "notes": "Golden Bell - Amen Corner par 3, swirling winds",
-      "tee_lat": 33.501,
-      "tee_lng": -81.853,
-      "green_lat": 33.5008,
-      "green_lng": -81.85
+      "notes": "Golden Bell - Most famous hole. Amen Corner par 3 with swirling winds over Rae's Creek",
+      "tee_lat": 33.5053,
+      "tee_lng": -82.0230,
+      "green_lat": 33.5051,
+      "green_lng": -82.0215
     },
     {
       "hole_id": "augusta_13",
       "hole_number": 13,
       "par": 5,
       "handicap_index": 11,
-      "distance_to_pin_yards": 510,
+      "distance_to_pin_yards": 545,
       "shot_bearing_degrees": 180,
       "elevation_change_feet": -30,
       "fairway_type": "fairway",
@@ -143,7 +400,7 @@
         {
           "hazard_type": "water",
           "location": "short",
-          "distance_from_tee_yards": 460,
+          "distance_from_tee_yards": 530,
           "severity": "water",
           "description": "Rae's Creek in front of green"
         },
@@ -156,39 +413,60 @@
         }
       ],
       "green_shape": "wide",
-      "notes": "Azalea - Reachable par 5, risk/reward",
-      "tee_lat": 33.5005,
-      "tee_lng": -81.8495,
-      "green_lat": 33.502,
-      "green_lng": -81.847
+      "notes": "Azalea - One of world's best par 5s. Reachable with risk/reward over creek. Hanging lies on approach",
+      "tee_lat": 33.5048,
+      "tee_lng": -82.0210,
+      "green_lat": 33.5005,
+      "green_lng": -82.0205
+    },
+    {
+      "hole_id": "augusta_14",
+      "hole_number": 14,
+      "par": 4,
+      "handicap_index": 14,
+      "distance_to_pin_yards": 440,
+      "shot_bearing_degrees": 200,
+      "elevation_change_feet": -10,
+      "fairway_type": "fairway",
+      "hazards": [],
+      "green_shape": "medium",
+      "notes": "Chinese Fir - Only bunkerless hole. Heaving green with massive false front provides all the challenge",
+      "tee_lat": 33.5000,
+      "tee_lng": -82.0200,
+      "green_lat": 33.4970,
+      "green_lng": -82.0215
     },
     {
       "hole_id": "augusta_15",
       "hole_number": 15,
       "par": 5,
       "handicap_index": 5,
-      "distance_to_pin_yards": 530,
-      "shot_bearing_degrees": 180,
+      "distance_to_pin_yards": 550,
+      "shot_bearing_degrees": 250,
       "elevation_change_feet": -40,
       "fairway_type": "fairway",
       "hazards": [
         {
           "hazard_type": "water",
           "location": "short",
-          "distance_from_tee_yards": 490,
+          "distance_from_tee_yards": 540,
           "severity": "water",
           "description": "Pond in front of green"
         },
         {
           "hazard_type": "water",
           "location": "long",
-          "distance_from_tee_yards": 530,
+          "distance_from_tee_yards": 560,
           "severity": "water",
           "description": "Pond behind green"
         }
       ],
       "green_shape": "wide",
-      "notes": "Firethorn - Eagle hole, water front and back"
+      "notes": "Firethorn - Last great par 5. Downhill to shallow crowned green. Water front and back. Eagle hole",
+      "tee_lat": 33.4972,
+      "tee_lng": -82.0220,
+      "green_lat": 33.4965,
+      "green_lng": -82.0260
     },
     {
       "hole_id": "augusta_16",
@@ -196,37 +474,62 @@
       "par": 3,
       "handicap_index": 17,
       "distance_to_pin_yards": 170,
-      "shot_bearing_degrees": 270,
+      "shot_bearing_degrees": 290,
       "elevation_change_feet": -25,
       "fairway_type": "fairway",
       "hazards": [
         {
           "hazard_type": "water",
           "location": "left",
-          "distance_from_tee_yards": 0,
+          "distance_from_tee_yards": 165,
           "severity": "water",
-          "description": "Large pond left"
+          "description": "Large pond left and front"
         },
         {
           "hazard_type": "bunker",
           "location": "right",
-          "distance_from_tee_yards": 0,
+          "distance_from_tee_yards": 170,
           "severity": "bunker",
           "description": "Right bunkers"
         }
       ],
       "green_shape": "wide",
-      "notes": "Redbud - Tiger's famous chip-in hole",
-      "tee_lat": 33.5025,
-      "tee_lng": -81.8465,
-      "green_lat": 33.5035,
-      "green_lng": -81.847
+      "notes": "Redbud - Tiger's famous chip-in hole. Sweeping green contours. Sunday pin position yields aces",
+      "tee_lat": 33.4968,
+      "tee_lng": -82.0265,
+      "green_lat": 33.4975,
+      "green_lng": -82.0280
+    },
+    {
+      "hole_id": "augusta_17",
+      "hole_number": 17,
+      "par": 4,
+      "handicap_index": 12,
+      "distance_to_pin_yards": 440,
+      "shot_bearing_degrees": 330,
+      "elevation_change_feet": 10,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 280,
+          "severity": "bunker",
+          "description": "Left fairway bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Nandina - Former Eisenhower Tree hole. Maxwell rolls on green make approach tricky from any angle",
+      "tee_lat": 33.4978,
+      "tee_lng": -82.0283,
+      "green_lat": 33.5005,
+      "green_lng": -82.0298
     },
     {
       "hole_id": "augusta_18",
       "hole_number": 18,
       "par": 4,
-      "handicap_index": 1,
+      "handicap_index": 8,
       "distance_to_pin_yards": 465,
       "shot_bearing_degrees": 0,
       "elevation_change_feet": 80,
@@ -241,16 +544,20 @@
         },
         {
           "hazard_type": "bunker",
-          "location": "left",
-          "distance_from_tee_yards": 0,
+          "location": "right",
+          "distance_from_tee_yards": 460,
           "severity": "bunker",
-          "description": "Greenside bunkers"
+          "description": "Right greenside bunker"
         }
       ],
       "green_shape": "medium",
-      "notes": "Holly - Iconic uphill finishing hole"
+      "notes": "Holly - Iconic uphill finishing hole. Two-level green. Dozens of championships settled here",
+      "tee_lat": 33.5008,
+      "tee_lng": -82.0300,
+      "green_lat": 33.5045,
+      "green_lng": -82.0295
     }
   ],
-  "center_lat": 33.5032,
-  "center_lng": -81.851
+  "center_lat": 33.5027,
+  "center_lng": -82.0199
 }

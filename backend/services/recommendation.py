@@ -9,6 +9,7 @@ Main orchestrator for club recommendations:
 """
 
 from typing import Dict, Optional
+import math
 from models import (
     PlayerBaseline,
     Hole,
@@ -22,10 +23,12 @@ from models import (
     AlternativeClub,
     AlternativePlay,
     RiskReward,
+    ConfidenceScore,
 )
 from .physics import (
     calculate_temperature_adjustment,
     calculate_elevation_adjustment,
+    calculate_shot_elevation_adjustment,
     calculate_wind_adjustment,
     calculate_rain_adjustment,
     calculate_lie_adjustment,
@@ -45,6 +48,7 @@ def calculate_adjusted_distance(
     baseline_total: int,
     temperature: float,
     elevation_feet: int,
+    elevation_change_feet: int,
     wind_relative: str,
     wind_speed: float,
     rain: bool,
@@ -62,8 +66,13 @@ def calculate_adjusted_distance(
     temp_adj = calculate_temperature_adjustment(temperature, baseline_carry)
     adjusted_carry += temp_adj
 
-    elev_adj = calculate_elevation_adjustment(elevation_feet, baseline_carry)
-    adjusted_carry += elev_adj
+    # Course altitude adjustment (thin air)
+    course_elev_adj = calculate_elevation_adjustment(elevation_feet, baseline_carry)
+    adjusted_carry += course_elev_adj
+
+    # Uphill/downhill shot adjustment
+    shot_elev_adj = calculate_shot_elevation_adjustment(elevation_change_feet, baseline_carry)
+    adjusted_carry += shot_elev_adj
 
     wind_adj = calculate_wind_adjustment(wind_relative, wind_speed, baseline_carry)
     adjusted_carry += wind_adj
@@ -86,7 +95,8 @@ def calculate_adjusted_distance(
         "adjusted_total": adjusted_total,
         "adjustments": {
             "temperature_yards": temp_adj,
-            "elevation_yards": elev_adj,
+            "course_elevation_yards": course_elev_adj,
+            "shot_elevation_yards": shot_elev_adj,
             "wind_yards": wind_adj,
             "rain_percent": rain_pct,
             "lie_percent": lie_pct,
@@ -151,12 +161,145 @@ def generate_alternative_rationale(
     return None
 
 
+def calculate_confidence_score(
+    match_score: float,
+    distance_to_target: int,
+    adjusted_distance: int,
+    dispersion: int,
+    has_elevation_data: bool,
+    elevation_change_feet: int,
+    has_wind_data: bool,
+    wind_speed: float,
+    player_lie: str,
+    lie_quality: Optional[str],
+    is_real_player_data: bool
+) -> tuple[ConfidenceScore, str]:
+    """
+    Calculate calibrated confidence score with detailed factors.
+    
+    Returns:
+        Tuple of (ConfidenceScore, explanation_text)
+    """
+    # 1. Distance certainty: How well does the club match the distance?
+    distance_diff = abs(adjusted_distance - distance_to_target)
+    if distance_diff <= dispersion / 2:
+        distance_certainty = 1.0
+    elif distance_diff <= dispersion:
+        distance_certainty = 0.85
+    elif distance_diff <= dispersion * 1.5:
+        distance_certainty = 0.7
+    else:
+        distance_certainty = max(0.5, 1.0 - (distance_diff / distance_to_target))
+    
+    # 2. Elevation certainty: Do we have good elevation data?
+    if has_elevation_data and elevation_change_feet != 0:
+        # We have real elevation data
+        if abs(elevation_change_feet) > 10:
+            elevation_certainty = 0.95  # Significant elevation, we accounted for it
+        else:
+            elevation_certainty = 0.9   # Mild elevation
+    elif has_elevation_data and elevation_change_feet == 0:
+        elevation_certainty = 1.0  # Flat shot, no uncertainty
+    else:
+        elevation_certainty = 0.7  # No elevation data, assuming flat
+    
+    # 3. Wind certainty: Is wind data provided?
+    if has_wind_data and wind_speed >= 10:
+        wind_certainty = 0.8   # Strong wind, accounted for but variable
+    elif has_wind_data and wind_speed >= 5:
+        wind_certainty = 0.9   # Moderate wind
+    elif wind_speed < 5:
+        wind_certainty = 1.0   # Calm, no uncertainty
+    else:
+        wind_certainty = 0.75  # No wind data, assuming calm
+    
+    # 4. Lie certainty: How predictable is the lie?
+    if player_lie in ["tee", "fairway"] and (lie_quality in ["clean", "normal", None]):
+        lie_certainty = 1.0
+    elif player_lie == "fairway" and lie_quality == "thick":
+        lie_certainty = 0.75
+    elif player_lie == "semi_rough":
+        lie_certainty = 0.8
+    elif player_lie == "rough":
+        if lie_quality == "thick":
+            lie_certainty = 0.6
+        else:
+            lie_certainty = 0.7
+    elif player_lie == "bunker":
+        lie_certainty = 0.65
+    else:  # woods, plugged
+        lie_certainty = 0.5
+    
+    # 5. Player data quality: Real player data vs defaults?
+    if is_real_player_data:
+        player_data_quality = 0.95
+    else:
+        player_data_quality = 0.7  # Using generic defaults
+    
+    # Calculate overall confidence using weighted geometric mean
+    # This ensures that a low score in any factor significantly impacts overall confidence
+    weights = {
+        'distance': 0.35,
+        'elevation': 0.15,
+        'wind': 0.15,
+        'lie': 0.20,
+        'player_data': 0.15
+    }
+    
+    # Weighted geometric mean: product of (factor^weight)
+    overall_confidence = (
+        distance_certainty ** weights['distance'] *
+        elevation_certainty ** weights['elevation'] *
+        wind_certainty ** weights['wind'] *
+        lie_certainty ** weights['lie'] *
+        player_data_quality ** weights['player_data']
+    )
+    
+    # Build explanation
+    explanation_parts = []
+    if distance_certainty >= 0.9:
+        explanation_parts.append("excellent distance match")
+    elif distance_certainty >= 0.75:
+        explanation_parts.append("good distance match")
+    else:
+        explanation_parts.append("distance is marginal")
+    
+    if elevation_certainty < 0.8:
+        explanation_parts.append("elevation estimated")
+    
+    if wind_certainty < 0.85:
+        explanation_parts.append("wind variable")
+    
+    if lie_certainty < 0.8:
+        explanation_parts.append(f"challenging lie")
+    
+    if player_data_quality < 0.8:
+        explanation_parts.append("using default distances")
+    
+    if not explanation_parts:
+        explanation = "All factors look great — high confidence in this recommendation."
+    else:
+        explanation = f"Good recommendation, but note: {', '.join(explanation_parts)}."
+    
+    confidence_score = ConfidenceScore(
+        distance_certainty=round(distance_certainty, 2),
+        elevation_certainty=round(elevation_certainty, 2),
+        wind_certainty=round(wind_certainty, 2),
+        lie_certainty=round(lie_certainty, 2),
+        player_data_quality=round(player_data_quality, 2),
+        overall_confidence=round(overall_confidence, 2)
+    )
+    
+    return confidence_score, explanation
+
+
 def generate_recommendation(
     shot_analysis: ShotAnalysis,
     player_baseline: PlayerBaseline,
     hole: Hole,
     weather: WeatherConditions,
     course_elevation_feet: int = 0,
+    elevation_change_feet: int = 0,
     round_context: Optional[Dict] = None
 ) -> CaddieRecommendation:
     """
@@ -201,6 +344,7 @@ def generate_recommendation(
             baseline_total=club_dist.total_distance,
             temperature=weather.temperature_fahrenheit,
             elevation_feet=course_elevation_feet,
+            elevation_change_feet=elevation_change_feet,
             wind_relative=wind_relative,
             wind_speed=weather.wind_speed_mph,
             rain=weather.rain,
@@ -346,8 +490,11 @@ def generate_recommendation(
     # Generate "why" explanation
     adj = primary_option["adjustments"]
     adj_parts = []
-    if adj["elevation_yards"] > 0:
-        adj_parts.append(f"+{adj['elevation_yards']}y elevation")
+    if adj.get("course_elevation_yards", 0) > 0:
+        adj_parts.append(f"+{adj['course_elevation_yards']}y altitude")
+    if adj.get("shot_elevation_yards", 0) != 0:
+        direction = "uphill" if adj["shot_elevation_yards"] > 0 else "downhill"
+        adj_parts.append(f"{adj['shot_elevation_yards']:+d}y {direction}")
     if adj["wind_yards"] != 0:
         adj_parts.append(f"{adj['wind_yards']:+d}y {wind_relative}")
     if adj["temperature_yards"] != 0:
@@ -418,7 +565,26 @@ def generate_recommendation(
         conservative_downside=conservative_downside
     )
     
-    # 8. Return conviction-first recommendation
+    # 8. Calculate confidence score
+    has_elevation_data = elevation_change_feet != 0 or course_elevation_feet > 0
+    has_wind_data = weather.wind_speed_mph > 0
+    is_real_player_data = len(player_baseline.club_distances) >= 8  # Heuristic: 8+ clubs = real data
+    
+    confidence_score, confidence_explanation = calculate_confidence_score(
+        match_score=primary_option["match_score"],
+        distance_to_target=target_distance,
+        adjusted_distance=primary_option["adjusted_total"],
+        dispersion=primary_option["dispersion"],
+        has_elevation_data=has_elevation_data,
+        elevation_change_feet=elevation_change_feet,
+        has_wind_data=has_wind_data,
+        wind_speed=weather.wind_speed_mph,
+        player_lie=shot_analysis.player_lie.value if hasattr(shot_analysis.player_lie, 'value') else shot_analysis.player_lie,
+        lie_quality=shot_analysis.lie_quality.value if shot_analysis.lie_quality and hasattr(shot_analysis.lie_quality, 'value') else shot_analysis.lie_quality,
+        is_real_player_data=is_real_player_data
+    )
+    
+    # 9. Return conviction-first recommendation
     return CaddieRecommendation(
         recommendation_id=f"rec_{shot_analysis.analysis_id}",
         shot_analysis_id=shot_analysis.analysis_id,
@@ -430,8 +596,10 @@ def generate_recommendation(
         adjusted_distance=primary_option["adjusted_total"],
         optimal_miss=optimal_miss,
         danger_zone=danger_zone,
+        confidence=confidence_score,
+        confidence_explanation=confidence_explanation,
         alternatives=alternatives if alternatives else None,
         risk_reward=risk_reward,
-        confidence_percent=min(95, max(50, int(primary_option["match_score"]))),
+        confidence_percent=min(95, max(50, int(confidence_score.overall_confidence * 100))),
         expected_carry_yards=primary_option["adjusted_carry"]
     )
