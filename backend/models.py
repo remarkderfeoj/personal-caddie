@@ -180,6 +180,16 @@ class FairwayType(str, Enum):
     WATER = "water"
 
 
+class HoleShape(str, Enum):
+    """Shape/layout of the hole"""
+    STRAIGHT = "straight"
+    DOGLEG_LEFT = "dogleg_left"
+    DOGLEG_RIGHT = "dogleg_right"
+    SLIGHT_DOGLEG_LEFT = "slight_dogleg_left"
+    SLIGHT_DOGLEG_RIGHT = "slight_dogleg_right"
+    DOUBLE_DOGLEG = "double_dogleg"
+
+
 class Hole(BaseModel):
     """Single hole on a golf course"""
     hole_id: str = Field(max_length=50, pattern=r'^[a-zA-Z0-9_-]+$')
@@ -187,9 +197,10 @@ class Hole(BaseModel):
     par: int = Field(ge=3, le=5)
     handicap_index: int = Field(ge=1, le=18)
     distance_to_pin_yards: int = Field(ge=50, le=700)
-    shot_bearing_degrees: int = Field(ge=0, le=359, description="Compass bearing of shot direction")
+    shot_bearing_degrees: float = Field(ge=0, le=360, description="Compass bearing of shot direction")
     elevation_change_feet: Optional[int] = Field(None, ge=-500, le=500)
-    fairway_type: FairwayType
+    fairway_type: FairwayType = FairwayType.FAIRWAY
+    hole_shape: Optional[HoleShape] = HoleShape.STRAIGHT
     hazards: Optional[List[Hazard]] = None
     green_shape: Optional[GreenShape] = None
     notes: Optional[str] = Field(None, max_length=1000)

@@ -1223,20 +1223,20 @@ function generateHoleSVG(hole, interactive) {
     const greenRy = isPar3 ? 22 : 25;
     const teeY = fwBottom + 30;
 
-    // Detect hole shape from fairway_type field first, then fall back to notes
+    // Detect hole shape from hole_shape field first, then fall back to notes
     const notes = (hole.notes || '').toLowerCase();
-    const fwType = (hole.fairway_type || '').toLowerCase();
+    const shapeField = (hole.hole_shape || '').toLowerCase();
     let holeShape = 'straight';
     
     if (isPar3) {
         holeShape = 'straight'; // Par 3s are always straight
-    } else if (fwType === 'dogleg_left') {
+    } else if (shapeField === 'dogleg_left') {
         holeShape = 'dogleg_left';
-    } else if (fwType === 'dogleg_right') {
+    } else if (shapeField === 'dogleg_right') {
         holeShape = 'dogleg_right';
-    } else if (fwType === 'slight_dogleg_left') {
+    } else if (shapeField === 'slight_dogleg_left') {
         holeShape = 'slight_dogleg_left';
-    } else if (fwType === 'slight_dogleg_right') {
+    } else if (shapeField === 'slight_dogleg_right') {
         holeShape = 'slight_dogleg_right';
     } else if (notes.includes('sharp left') || notes.includes('severe dogleg left')) {
         holeShape = 'dogleg_left';

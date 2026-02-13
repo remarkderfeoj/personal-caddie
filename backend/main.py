@@ -267,6 +267,7 @@ def get_holes(request: Request, course_id: str):
             "distance": h.distance_to_pin_yards,
             "elevation_change": h.elevation_change_feet or 0,
             "fairway_type": h.fairway_type.value if hasattr(h.fairway_type, 'value') else h.fairway_type,
+            "hole_shape": h.hole_shape.value if h.hole_shape and hasattr(h.hole_shape, 'value') else (h.hole_shape or "straight"),
             "green_shape": h.green_shape.value if h.green_shape and hasattr(h.green_shape, 'value') else (h.green_shape or "medium"),
             "hazards": [
                 {
