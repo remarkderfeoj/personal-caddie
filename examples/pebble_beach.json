@@ -1,0 +1,592 @@
+{
+  "course_id": "pebble_beach",
+  "course_name": "Pebble Beach Golf Links",
+  "course_elevation_feet": 50,
+  "holes": [
+    {
+      "hole_id": "pebble_1",
+      "hole_number": 1,
+      "par": 4,
+      "handicap_index": 11,
+      "distance_to_pin_yards": 377,
+      "shot_bearing_degrees": 90,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "out_of_bounds",
+          "location": "left",
+          "distance_from_tee_yards": 0,
+          "severity": "out_of_bounds",
+          "description": "OB along coastal cliffs left"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 300,
+          "severity": "bunker",
+          "description": "Right fairway bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Opening hole along coast. Ocean left, favor right. Wind can be strong",
+      "tee_lat": 36.5705,
+      "tee_lng": -121.9480,
+      "green_lat": 36.5705,
+      "green_lng": -121.9445
+    },
+    {
+      "hole_id": "pebble_2",
+      "hole_number": 2,
+      "par": 5,
+      "handicap_index": 13,
+      "distance_to_pin_yards": 511,
+      "shot_bearing_degrees": 45,
+      "elevation_change_feet": 20,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 280,
+          "severity": "bunker",
+          "description": "Left fairway bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 490,
+          "severity": "bunker",
+          "description": "Greenside bunkers"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Uphill par 5. Reachable but well-bunkered green",
+      "tee_lat": 36.5703,
+      "tee_lng": -121.9442,
+      "green_lat": 36.5730,
+      "green_lng": -121.9415
+    },
+    {
+      "hole_id": "pebble_3",
+      "hole_number": 3,
+      "par": 4,
+      "handicap_index": 7,
+      "distance_to_pin_yards": 390,
+      "shot_bearing_degrees": 0,
+      "elevation_change_feet": -10,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 250,
+          "severity": "bunker",
+          "description": "Left fairway bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 375,
+          "severity": "bunker",
+          "description": "Right greenside bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Slight downhill. Strategic bunker placement requires precision",
+      "tee_lat": 36.5733,
+      "tee_lng": -121.9413,
+      "green_lat": 36.5760,
+      "green_lng": -121.9415
+    },
+    {
+      "hole_id": "pebble_4",
+      "hole_number": 4,
+      "par": 4,
+      "handicap_index": 9,
+      "distance_to_pin_yards": 326,
+      "shot_bearing_degrees": 320,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 240,
+          "severity": "bunker",
+          "description": "Left fairway bunkers"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 315,
+          "severity": "bunker",
+          "description": "Right greenside bunker"
+        }
+      ],
+      "green_shape": "narrow",
+      "notes": "Short par 4 with narrow green. Accuracy over power",
+      "tee_lat": 36.5763,
+      "tee_lng": -121.9418,
+      "green_lat": 36.5780,
+      "green_lng": -121.9445
+    },
+    {
+      "hole_id": "pebble_5",
+      "hole_number": 5,
+      "par": 3,
+      "handicap_index": 17,
+      "distance_to_pin_yards": 192,
+      "shot_bearing_degrees": 270,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 188,
+          "severity": "bunker",
+          "description": "Left bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 190,
+          "severity": "bunker",
+          "description": "Right bunker"
+        }
+      ],
+      "green_shape": "small",
+      "notes": "Tiny green guarded by bunkers. Requires precise iron play",
+      "tee_lat": 36.5782,
+      "tee_lng": -121.9448,
+      "green_lat": 36.5780,
+      "green_lng": -121.9470
+    },
+    {
+      "hole_id": "pebble_6",
+      "hole_number": 6,
+      "par": 5,
+      "handicap_index": 3,
+      "distance_to_pin_yards": 506,
+      "shot_bearing_degrees": 225,
+      "elevation_change_feet": 30,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 300,
+          "severity": "water",
+          "description": "Ocean left entire way"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 490,
+          "severity": "bunker",
+          "description": "Right greenside bunkers"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Dramatic uphill along cliffs. Ocean left entire way. Risk/reward second shot",
+      "tee_lat": 36.5778,
+      "tee_lng": -121.9473,
+      "green_lat": 36.5752,
+      "green_lng": -121.9492
+    },
+    {
+      "hole_id": "pebble_7",
+      "hole_number": 7,
+      "par": 3,
+      "handicap_index": 15,
+      "distance_to_pin_yards": 106,
+      "shot_bearing_degrees": 180,
+      "elevation_change_feet": -20,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 0,
+          "severity": "water",
+          "description": "Ocean left of green"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 105,
+          "severity": "bunker",
+          "description": "Right greenside bunker"
+        }
+      ],
+      "green_shape": "narrow",
+      "notes": "Iconic short par 3. Tiny green with ocean left. Wind makes it play tough despite short yardage",
+      "tee_lat": 36.5750,
+      "tee_lng": -121.9495,
+      "green_lat": 36.5742,
+      "green_lng": -121.9495
+    },
+    {
+      "hole_id": "pebble_8",
+      "hole_number": 8,
+      "par": 4,
+      "handicap_index": 5,
+      "distance_to_pin_yards": 427,
+      "shot_bearing_degrees": 90,
+      "elevation_change_feet": 80,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 280,
+          "severity": "water",
+          "description": "Ocean left"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 410,
+          "severity": "bunker",
+          "description": "Right greenside bunker"
+        }
+      ],
+      "green_shape": "elevated",
+      "notes": "Dramatic cliffside hole. Second shot plays dramatically uphill over chasm to green",
+      "tee_lat": 36.5740,
+      "tee_lng": -121.9498,
+      "green_lat": 36.5743,
+      "green_lng": -121.9462
+    },
+    {
+      "hole_id": "pebble_9",
+      "hole_number": 9,
+      "par": 4,
+      "handicap_index": 1,
+      "distance_to_pin_yards": 481,
+      "shot_bearing_degrees": 30,
+      "elevation_change_feet": -40,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 300,
+          "severity": "water",
+          "description": "Ocean left from tee to green"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 465,
+          "severity": "bunker",
+          "description": "Right greenside bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Longest and hardest hole. Ocean entire left side. Downhill but plays long",
+      "tee_lat": 36.5745,
+      "tee_lng": -121.9458,
+      "green_lat": 36.5768,
+      "green_lng": -121.9435
+    },
+    {
+      "hole_id": "pebble_10",
+      "hole_number": 10,
+      "par": 4,
+      "handicap_index": 2,
+      "distance_to_pin_yards": 446,
+      "shot_bearing_degrees": 180,
+      "elevation_change_feet": -30,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 280,
+          "severity": "water",
+          "description": "Ocean left"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 430,
+          "severity": "bunker",
+          "description": "Right greenside bunkers"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Long downhill par 4 along ocean. Spectacular views",
+      "tee_lat": 36.5772,
+      "tee_lng": -121.9433,
+      "green_lat": 36.5743,
+      "green_lng": -121.9438
+    },
+    {
+      "hole_id": "pebble_11",
+      "hole_number": 11,
+      "par": 4,
+      "handicap_index": 12,
+      "distance_to_pin_yards": 373,
+      "shot_bearing_degrees": 90,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 240,
+          "severity": "bunker",
+          "description": "Left fairway bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 360,
+          "severity": "bunker",
+          "description": "Right greenside bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Inland hole. Strategic placement required for good approach angle",
+      "tee_lat": 36.5740,
+      "tee_lng": -121.9440,
+      "green_lat": 36.5742,
+      "green_lng": -121.9408
+    },
+    {
+      "hole_id": "pebble_12",
+      "hole_number": 12,
+      "par": 3,
+      "handicap_index": 16,
+      "distance_to_pin_yards": 201,
+      "shot_bearing_degrees": 45,
+      "elevation_change_feet": 10,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "short",
+          "distance_from_tee_yards": 195,
+          "severity": "bunker",
+          "description": "Front bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 200,
+          "severity": "bunker",
+          "description": "Left bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Uphill par 3. Deceptive distance. Club more than yardage suggests",
+      "tee_lat": 36.5740,
+      "tee_lng": -121.9405,
+      "green_lat": 36.5755,
+      "green_lng": -121.9392
+    },
+    {
+      "hole_id": "pebble_13",
+      "hole_number": 13,
+      "par": 4,
+      "handicap_index": 8,
+      "distance_to_pin_yards": 403,
+      "shot_bearing_degrees": 330,
+      "elevation_change_feet": -20,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 270,
+          "severity": "bunker",
+          "description": "Left fairway bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 390,
+          "severity": "bunker",
+          "description": "Right greenside bunkers"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Gentle downhill dogleg. Strategic tee shot for best approach angle",
+      "tee_lat": 36.5758,
+      "tee_lng": -121.9388,
+      "green_lat": 36.5778,
+      "green_lng": -121.9408
+    },
+    {
+      "hole_id": "pebble_14",
+      "hole_number": 14,
+      "par": 5,
+      "handicap_index": 4,
+      "distance_to_pin_yards": 572,
+      "shot_bearing_degrees": 270,
+      "elevation_change_feet": -10,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 350,
+          "severity": "water",
+          "description": "Ocean all along left"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 550,
+          "severity": "bunker",
+          "description": "Right greenside bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Long par 5 along cliffs. Ocean left rewards risk-takers going for green in two",
+      "tee_lat": 36.5780,
+      "tee_lng": -121.9410,
+      "green_lat": 36.5778,
+      "green_lng": -121.9460
+    },
+    {
+      "hole_id": "pebble_15",
+      "hole_number": 15,
+      "par": 4,
+      "handicap_index": 10,
+      "distance_to_pin_yards": 396,
+      "shot_bearing_degrees": 200,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 250,
+          "severity": "bunker",
+          "description": "Left fairway bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 380,
+          "severity": "bunker",
+          "description": "Right greenside bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Straightaway par 4. Good birdie opportunity before difficult finish",
+      "tee_lat": 36.5775,
+      "tee_lng": -121.9463,
+      "green_lat": 36.5748,
+      "green_lng": -121.9468
+    },
+    {
+      "hole_id": "pebble_16",
+      "hole_number": 16,
+      "par": 4,
+      "handicap_index": 6,
+      "distance_to_pin_yards": 401,
+      "shot_bearing_degrees": 90,
+      "elevation_change_feet": 10,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 280,
+          "severity": "water",
+          "description": "Ocean left"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 385,
+          "severity": "bunker",
+          "description": "Right greenside bunkers"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Ocean returns on left. Uphill to elevated green. Start of dramatic finish",
+      "tee_lat": 36.5745,
+      "tee_lng": -121.9470,
+      "green_lat": 36.5748,
+      "green_lng": -121.9435
+    },
+    {
+      "hole_id": "pebble_17",
+      "hole_number": 17,
+      "par": 3,
+      "handicap_index": 18,
+      "distance_to_pin_yards": 177,
+      "shot_bearing_degrees": 135,
+      "elevation_change_feet": -30,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 0,
+          "severity": "water",
+          "description": "Ocean wraps around left and rear"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 175,
+          "severity": "bunker",
+          "description": "Right bunker"
+        }
+      ],
+      "green_shape": "narrow",
+      "notes": "One of golf's most dramatic par 3s. Tiny green with ocean wrapping left and behind. Wind crucial",
+      "tee_lat": 36.5750,
+      "tee_lng": -121.9432,
+      "green_lat": 36.5740,
+      "green_lng": -121.9420
+    },
+    {
+      "hole_id": "pebble_18",
+      "hole_number": 18,
+      "par": 5,
+      "handicap_index": 14,
+      "distance_to_pin_yards": 543,
+      "shot_bearing_degrees": 315,
+      "elevation_change_feet": 20,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 350,
+          "severity": "water",
+          "description": "Ocean entire left side from tee to green"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 480,
+          "severity": "bunker",
+          "description": "Left fairway bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 530,
+          "severity": "bunker",
+          "description": "Right greenside bunker"
+        }
+      ],
+      "green_shape": "large",
+      "notes": "Iconic finishing hole. Ocean left entire way. One of most famous closing holes in golf. Championships won/lost here",
+      "tee_lat": 36.5738,
+      "tee_lng": -121.9418,
+      "green_lat": 36.5705,
+      "green_lng": -121.9442
+    }
+  ],
+  "center_lat": 36.5750,
+  "center_lng": -121.9445
+}

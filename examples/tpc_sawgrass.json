@@ -7,7 +7,7 @@
       "hole_id": "sawgrass_1",
       "hole_number": 1,
       "par": 4,
-      "handicap_index": 5,
+      "handicap_index": 11,
       "distance_to_pin_yards": 423,
       "shot_bearing_degrees": 180,
       "elevation_change_feet": 0,
@@ -18,47 +18,464 @@
           "location": "left",
           "distance_from_tee_yards": 280,
           "severity": "water",
-          "description": "Lake left"
+          "description": "Lake left of fairway and green"
         }
       ],
       "green_shape": "medium",
-      "notes": "Strong opening hole with water left"
+      "notes": "Strong opening hole with water left. Sets the tone for the championship test ahead",
+      "tee_lat": 30.1995,
+      "tee_lng": -81.3940,
+      "green_lat": 30.1962,
+      "green_lng": -81.3940
+    },
+    {
+      "hole_id": "sawgrass_2",
+      "hole_number": 2,
+      "par": 5,
+      "handicap_index": 15,
+      "distance_to_pin_yards": 532,
+      "shot_bearing_degrees": 200,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 450,
+          "severity": "water",
+          "description": "Water left of green"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 510,
+          "severity": "bunker",
+          "description": "Right greenside bunkers"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Reachable par 5. Risk/reward second shot over water to narrow green",
+      "tee_lat": 30.1958,
+      "tee_lng": -81.3938,
+      "green_lat": 30.1930,
+      "green_lng": -81.3952
+    },
+    {
+      "hole_id": "sawgrass_3",
+      "hole_number": 3,
+      "par": 3,
+      "handicap_index": 17,
+      "distance_to_pin_yards": 177,
+      "shot_bearing_degrees": 220,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 175,
+          "severity": "bunker",
+          "description": "Left greenside bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 175,
+          "severity": "bunker",
+          "description": "Right greenside bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Par 3 over water. Requires precise iron play to elevated green",
+      "tee_lat": 30.1928,
+      "tee_lng": -81.3955,
+      "green_lat": 30.1920,
+      "green_lng": -81.3970
+    },
+    {
+      "hole_id": "sawgrass_4",
+      "hole_number": 4,
+      "par": 4,
+      "handicap_index": 9,
+      "distance_to_pin_yards": 384,
+      "shot_bearing_degrees": 270,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 260,
+          "severity": "bunker",
+          "description": "Left fairway bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 375,
+          "severity": "bunker",
+          "description": "Right greenside bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Dogleg left. Positioning off tee is critical for approach angle",
+      "tee_lat": 30.1922,
+      "tee_lng": -81.3975,
+      "green_lat": 30.1925,
+      "green_lng": -81.4010
+    },
+    {
+      "hole_id": "sawgrass_5",
+      "hole_number": 5,
+      "par": 4,
+      "handicap_index": 3,
+      "distance_to_pin_yards": 471,
+      "shot_bearing_degrees": 300,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 280,
+          "severity": "bunker",
+          "description": "Left fairway bunkers"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 460,
+          "severity": "bunker",
+          "description": "Right greenside bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Long par 4. One of toughest holes on course. Demands length and accuracy",
+      "tee_lat": 30.1928,
+      "tee_lng": -81.4015,
+      "green_lat": 30.1950,
+      "green_lng": -81.4035
+    },
+    {
+      "hole_id": "sawgrass_6",
+      "hole_number": 6,
+      "par": 4,
+      "handicap_index": 13,
+      "distance_to_pin_yards": 393,
+      "shot_bearing_degrees": 330,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 270,
+          "severity": "bunker",
+          "description": "Left fairway bunkers"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Strategic par 4. Bunkers dictate tee shot placement",
+      "tee_lat": 30.1955,
+      "tee_lng": -81.4038,
+      "green_lat": 30.1978,
+      "green_lng": -81.4055
+    },
+    {
+      "hole_id": "sawgrass_7",
+      "hole_number": 7,
+      "par": 4,
+      "handicap_index": 1,
+      "distance_to_pin_yards": 442,
+      "shot_bearing_degrees": 0,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 280,
+          "severity": "bunker",
+          "description": "Left fairway bunkers"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 430,
+          "severity": "bunker",
+          "description": "Right greenside bunkers"
+        }
+      ],
+      "green_shape": "narrow",
+      "notes": "Hardest hole on course. Long and demanding with well-protected green",
+      "tee_lat": 30.1982,
+      "tee_lng": -81.4058,
+      "green_lat": 30.2020,
+      "green_lng": -81.4058
     },
     {
       "hole_id": "sawgrass_8",
       "hole_number": 8,
       "par": 3,
-      "handicap_index": 15,
-      "distance_to_pin_yards": 219,
-      "shot_bearing_degrees": 90,
+      "handicap_index": 7,
+      "distance_to_pin_yards": 237,
+      "shot_bearing_degrees": 45,
       "elevation_change_feet": 0,
       "fairway_type": "fairway",
       "hazards": [
         {
           "hazard_type": "water",
           "location": "short",
-          "distance_from_tee_yards": 200,
+          "distance_from_tee_yards": 220,
           "severity": "water",
           "description": "Pond short of green"
         },
         {
           "hazard_type": "bunker",
           "location": "right",
-          "distance_from_tee_yards": 0,
+          "distance_from_tee_yards": 235,
           "severity": "bunker",
           "description": "Right bunker"
         }
       ],
       "green_shape": "medium",
-      "notes": "Long par 3 over water"
+      "notes": "Long par 3 over water. Longest par 3 on the course",
+      "tee_lat": 30.2022,
+      "tee_lng": -81.4060,
+      "green_lat": 30.2038,
+      "green_lng": -81.4042
+    },
+    {
+      "hole_id": "sawgrass_9",
+      "hole_number": 9,
+      "par": 5,
+      "handicap_index": 5,
+      "distance_to_pin_yards": 583,
+      "shot_bearing_degrees": 90,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 300,
+          "severity": "water",
+          "description": "Water along left side"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 560,
+          "severity": "bunker",
+          "description": "Right greenside bunker"
+        }
+      ],
+      "green_shape": "large",
+      "notes": "Long par 5 with water left. Risk/reward decision on second shot",
+      "tee_lat": 30.2040,
+      "tee_lng": -81.4038,
+      "green_lat": 30.2045,
+      "green_lng": -81.3985
+    },
+    {
+      "hole_id": "sawgrass_10",
+      "hole_number": 10,
+      "par": 4,
+      "handicap_index": 12,
+      "distance_to_pin_yards": 424,
+      "shot_bearing_degrees": 120,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 270,
+          "severity": "bunker",
+          "description": "Left fairway bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 410,
+          "severity": "bunker",
+          "description": "Right greenside bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Back nine opener. Solid par 4 with strategic bunker placement",
+      "tee_lat": 30.2048,
+      "tee_lng": -81.3980,
+      "green_lat": 30.2022,
+      "green_lng": -81.3955
+    },
+    {
+      "hole_id": "sawgrass_11",
+      "hole_number": 11,
+      "par": 5,
+      "handicap_index": 8,
+      "distance_to_pin_yards": 558,
+      "shot_bearing_degrees": 180,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 350,
+          "severity": "water",
+          "description": "Water left of landing area and green"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 530,
+          "severity": "bunker",
+          "description": "Right greenside bunkers"
+        }
+      ],
+      "green_shape": "large",
+      "notes": "Strategic par 5 with water left. Reachable in two for long hitters",
+      "tee_lat": 30.2018,
+      "tee_lng": -81.3952,
+      "green_lat": 30.1975,
+      "green_lng": -81.3950
+    },
+    {
+      "hole_id": "sawgrass_12",
+      "hole_number": 12,
+      "par": 4,
+      "handicap_index": 16,
+      "distance_to_pin_yards": 358,
+      "shot_bearing_degrees": 220,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 240,
+          "severity": "bunker",
+          "description": "Left fairway bunker"
+        },
+        {
+          "hazard_type": "water",
+          "location": "right",
+          "distance_from_tee_yards": 350,
+          "severity": "water",
+          "description": "Water right of green"
+        }
+      ],
+      "green_shape": "narrow",
+      "notes": "Short par 4 with water right. Precision more important than power",
+      "tee_lat": 30.1972,
+      "tee_lng": -81.3948,
+      "green_lat": 30.1950,
+      "green_lng": -81.3965
+    },
+    {
+      "hole_id": "sawgrass_13",
+      "hole_number": 13,
+      "par": 3,
+      "handicap_index": 18,
+      "distance_to_pin_yards": 181,
+      "shot_bearing_degrees": 240,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 180,
+          "severity": "bunker",
+          "description": "Left bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 180,
+          "severity": "bunker",
+          "description": "Right bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Strategic par 3. Bunkers guard both sides of green",
+      "tee_lat": 30.1948,
+      "tee_lng": -81.3968,
+      "green_lat": 30.1938,
+      "green_lng": -81.3983
+    },
+    {
+      "hole_id": "sawgrass_14",
+      "hole_number": 14,
+      "par": 4,
+      "handicap_index": 4,
+      "distance_to_pin_yards": 481,
+      "shot_bearing_degrees": 270,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 280,
+          "severity": "bunker",
+          "description": "Left fairway bunkers"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 470,
+          "severity": "bunker",
+          "description": "Right greenside bunkers"
+        }
+      ],
+      "green_shape": "narrow",
+      "notes": "Brutally long par 4. Tests both length and accuracy",
+      "tee_lat": 30.1940,
+      "tee_lng": -81.3988,
+      "green_lat": 30.1945,
+      "green_lng": -81.4030
+    },
+    {
+      "hole_id": "sawgrass_15",
+      "hole_number": 15,
+      "par": 4,
+      "handicap_index": 6,
+      "distance_to_pin_yards": 449,
+      "shot_bearing_degrees": 300,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "water",
+          "location": "left",
+          "distance_from_tee_yards": 270,
+          "severity": "water",
+          "description": "Water left of landing area"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 440,
+          "severity": "bunker",
+          "description": "Right greenside bunker"
+        }
+      ],
+      "green_shape": "medium",
+      "notes": "Long par 4 with water left. Sets up critical finish",
+      "tee_lat": 30.1948,
+      "tee_lng": -81.4035,
+      "green_lat": 30.1970,
+      "green_lng": -81.4055
     },
     {
       "hole_id": "sawgrass_16",
       "hole_number": 16,
       "par": 5,
-      "handicap_index": 9,
+      "handicap_index": 10,
       "distance_to_pin_yards": 523,
-      "shot_bearing_degrees": 0,
+      "shot_bearing_degrees": 330,
       "elevation_change_feet": 0,
       "fairway_type": "fairway",
       "hazards": [
@@ -72,21 +489,25 @@
         {
           "hazard_type": "bunker",
           "location": "right",
-          "distance_from_tee_yards": 480,
+          "distance_from_tee_yards": 500,
           "severity": "bunker",
-          "description": "Greenside bunker"
+          "description": "Right greenside bunker"
         }
       ],
       "green_shape": "medium",
-      "notes": "Scoring opportunity before the finish"
+      "notes": "Scoring opportunity before Island Hole. Risk/reward decision on second shot",
+      "tee_lat": 30.1975,
+      "tee_lng": -81.4058,
+      "green_lat": 30.2005,
+      "green_lng": -81.4075
     },
     {
       "hole_id": "sawgrass_17",
       "hole_number": 17,
       "par": 3,
-      "handicap_index": 17,
+      "handicap_index": 14,
       "distance_to_pin_yards": 137,
-      "shot_bearing_degrees": 180,
+      "shot_bearing_degrees": 0,
       "elevation_change_feet": 0,
       "fairway_type": "fairway",
       "hazards": [
@@ -95,37 +516,44 @@
           "location": "short",
           "distance_from_tee_yards": 0,
           "severity": "water",
-          "description": "Water surrounding island green"
+          "description": "Water completely surrounds island green"
         },
         {
           "hazard_type": "water",
           "location": "left",
           "distance_from_tee_yards": 0,
           "severity": "water",
-          "description": "Water surrounding island green"
+          "description": "Water completely surrounds island green"
         },
         {
           "hazard_type": "water",
           "location": "right",
           "distance_from_tee_yards": 0,
           "severity": "water",
-          "description": "Water surrounding island green"
+          "description": "Water completely surrounds island green"
+        },
+        {
+          "hazard_type": "water",
+          "location": "long",
+          "distance_from_tee_yards": 0,
+          "severity": "water",
+          "description": "Water completely surrounds island green"
         }
       ],
       "green_shape": "small",
-      "notes": "The Island Hole - most famous par 3 in golf",
-      "tee_lat": 30.196,
-      "tee_lng": -81.395,
-      "green_lat": 30.1955,
-      "green_lng": -81.394
+      "notes": "The Island Hole - Most famous par 3 in golf. Water completely surrounds tiny green. High drama",
+      "tee_lat": 30.2008,
+      "tee_lng": -81.4078,
+      "green_lat": 30.2020,
+      "green_lng": -81.4078
     },
     {
       "hole_id": "sawgrass_18",
       "hole_number": 18,
       "par": 4,
-      "handicap_index": 1,
+      "handicap_index": 2,
       "distance_to_pin_yards": 462,
-      "shot_bearing_degrees": 270,
+      "shot_bearing_degrees": 90,
       "elevation_change_feet": 0,
       "fairway_type": "fairway",
       "hazards": [
@@ -135,14 +563,21 @@
           "distance_from_tee_yards": 280,
           "severity": "water",
           "description": "Lake along entire left side"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 450,
+          "severity": "bunker",
+          "description": "Right greenside bunker"
         }
       ],
       "green_shape": "medium",
-      "notes": "Dramatic finishing hole with water left",
-      "tee_lat": 30.1958,
-      "tee_lng": -81.3935,
-      "green_lat": 30.1975,
-      "green_lng": -81.3945
+      "notes": "Dramatic finishing hole. Water left entire way. Championships won and lost here",
+      "tee_lat": 30.2022,
+      "tee_lng": -81.4080,
+      "green_lat": 30.2025,
+      "green_lng": -81.4038
     }
   ],
   "center_lat": 30.1975,

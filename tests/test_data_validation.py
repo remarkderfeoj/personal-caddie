@@ -19,7 +19,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
 
-EXAMPLES_DIR = Path(__file__).parent.parent / "examples"
+# Handle both pytest execution and direct script execution
+if Path(__file__).parent.parent.name == "personal-caddie":
+    EXAMPLES_DIR = Path(__file__).parent.parent / "examples"
+else:
+    EXAMPLES_DIR = Path(__file__).parent / "examples"
+
+# Fallback: if examples dir doesn't exist, try from current working directory
+if not EXAMPLES_DIR.exists():
+    EXAMPLES_DIR = Path.cwd() / "examples"
 
 # Valid ranges for hole distances by par
 DISTANCE_RANGES = {
@@ -31,18 +39,19 @@ DISTANCE_RANGES = {
 
 def load_all_course_files():
     """Load all course JSON files from examples directory"""
-    course_files = glob.glob(str(EXAMPLES_DIR / "*.json"))
-    # Filter out non-course files
-    course_files = [f for f in course_files if not any(x in f for x in [
-        "sample_player", "baseline", "weather", "shot", "caddie"
+    pattern = str(EXAMPLES_DIR / "*.json")
+    course_files = glob.glob(pattern)
+    # Filter out non-course files (check filename only, not full path)
+    filtered = [f for f in course_files if not any(x in Path(f).name for x in [
+        "sample_player", "baseline", "weather", "shot"
     ])]
-    return course_files
+    return filtered
 
 
 def test_all_courses_load():
     """Test that all course JSON files can be loaded"""
     course_files = load_all_course_files()
-    assert len(course_files) > 0, "No course files found"
+    assert len(course_files) > 0, f"No course files found in {EXAMPLES_DIR.absolute()} (exists: {EXAMPLES_DIR.exists()})"
     
     failed = []
     for course_file in course_files:

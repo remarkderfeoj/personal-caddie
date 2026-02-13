@@ -8,7 +8,7 @@
       "hole_number": 1,
       "par": 4,
       "handicap_index": 12,
-      "distance_to_pin_yards": 376,
+      "distance_to_pin_yards": 375,
       "shot_bearing_degrees": 90,
       "elevation_change_feet": 0,
       "fairway_type": "fairway",
@@ -18,15 +18,467 @@
           "location": "right",
           "distance_from_tee_yards": 250,
           "severity": "bunker",
-          "description": "Swilcan Burn bunker"
+          "description": "Swilcan Burn crosses fairway"
         }
       ],
       "green_shape": "wide",
-      "notes": "Iconic opener with Swilcan Burn and town backdrop",
+      "notes": "Burn - Wide open opener. Swilcan Burn crosses fairway. Double green shared with 18th",
       "tee_lat": 56.3428,
-      "tee_lng": -2.802,
-      "green_lat": 56.344,
+      "tee_lng": -2.8020,
+      "green_lat": 56.3438,
       "green_lng": -2.7975
+    },
+    {
+      "hole_id": "st_andrews_2",
+      "hole_number": 2,
+      "par": 4,
+      "handicap_index": 8,
+      "distance_to_pin_yards": 452,
+      "shot_bearing_degrees": 80,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 250,
+          "severity": "bunker",
+          "description": "Cheape's Bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 440,
+          "severity": "bunker",
+          "description": "Greenside bunkers"
+        }
+      ],
+      "green_shape": "large",
+      "notes": "Dyke - Cheape's Bunker threatens drive. Shares green with 16th. Uphill approach",
+      "tee_lat": 56.3440,
+      "tee_lng": -2.7970,
+      "green_lat": 56.3452,
+      "green_lng": -2.7930
+    },
+    {
+      "hole_id": "st_andrews_3",
+      "hole_number": 3,
+      "par": 4,
+      "handicap_index": 10,
+      "distance_to_pin_yards": 398,
+      "shot_bearing_degrees": 70,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 260,
+          "severity": "bunker",
+          "description": "Cartgate Bunker"
+        }
+      ],
+      "green_shape": "large",
+      "notes": "Cartgate (Out) - Shares green with 15th. Cartgate Bunker on left",
+      "tee_lat": 56.3454,
+      "tee_lng": -2.7925,
+      "green_lat": 56.3470,
+      "green_lng": -2.7888
+    },
+    {
+      "hole_id": "st_andrews_4",
+      "hole_number": 4,
+      "par": 4,
+      "handicap_index": 4,
+      "distance_to_pin_yards": 480,
+      "shot_bearing_degrees": 60,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 280,
+          "severity": "bunker",
+          "description": "Cottage Bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 470,
+          "severity": "bunker",
+          "description": "Greenside bunkers"
+        }
+      ],
+      "green_shape": "large",
+      "notes": "Ginger Beer - Long par 4. Cottage Bunker left. Shares green with 14th",
+      "tee_lat": 56.3472,
+      "tee_lng": -2.7883,
+      "green_lat": 56.3495,
+      "green_lng": -2.7845
+    },
+    {
+      "hole_id": "st_andrews_5",
+      "hole_number": 5,
+      "par": 5,
+      "handicap_index": 14,
+      "distance_to_pin_yards": 570,
+      "shot_bearing_degrees": 50,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 300,
+          "severity": "bunker",
+          "description": "Spectacles Bunkers (pair)"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 555,
+          "severity": "bunker",
+          "description": "Greenside bunkers"
+        }
+      ],
+      "green_shape": "large",
+      "notes": "Hole O'Cross (Out) - Famous Spectacles Bunkers. Shares green with 13th",
+      "tee_lat": 56.3498,
+      "tee_lng": -2.7840,
+      "green_lat": 56.3530,
+      "green_lng": -2.7795
+    },
+    {
+      "hole_id": "st_andrews_6",
+      "hole_number": 6,
+      "par": 4,
+      "handicap_index": 6,
+      "distance_to_pin_yards": 416,
+      "shot_bearing_degrees": 40,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 270,
+          "severity": "bunker",
+          "description": "Coffin Bunker complex"
+        }
+      ],
+      "green_shape": "large",
+      "notes": "Heathery (Out) - Famous Coffin Bunkers right. Shares green with 12th",
+      "tee_lat": 56.3532,
+      "tee_lng": -2.7790,
+      "green_lat": 56.3558,
+      "green_lng": -2.7755
+    },
+    {
+      "hole_id": "st_andrews_7",
+      "hole_number": 7,
+      "par": 4,
+      "handicap_index": 16,
+      "distance_to_pin_yards": 371,
+      "shot_bearing_degrees": 30,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 250,
+          "severity": "bunker",
+          "description": "Shell Bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 360,
+          "severity": "bunker",
+          "description": "Greenside bunkers"
+        }
+      ],
+      "green_shape": "large",
+      "notes": "High (Out) - Shell Bunker threatens drive. Shares green with 11th",
+      "tee_lat": 56.3560,
+      "tee_lng": -2.7750,
+      "green_lat": 56.3585,
+      "green_lng": -2.7730
+    },
+    {
+      "hole_id": "st_andrews_8",
+      "hole_number": 8,
+      "par": 3,
+      "handicap_index": 18,
+      "distance_to_pin_yards": 187,
+      "shot_bearing_degrees": 20,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "short",
+          "distance_from_tee_yards": 175,
+          "severity": "bunker",
+          "description": "Short Hole Bunker"
+        }
+      ],
+      "green_shape": "narrow",
+      "notes": "Short - Only single green on course. Narrow target with bunker short",
+      "tee_lat": 56.3588,
+      "tee_lng": -2.7728,
+      "green_lat": 56.3605,
+      "green_lng": -2.7718
+    },
+    {
+      "hole_id": "st_andrews_9",
+      "hole_number": 9,
+      "par": 4,
+      "handicap_index": 15,
+      "distance_to_pin_yards": 352,
+      "shot_bearing_degrees": 350,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 240,
+          "severity": "bunker",
+          "description": "Kruger Bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 340,
+          "severity": "bunker",
+          "description": "End Hole Bunker"
+        }
+      ],
+      "green_shape": "large",
+      "notes": "End - Turn for home. Shares green with 9th. Kruger and End Hole bunkers",
+      "tee_lat": 56.3608,
+      "tee_lng": -2.7715,
+      "green_lat": 56.3625,
+      "green_lng": -2.7730
+    },
+    {
+      "hole_id": "st_andrews_10",
+      "hole_number": 10,
+      "par": 4,
+      "handicap_index": 13,
+      "distance_to_pin_yards": 386,
+      "shot_bearing_degrees": 320,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 260,
+          "severity": "bunker",
+          "description": "Bobby Jones Bunker"
+        }
+      ],
+      "green_shape": "large",
+      "notes": "Bobby Jones - Named for the great champion. Shares green with 8th",
+      "tee_lat": 56.3628,
+      "tee_lng": -2.7733,
+      "green_lat": 56.3605,
+      "green_lng": -2.7755
+    },
+    {
+      "hole_id": "st_andrews_11",
+      "hole_number": 11,
+      "par": 3,
+      "handicap_index": 17,
+      "distance_to_pin_yards": 174,
+      "shot_bearing_degrees": 290,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 170,
+          "severity": "bunker",
+          "description": "Strath Bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 172,
+          "severity": "bunker",
+          "description": "Hill Bunker"
+        }
+      ],
+      "green_shape": "large",
+      "notes": "High (In) - Eden Course visible. Shares green with 7th. Strath and Hill bunkers",
+      "tee_lat": 56.3603,
+      "tee_lng": -2.7758,
+      "green_lat": 56.3590,
+      "green_lng": -2.7775
+    },
+    {
+      "hole_id": "st_andrews_12",
+      "hole_number": 12,
+      "par": 4,
+      "handicap_index": 11,
+      "distance_to_pin_yards": 351,
+      "shot_bearing_degrees": 260,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 240,
+          "severity": "bunker",
+          "description": "Coffin Bunker complex"
+        }
+      ],
+      "green_shape": "large",
+      "notes": "Heathery (In) - Shares green with 6th. Coffin Bunkers guard left",
+      "tee_lat": 56.3588,
+      "tee_lng": -2.7778,
+      "green_lat": 56.3565,
+      "green_lng": -2.7805
+    },
+    {
+      "hole_id": "st_andrews_13",
+      "hole_number": 13,
+      "par": 4,
+      "handicap_index": 3,
+      "distance_to_pin_yards": 465,
+      "shot_bearing_degrees": 240,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 280,
+          "severity": "bunker",
+          "description": "Cat's Trap Bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 455,
+          "severity": "bunker",
+          "description": "Coffin Bunker"
+        }
+      ],
+      "green_shape": "large",
+      "notes": "Hole O'Cross (In) - Long difficult par 4. Shares green with 5th. Cat's Trap left",
+      "tee_lat": 56.3563,
+      "tee_lng": -2.7808,
+      "green_lat": 56.3535,
+      "green_lng": -2.7840
+    },
+    {
+      "hole_id": "st_andrews_14",
+      "hole_number": 14,
+      "par": 5,
+      "handicap_index": 9,
+      "distance_to_pin_yards": 614,
+      "shot_bearing_degrees": 220,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 300,
+          "severity": "bunker",
+          "description": "Beardies Bunker complex"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 450,
+          "severity": "bunker",
+          "description": "Kitchen Bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 600,
+          "severity": "bunker",
+          "description": "Hell Bunker"
+        }
+      ],
+      "green_shape": "large",
+      "notes": "Long - Longest hole in championship golf. Famous Hell Bunker. Shares green with 4th",
+      "tee_lat": 56.3533,
+      "tee_lng": -2.7843,
+      "green_lat": 56.3495,
+      "green_lng": -2.7895
+    },
+    {
+      "hole_id": "st_andrews_15",
+      "hole_number": 15,
+      "par": 4,
+      "handicap_index": 5,
+      "distance_to_pin_yards": 455,
+      "shot_bearing_degrees": 200,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 270,
+          "severity": "bunker",
+          "description": "Sutherland Bunker"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 440,
+          "severity": "bunker",
+          "description": "Greenside bunkers"
+        }
+      ],
+      "green_shape": "large",
+      "notes": "Cartgate (In) - Long par 4. Shares green with 3rd. Sutherland Bunker threatens",
+      "tee_lat": 56.3493,
+      "tee_lng": -2.7898,
+      "green_lat": 56.3460,
+      "green_lng": -2.7930
+    },
+    {
+      "hole_id": "st_andrews_16",
+      "hole_number": 16,
+      "par": 4,
+      "handicap_index": 7,
+      "distance_to_pin_yards": 418,
+      "shot_bearing_degrees": 180,
+      "elevation_change_feet": 0,
+      "fairway_type": "fairway",
+      "hazards": [
+        {
+          "hazard_type": "bunker",
+          "location": "left",
+          "distance_from_tee_yards": 260,
+          "severity": "bunker",
+          "description": "Principal's Nose Bunker complex"
+        },
+        {
+          "hazard_type": "bunker",
+          "location": "right",
+          "distance_from_tee_yards": 405,
+          "severity": "bunker",
+          "description": "Wig Bunker"
+        }
+      ],
+      "green_shape": "large",
+      "notes": "Corner of the Dyke - Famous Principal's Nose Bunkers. Shares green with 2nd",
+      "tee_lat": 56.3458,
+      "tee_lng": -2.7933,
+      "green_lat": 56.3428,
+      "green_lng": -2.7940
     },
     {
       "hole_id": "st_andrews_17",
@@ -41,51 +493,51 @@
         {
           "hazard_type": "bunker",
           "location": "left",
-          "distance_from_tee_yards": 0,
+          "distance_from_tee_yards": 480,
           "severity": "bunker",
-          "description": "Road Hole Bunker"
+          "description": "Road Hole Bunker - deepest on course"
         },
         {
           "hazard_type": "out_of_bounds",
           "location": "right",
-          "distance_from_tee_yards": 380,
+          "distance_from_tee_yards": 400,
           "severity": "out_of_bounds",
-          "description": "Road"
+          "description": "Road and wall behind green"
         }
       ],
       "green_shape": "narrow",
-      "notes": "Famous Road Hole - most difficult par 4 in golf",
-      "tee_lat": 56.344,
-      "tee_lng": -2.797,
-      "green_lat": 56.343,
-      "green_lng": -2.801
+      "notes": "Road - Most famous and difficult par 4 in golf. Road Hole Bunker and wall. No green share",
+      "tee_lat": 56.3425,
+      "tee_lng": -2.7943,
+      "green_lat": 56.3430,
+      "green_lng": -2.7992
     },
     {
       "hole_id": "st_andrews_18",
       "hole_number": 18,
       "par": 4,
       "handicap_index": 10,
-      "distance_to_pin_yards": 356,
+      "distance_to_pin_yards": 365,
       "shot_bearing_degrees": 0,
       "elevation_change_feet": 0,
       "fairway_type": "fairway",
       "hazards": [
         {
           "hazard_type": "bunker",
-          "location": "center",
-          "distance_from_tee_yards": 90,
+          "location": "short",
+          "distance_from_tee_yards": 340,
           "severity": "bunker",
-          "description": "Valley of Sin"
+          "description": "Valley of Sin - massive swale short of green"
         }
       ],
       "green_shape": "wide",
-      "notes": "Home of Golf - Swilcan Bridge and finishing green",
-      "tee_lat": 56.343,
-      "tee_lng": -2.8012,
+      "notes": "Home - Iconic finish. Swilcan Bridge, Valley of Sin. Shares green with 1st. Most famous green in golf",
+      "tee_lat": 56.3433,
+      "tee_lng": -2.7995,
       "green_lat": 56.3428,
-      "green_lng": -2.8025
+      "green_lng": -2.8023
     }
   ],
-  "center_lat": 56.343,
-  "center_lng": -2.802
+  "center_lat": 56.3430,
+  "center_lng": -2.7880
 }
