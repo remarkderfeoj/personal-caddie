@@ -99,10 +99,46 @@ python3 -m pip install pytest httpx pytest-cov
 
 ---
 
-### P1-003: (Reserved for future incorrect behavior bugs)
-**Status:** -  
-**Component:** -  
-**Description:** -
+### P1-003: St Andrews Duplicate Handicap Indices
+**Status:** 🔴 OPEN  
+**Component:** examples/st_andrews.json  
+**Description:** St Andrews Old Course has duplicate handicap index 10 and missing index 2.
+
+**Expected:** All 18 holes have unique handicap indices 1-18  
+**Actual:** Index 10 appears twice, index 2 missing  
+**Impact:** Low - affects handicap calculations for match play
+
+**Fix:** Review St Andrews hole data and correct handicap indices.
+
+---
+
+### P1-004: Augusta National Duplicate Handicap Indices
+**Status:** 🔴 OPEN  
+**Component:** examples/augusta_national.json  
+**Description:** Augusta National has duplicate handicap indices 5 and 13, missing indices 6 and 18.
+
+**Expected:** All 18 holes have unique handicap indices 1-18  
+**Actual:** Indices 5 and 13 duplicated, indices 6 and 18 missing  
+**Impact:** Low - affects handicap calculations
+
+**Fix:** Verify against official Augusta National handicap ratings and correct.
+
+---
+
+### P1-005: Incomplete Course Data (16 Courses)
+**Status:** 🟡 BY DESIGN  
+**Component:** examples/*.json  
+**Description:** 16 courses have only 3-5 holes instead of complete 18-hole layouts.
+
+**Courses affected:** Torrey Pines, Muirfield, Pine Valley, Shinnecock, Oakmont, Winged Foot, Olympic Club, Whistling Straits, Bandon Dunes, Kiawah, Cypress Point, Bethpage Black, Merion, Pinehurst No. 2, Royal Melbourne, Sample Course
+
+**Expected:** All courses have 18 holes  
+**Actual:** Most have 3-5 signature holes only  
+**Impact:** Medium - These courses cannot be used for full-round play
+
+**Notes:** May be intentional for demo purposes (showcasing famous holes). If these are meant to be complete courses, hole data needs to be added.
+
+**Decision needed:** Are these incomplete by design or missing data?
 
 ---
 
