@@ -1223,24 +1223,33 @@ function generateHoleSVG(hole, interactive) {
     const greenRy = isPar3 ? 22 : 25;
     const teeY = fwBottom + 30;
 
-    // Detect hole shape from notes
+    // Detect hole shape from fairway_type field first, then fall back to notes
     const notes = (hole.notes || '').toLowerCase();
+    const fwType = (hole.fairway_type || '').toLowerCase();
     let holeShape = 'straight';
     
     if (isPar3) {
         holeShape = 'straight'; // Par 3s are always straight
+    } else if (fwType === 'dogleg_left') {
+        holeShape = 'dogleg_left';
+    } else if (fwType === 'dogleg_right') {
+        holeShape = 'dogleg_right';
+    } else if (fwType === 'slight_dogleg_left') {
+        holeShape = 'slight_dogleg_left';
+    } else if (fwType === 'slight_dogleg_right') {
+        holeShape = 'slight_dogleg_right';
     } else if (notes.includes('sharp left') || notes.includes('severe dogleg left')) {
         holeShape = 'dogleg_left';
     } else if (notes.includes('sharp right') || notes.includes('severe dogleg right')) {
         holeShape = 'dogleg_right';
-    } else if (notes.includes('dogleg left')) {
-        holeShape = 'dogleg_left';
-    } else if (notes.includes('dogleg right')) {
-        holeShape = 'dogleg_right';
-    } else if (notes.includes('slight dogleg left')) {
+    } else if (notes.includes('slight dogleg left') || notes.includes('slight dogleg-left')) {
         holeShape = 'slight_dogleg_left';
-    } else if (notes.includes('slight dogleg right')) {
+    } else if (notes.includes('slight dogleg right') || notes.includes('slight dogleg-right')) {
         holeShape = 'slight_dogleg_right';
+    } else if (notes.includes('dogleg left') || notes.includes('dogleg-left')) {
+        holeShape = 'dogleg_left';
+    } else if (notes.includes('dogleg right') || notes.includes('dogleg-right')) {
+        holeShape = 'dogleg_right';
     }
 
     // Generate fairway path based on hole shape
