@@ -1420,6 +1420,7 @@ function generateHoleSVG(hole, interactive) {
         ${hazardsSVG}
         <text x="16" y="30" font-size="14" font-weight="bold" fill="rgba(255,255,255,.5)">#${hole.hole_number}</text>
         <text x="${w-16}" y="30" text-anchor="end" font-size="12" fill="rgba(255,255,255,.3)">Par ${hole.par}</text>
+        <text x="${w/2}" y="${h-10}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.3)">${holeShape}</text>
     </svg>`;
 }
 
