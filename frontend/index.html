@@ -1210,219 +1210,282 @@ function setWind(el) {
 
 // ── HOLE SVG VISUALIZATION ──
 function generateHoleSVG(hole, interactive) {
-    const w = 300, h = 540;
+    const w = 300, h = 560;
     const isPar3 = hole.par === 3;
     const isPar5 = hole.par === 5;
-
-    const fwTop = isPar3 ? 180 : 100;
-    const fwBottom = h - 100;
-    // Varied fairway width by par
-    const fwWidth = isPar3 ? 50 : isPar5 ? 85 : 70;
-    const greenY = fwTop - 10;
-    const greenRx = isPar3 ? 30 : 35;
-    const greenRy = isPar3 ? 22 : 25;
-    const teeY = fwBottom + 30;
-
-    // Detect hole shape from hole_shape field first, then fall back to notes
     const notes = (hole.notes || '').toLowerCase();
     const shapeField = (hole.hole_shape || '').toLowerCase();
+    
+    // Seeded random for deterministic tree placement
+    let seed = hole.hole_number * 2654435761;
+    function srand() { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; }
+
+    // Detect hole shape
     let holeShape = 'straight';
-    
-    if (isPar3) {
-        holeShape = 'straight'; // Par 3s are always straight
-    } else if (shapeField === 'dogleg_left') {
-        holeShape = 'dogleg_left';
-    } else if (shapeField === 'dogleg_right') {
-        holeShape = 'dogleg_right';
-    } else if (shapeField === 'slight_dogleg_left') {
-        holeShape = 'slight_dogleg_left';
-    } else if (shapeField === 'slight_dogleg_right') {
-        holeShape = 'slight_dogleg_right';
-    } else if (notes.includes('sharp left') || notes.includes('severe dogleg left')) {
-        holeShape = 'dogleg_left';
-    } else if (notes.includes('sharp right') || notes.includes('severe dogleg right')) {
-        holeShape = 'dogleg_right';
-    } else if (notes.includes('slight dogleg left') || notes.includes('slight dogleg-left')) {
-        holeShape = 'slight_dogleg_left';
-    } else if (notes.includes('slight dogleg right') || notes.includes('slight dogleg-right')) {
-        holeShape = 'slight_dogleg_right';
-    } else if (notes.includes('dogleg left') || notes.includes('dogleg-left')) {
-        holeShape = 'dogleg_left';
-    } else if (notes.includes('dogleg right') || notes.includes('dogleg-right')) {
-        holeShape = 'dogleg_right';
-    }
+    if (isPar3) { holeShape = 'straight'; }
+    else if (shapeField && shapeField !== 'straight') { holeShape = shapeField; }
+    else if (notes.includes('sharp left') || notes.includes('severe dogleg left')) holeShape = 'dogleg_left';
+    else if (notes.includes('sharp right') || notes.includes('severe dogleg right')) holeShape = 'dogleg_right';
+    else if (notes.includes('slight dogleg left') || notes.includes('slight dogleg-left')) holeShape = 'slight_dogleg_left';
+    else if (notes.includes('slight dogleg right') || notes.includes('slight dogleg-right')) holeShape = 'slight_dogleg_right';
+    else if (notes.includes('dogleg left') || notes.includes('dogleg-left')) holeShape = 'dogleg_left';
+    else if (notes.includes('dogleg right') || notes.includes('dogleg-right')) holeShape = 'dogleg_right';
 
-    // Generate fairway path based on hole shape
-    let fairwayPath = '';
-    const doglegPoint = fwBottom - ((fwBottom - fwTop) * 0.6); // Dogleg turn at 60% of hole
+    // Layout parameters
+    const fwHalfW = isPar3 ? 28 : isPar5 ? 36 : 32;
+    const shift = holeShape.includes('slight') ? 35 : (holeShape.includes('dogleg') ? 65 : 0);
+    const isLeft = holeShape.includes('left');
+    const sign = isLeft ? -1 : 1;
     
-    if (holeShape === 'straight') {
-        // Original straight fairway
-        fairwayPath = `M ${w/2-fwWidth} ${fwBottom}
-                 Q ${w/2-fwWidth-10} ${(fwTop+fwBottom)/2} ${w/2-fwWidth+5} ${fwTop+20}
-                 Q ${w/2-15} ${fwTop} ${w/2} ${fwTop}
-                 Q ${w/2+15} ${fwTop} ${w/2+fwWidth-5} ${fwTop+20}
-                 Q ${w/2+fwWidth+10} ${(fwTop+fwBottom)/2} ${w/2+fwWidth} ${fwBottom} Z`;
-    } else if (holeShape === 'dogleg_left') {
-        // Strong left dogleg - shifts left at 60%
-        const shift = 60;
-        fairwayPath = `M ${w/2-fwWidth} ${fwBottom}
-                 L ${w/2-fwWidth} ${doglegPoint+40}
-                 Q ${w/2-fwWidth-20} ${doglegPoint} ${w/2-fwWidth-shift} ${doglegPoint-30}
-                 L ${w/2-fwWidth-shift+5} ${fwTop+20}
-                 Q ${w/2-shift-15} ${fwTop} ${w/2-shift} ${fwTop}
-                 Q ${w/2-shift+15} ${fwTop} ${w/2+fwWidth-shift-5} ${fwTop+20}
-                 L ${w/2+fwWidth-shift} ${doglegPoint-30}
-                 Q ${w/2+fwWidth-20} ${doglegPoint} ${w/2+fwWidth} ${doglegPoint+40}
-                 L ${w/2+fwWidth} ${fwBottom} Z`;
-    } else if (holeShape === 'dogleg_right') {
-        // Strong right dogleg - shifts right at 60%
-        const shift = 60;
-        fairwayPath = `M ${w/2-fwWidth} ${fwBottom}
-                 L ${w/2-fwWidth} ${doglegPoint+40}
-                 Q ${w/2-fwWidth+20} ${doglegPoint} ${w/2-fwWidth+shift} ${doglegPoint-30}
-                 L ${w/2-fwWidth+shift-5} ${fwTop+20}
-                 Q ${w/2+shift-15} ${fwTop} ${w/2+shift} ${fwTop}
-                 Q ${w/2+shift+15} ${fwTop} ${w/2+fwWidth+shift+5} ${fwTop+20}
-                 L ${w/2+fwWidth+shift} ${doglegPoint-30}
-                 Q ${w/2+fwWidth+20} ${doglegPoint} ${w/2+fwWidth} ${doglegPoint+40}
-                 L ${w/2+fwWidth} ${fwBottom} Z`;
-    } else if (holeShape === 'slight_dogleg_left') {
-        // Gentle left curve
-        const shift = 30;
-        fairwayPath = `M ${w/2-fwWidth} ${fwBottom}
-                 Q ${w/2-fwWidth-15} ${(fwTop+fwBottom)/2} ${w/2-fwWidth-shift+5} ${fwTop+20}
-                 Q ${w/2-shift-15} ${fwTop} ${w/2-shift} ${fwTop}
-                 Q ${w/2-shift+15} ${fwTop} ${w/2+fwWidth-shift-5} ${fwTop+20}
-                 Q ${w/2+fwWidth-5} ${(fwTop+fwBottom)/2} ${w/2+fwWidth} ${fwBottom} Z`;
-    } else if (holeShape === 'slight_dogleg_right') {
-        // Gentle right curve
-        const shift = 30;
-        fairwayPath = `M ${w/2-fwWidth} ${fwBottom}
-                 Q ${w/2-fwWidth+5} ${(fwTop+fwBottom)/2} ${w/2-fwWidth+shift-5} ${fwTop+20}
-                 Q ${w/2+shift-15} ${fwTop} ${w/2+shift} ${fwTop}
-                 Q ${w/2+shift+15} ${fwTop} ${w/2+fwWidth+shift+5} ${fwTop+20}
-                 Q ${w/2+fwWidth+15} ${(fwTop+fwBottom)/2} ${w/2+fwWidth} ${fwBottom} Z`;
+    // Centerline: tee at bottom, green at top
+    const teeX = w/2, teeY = h - 55;
+    const greenY = isPar3 ? 140 : 65;
+    let greenX = w/2 + (holeShape === 'straight' ? 0 : sign * shift);
+    
+    // Dogleg midpoint
+    const dogY = teeY - (teeY - greenY) * 0.6;
+    const dogX = w/2 + (holeShape === 'straight' ? 0 : sign * shift * 0.3);
+    
+    // Build centerline points
+    function lerp(a, b, t) { return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t]; }
+    let cl;
+    if (holeShape === 'straight' || isPar3) {
+        cl = [[teeX, teeY]];
+        for (let t = 0.2; t <= 0.8; t += 0.2) cl.push(lerp([teeX, teeY], [greenX, greenY], t));
+        cl.push([greenX, greenY]);
+    } else {
+        cl = [[teeX, teeY]];
+        for (let t = 0.25; t < 1; t += 0.25) cl.push(lerp([teeX, teeY], [dogX, dogY], t));
+        cl.push([dogX, dogY]);
+        for (let t = 0.25; t < 1; t += 0.25) cl.push(lerp([dogX, dogY], [greenX, greenY], t));
+        cl.push([greenX, greenY]);
     }
-
-    // Landing zone circle for par 4s and 5s (where the drive should land)
-    let landingZoneSVG = '';
-    if (!isPar3) {
-        const driverDistance = isPar5 ? 250 : 220; // Typical drive distance
-        const landingFrac = Math.min(driverDistance / hole.distance, 0.7); // Don't go past 70%
-        const landingY = fwBottom - ((fwBottom - fwTop) * landingFrac);
-        
-        // Position landing zone accounting for dogleg
-        let landingX = w / 2;
-        if (holeShape === 'dogleg_left' || holeShape === 'slight_dogleg_left') {
-            if (landingFrac > 0.6) landingX -= (holeShape === 'dogleg_left' ? 60 : 30) * (landingFrac - 0.6) / 0.4;
-        } else if (holeShape === 'dogleg_right' || holeShape === 'slight_dogleg_right') {
-            if (landingFrac > 0.6) landingX += (holeShape === 'dogleg_right' ? 60 : 30) * (landingFrac - 0.6) / 0.4;
+    
+    // Offset perpendicular helper
+    function perp(i, d) {
+        const p = cl[i];
+        const n = i < cl.length-1 ? cl[i+1] : cl[i];
+        const pr = i > 0 ? cl[i-1] : cl[i];
+        const dx = (n[0]-pr[0]), dy = (n[1]-pr[1]);
+        const ln = Math.sqrt(dx*dx+dy*dy) || 1;
+        return [p[0] + (-dy/ln)*d, p[1] + (dx/ln)*d];
+    }
+    
+    function buildOutline(widths) {
+        const L = [], R = [];
+        for (let i = 0; i < cl.length; i++) {
+            const w = widths[Math.min(i, widths.length-1)];
+            L.push(perp(i, w));
+            R.push(perp(i, -w));
         }
-        
-        landingZoneSVG = `
-            <circle cx="${landingX}" cy="${landingY}" r="18" fill="none" stroke="rgba(255,217,61,.5)" stroke-width="2" stroke-dasharray="4,3"/>
-            <circle cx="${landingX}" cy="${landingY}" r="3" fill="rgba(255,217,61,.7)"/>
-            <text x="${landingX}" y="${landingY+28}" text-anchor="middle" font-size="10" fill="rgba(255,217,61,.8)">${Math.round(driverDistance)}yd</text>
-        `;
+        const pts = L.concat(R.reverse());
+        return 'M ' + pts.map(p => p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L ') + ' Z';
     }
-
-    let hazardsSVG = '';
-    (hole.hazards || []).forEach(hz => {
-        const hzColor = hz.type === 'water' ? '#4fc3f7' : hz.type === 'bunker' ? '#ffcc02' : hz.type === 'out_of_bounds' ? '#ff4757' : '#2d8a4e';
-        const hzOpacity = hz.type === 'water' ? 0.4 : hz.type === 'bunker' ? 0.5 : 0.3;
-        let hzX = w / 2, hzY = fwBottom - ((hz.distance / hole.distance) * (fwBottom - fwTop));
-        if (hz.distance === 0) hzY = greenY;
-
-        // Adjust hazard position for doglegs
-        const hazardFrac = hz.distance / hole.distance;
-        if (holeShape === 'dogleg_left' || holeShape === 'slight_dogleg_left') {
-            if (hazardFrac > 0.6) {
-                const shift = (holeShape === 'dogleg_left' ? 60 : 30) * (hazardFrac - 0.6) / 0.4;
-                hzX -= shift;
-            }
-        } else if (holeShape === 'dogleg_right' || holeShape === 'slight_dogleg_right') {
-            if (hazardFrac > 0.6) {
-                const shift = (holeShape === 'dogleg_right' ? 60 : 30) * (hazardFrac - 0.6) / 0.4;
-                hzX += shift;
+    
+    // Width profiles (tee → green)
+    const treeW = isPar3 
+        ? [52,54,56,54,50] 
+        : (cl.length > 6 ? [52,54,56,58,56,54,50,46,40,36] : [52,54,56,54,50]);
+    const roughW = isPar3 
+        ? [42,44,46,44,40] 
+        : (cl.length > 6 ? [42,44,46,48,46,44,40,36,32,28] : [42,44,46,44,40]);
+    const fwW = isPar3 
+        ? [fwHalfW-4,fwHalfW,fwHalfW,fwHalfW-2,fwHalfW-6] 
+        : (cl.length > 6 ? [fwHalfW,fwHalfW+2,fwHalfW+4,fwHalfW+2,fwHalfW,fwHalfW-2,fwHalfW-4,fwHalfW-6,fwHalfW-10,fwHalfW-14] : [fwHalfW,fwHalfW+2,fwHalfW+4,fwHalfW+2,fwHalfW-4]);
+    
+    let els = [];
+    
+    // Background
+    els.push(`<rect width="${w}" height="${h}" fill="#0d1117" rx="12"/>`);
+    
+    // Tree canopy (outermost organic shape)
+    const treePath = buildOutline(treeW.map(v => v + 20));
+    els.push(`<path d="${treePath}" fill="#1a3a1a"/>`);
+    
+    // Tree texture circles (deterministic via seeded random)
+    for (let i = 0; i < 55; i++) {
+        const tx = 20 + srand() * (w - 40);
+        const ty = 30 + srand() * (h - 80);
+        // Check if point is outside fairway corridor (rough check)
+        let inFairway = false;
+        for (let j = 0; j < cl.length - 1; j++) {
+            const cy = cl[j][1], ny = cl[j+1][1];
+            if (ty >= Math.min(cy, ny) && ty <= Math.max(cy, ny)) {
+                const t = (ny === cy) ? 0 : (ty - cy) / (ny - cy);
+                const cx = cl[j][0] + t * (cl[j+1][0] - cl[j][0]);
+                if (Math.abs(tx - cx) < (roughW[Math.min(j, roughW.length-1)] + 8)) {
+                    inFairway = true; break;
+                }
             }
         }
+        if (!inFairway) {
+            const r = 5 + srand() * 10;
+            const shades = ['#1e4a1e','#1a3d1a','#224a22','#163a16','#1e4420'];
+            const shade = shades[Math.floor(srand() * shades.length)];
+            els.push(`<circle cx="${tx.toFixed(0)}" cy="${ty.toFixed(0)}" r="${r.toFixed(0)}" fill="${shade}" opacity="0.6"/>`);
+        }
+    }
+    
+    // Semi-rough
+    els.push(`<path d="${buildOutline(roughW)}" fill="#1e4a1e"/>`);
+    
+    // Fairway
+    els.push(`<path d="${buildOutline(fwW)}" fill="#2d5a1e" stroke="#3a7a2a" stroke-width="0.5"/>`);
+    
+    // Mowing stripes
+    for (let i = 0; i < cl.length - 1; i++) {
+        const y1 = cl[i][1], y2 = cl[i+1][1];
+        const x1 = cl[i][0], x2 = cl[i+1][0];
+        for (let sy = Math.min(y1,y2); sy < Math.max(y1,y2); sy += 18) {
+            const t = (y1 === y2) ? 0 : (sy - y1) / (y2 - y1);
+            const cx = x1 + t * (x2 - x1);
+            const fw = fwW[Math.min(i, fwW.length-1)];
+            if (Math.floor(sy / 18) % 2 === 0) {
+                els.push(`<line x1="${(cx-fw+3).toFixed(0)}" y1="${sy}" x2="${(cx+fw-3).toFixed(0)}" y2="${sy}" stroke="rgba(60,120,40,0.12)" stroke-width="7"/>`);
+            }
+        }
+    }
+    
+    // Cart path (right side)
+    const cpPts = [];
+    for (let i = 0; i < cl.length; i++) {
+        const w2 = fwW[Math.min(i, fwW.length-1)] + 5;
+        cpPts.push(perp(i, -w2));
+    }
+    els.push(`<path d="M ${cpPts.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L ')}" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="2.5" stroke-linecap="round"/>`);
 
-        if (hz.location === 'left') hzX = hzX - fwWidth - 15;
-        else if (hz.location === 'right') hzX = hzX + fwWidth + 15;
-        else if (hz.location === 'short') { hzY = greenY + 30; }
-        else if (hz.location === 'long') { hzY = greenY - 30; }
+    // Parse hazards from notes for positioning
+    const hasWaterLeft = notes.includes('water left') || notes.includes('hazard left') || notes.includes('water short and left');
+    const hasWaterRight = notes.includes('water right') || notes.includes('hazard right') || notes.includes('water behind');
+    const hasWaterFront = notes.includes('water short') || notes.includes('water front') || notes.includes('carry') || notes.includes('hazard in front');
+    const hasBunkerLeft = notes.includes('bunker left') || notes.includes('bunker front left') || notes.includes('bunker back left') || notes.includes('bunkers left');
+    const hasBunkerRight = notes.includes('bunker right') || notes.includes('bunker front right') || notes.includes('bunkers right');
+    const hasFwBunker = notes.includes('fairway bunker') || notes.includes('bunker protect') || notes.includes('bunker corner') || notes.includes('bunkers to the right');
+    const hasBunkerFront = notes.includes('bunker front') || notes.includes('bunker in front') || notes.includes('bunker guards');
 
-        if (hz.type === 'water') {
-            hazardsSVG += `<ellipse cx="${hzX}" cy="${hzY}" rx="25" ry="15" fill="${hzColor}" opacity="${hzOpacity}"/>`;
-            hazardsSVG += `<text x="${hzX}" y="${hzY + 4}" text-anchor="middle" font-size="10" fill="${hzColor}">💧</text>`;
-        } else if (hz.type === 'bunker') {
-            hazardsSVG += `<ellipse cx="${hzX}" cy="${hzY}" rx="18" ry="10" fill="${hzColor}" opacity="${hzOpacity}"/>`;
-        } else if (hz.type === 'out_of_bounds') {
-            const x1 = hz.location === 'left' ? 10 : w - 10;
-            hazardsSVG += `<line x1="${x1}" y1="${fwTop}" x2="${x1}" y2="${fwBottom}" stroke="${hzColor}" stroke-width="3" stroke-dasharray="8,4" opacity="0.6"/>`;
-            hazardsSVG += `<text x="${x1}" y="${(fwTop+fwBottom)/2}" text-anchor="middle" font-size="9" fill="${hzColor}" transform="rotate(-90,${x1},${(fwTop+fwBottom)/2})">OB</text>`;
+    // Draw water hazards
+    if (hasWaterLeft || hasWaterRight || hasWaterFront) {
+        let wx, wy;
+        if (hasWaterFront) {
+            wx = greenX; wy = greenY + 35;
+        } else if (hasWaterLeft) {
+            wx = greenX - 45; wy = greenY + 10;
         } else {
-            hazardsSVG += `<rect x="${hzX-15}" y="${hzY-15}" width="30" height="30" rx="8" fill="${hzColor}" opacity="${hzOpacity}"/>`;
-            hazardsSVG += `<text x="${hzX}" y="${hzY + 4}" text-anchor="middle" font-size="10" fill="${hzColor}">🌲</text>`;
+            wx = greenX + 45; wy = greenY + 10;
+        }
+        const wpath = `M ${wx-18} ${wy-8} Q ${wx-12} ${wy-15} ${wx} ${wy-12} Q ${wx+15} ${wy-16} ${wx+20} ${wy-5} Q ${wx+18} ${wy+8} ${wx+5} ${wy+10} Q ${wx-10} ${wy+12} ${wx-18} ${wy-8} Z`;
+        els.push(`<path d="${wpath}" fill="#1a4a7a" stroke="#3a7aaa" stroke-width="0.8" opacity="0.85"/>`);
+    }
+
+    // Also handle structured hazards array
+    (hole.hazards || []).forEach(hz => {
+        if (hz.type === 'water') {
+            let wx = greenX, wy = greenY + 30;
+            if (hz.location === 'left') { wx = greenX - 45; wy = greenY + 10; }
+            else if (hz.location === 'right') { wx = greenX + 45; wy = greenY + 10; }
+            else if (hz.location === 'short') { wy = greenY + 40; }
+            const wpath = `M ${wx-18} ${wy-8} Q ${wx-12} ${wy-15} ${wx} ${wy-12} Q ${wx+15} ${wy-16} ${wx+20} ${wy-5} Q ${wx+18} ${wy+8} ${wx+5} ${wy+10} Q ${wx-10} ${wy+12} ${wx-18} ${wy-8} Z`;
+            els.push(`<path d="${wpath}" fill="#1a4a7a" stroke="#3a7aaa" stroke-width="0.8" opacity="0.85"/>`);
         }
     });
 
-    const distLines = [100, 150, 200];
-    if (hole.distance > 350) distLines.push(250);
-    if (hole.distance > 500) distLines.push(300);
+    // Fairway bunker (at dogleg corner or ~60% up for straight holes)
+    if (hasFwBunker) {
+        const bx = holeShape.includes('right') ? (dogX - fwHalfW - 8) : holeShape.includes('left') ? (dogX + fwHalfW + 8) : (w/2 + fwHalfW + 5);
+        const by = dogY + 10;
+        const bp = `M ${bx-10} ${by} Q ${bx-6} ${by-12} ${bx+2} ${by-10} Q ${bx+12} ${by-6} ${bx+10} ${by+3} Q ${bx+5} ${by+10} ${bx-5} ${by+8} Q ${bx-12} ${by+4} ${bx-10} ${by} Z`;
+        els.push(`<path d="${bp}" fill="#d4b896" stroke="#b49866" stroke-width="0.5"/>`);
+    }
 
-    const markersSVG = distLines.filter(d => d < hole.distance - 30).map(d => {
-        const distFrac = d / hole.distance;
-        const y = fwBottom - ((fwBottom - fwTop) * distFrac);
-        
-        // Adjust distance markers for doglegs
-        let markerCenterX = w / 2;
-        if (holeShape === 'dogleg_left' || holeShape === 'slight_dogleg_left') {
-            if (distFrac > 0.6) {
-                const shift = (holeShape === 'dogleg_left' ? 60 : 30) * (distFrac - 0.6) / 0.4;
-                markerCenterX -= shift;
+    // Greenside bunkers
+    if (hasBunkerLeft || hasBunkerFront) {
+        const bx = greenX - 30, by = greenY + 8;
+        const bp = `M ${bx-8} ${by} Q ${bx-4} ${by-10} ${bx+4} ${by-8} Q ${bx+10} ${by-3} ${bx+8} ${by+5} Q ${bx+2} ${by+9} ${bx-6} ${by+6} Z`;
+        els.push(`<path d="${bp}" fill="#d4b896" stroke="#b49866" stroke-width="0.5"/>`);
+    }
+    if (hasBunkerRight) {
+        const bx = greenX + 32, by = greenY + 5;
+        const bp = `M ${bx-6} ${by-6} Q ${bx+2} ${by-12} ${bx+10} ${by-8} Q ${bx+14} ${by} ${bx+10} ${by+8} Q ${bx+2} ${by+12} ${bx-6} ${by+6} Q ${bx-10} ${by} ${bx-6} ${by-6} Z`;
+        els.push(`<path d="${bp}" fill="#d4b896" stroke="#b49866" stroke-width="0.5"/>`);
+    }
+
+    // Also render structured bunker hazards
+    (hole.hazards || []).forEach(hz => {
+        if (hz.type === 'bunker') {
+            let bx, by;
+            const distFrac = hz.distance / hole.distance;
+            if (distFrac < 0.3) { // near green
+                bx = hz.location === 'left' ? greenX - 30 : hz.location === 'right' ? greenX + 32 : greenX;
+                by = greenY + 8;
+            } else { // fairway bunker
+                by = teeY - (teeY - greenY) * distFrac;
+                const cx = cl[0][0] + (cl[cl.length-1][0] - cl[0][0]) * distFrac;
+                bx = hz.location === 'left' ? cx - fwHalfW - 5 : hz.location === 'right' ? cx + fwHalfW + 5 : cx;
             }
-        } else if (holeShape === 'dogleg_right' || holeShape === 'slight_dogleg_right') {
-            if (distFrac > 0.6) {
-                const shift = (holeShape === 'dogleg_right' ? 60 : 30) * (distFrac - 0.6) / 0.4;
-                markerCenterX += shift;
-            }
+            const bp = `M ${bx-8} ${by-5} Q ${bx} ${by-11} ${bx+9} ${by-6} Q ${bx+13} ${by+2} ${bx+7} ${by+8} Q ${bx-2} ${by+10} ${bx-9} ${by+4} Z`;
+            els.push(`<path d="${bp}" fill="#d4b896" stroke="#b49866" stroke-width="0.5"/>`);
         }
-        
-        const color = d === 150 ? 'rgba(0,212,170,.4)' : 'rgba(255,255,255,.15)';
-        const textColor = d === 150 ? 'rgba(0,212,170,.6)' : 'rgba(255,255,255,.3)';
-        const sw = d === 150 ? '1.5' : '1';
-        return `
-            <line x1="${markerCenterX-fwWidth+10}" y1="${y}" x2="${markerCenterX+fwWidth-10}" y2="${y}" stroke="${color}" stroke-width="${sw}" stroke-dasharray="4,4"/>
-            <text x="${markerCenterX+fwWidth+5}" y="${y+4}" font-size="9" fill="${textColor}" font-weight="${d===150?'bold':'normal'}">${d}</text>
-            <text x="${markerCenterX-fwWidth-2}" y="${y+4}" font-size="9" fill="${textColor}" text-anchor="end">${d}</text>
-        `;
-    }).join('');
+    });
 
-    // Adjust green position for doglegs
-    let greenX = w / 2;
-    if (holeShape === 'dogleg_left') greenX -= 60;
-    else if (holeShape === 'dogleg_right') greenX += 60;
-    else if (holeShape === 'slight_dogleg_left') greenX -= 30;
-    else if (holeShape === 'slight_dogleg_right') greenX += 30;
+    // Green
+    const gRx = isPar3 ? 22 : (hole.green_shape === 'narrow' ? 18 : hole.green_shape === 'large' || hole.green_shape === 'wide' ? 32 : 26);
+    const gRy = isPar3 ? 16 : (hole.green_shape === 'narrow' ? 22 : hole.green_shape === 'small' ? 16 : 20);
+    // Kidney-shaped green using path
+    const gx = greenX, gy = greenY;
+    const greenPath = `M ${gx-gRx} ${gy+2} Q ${gx-gRx-3} ${gy-gRy*0.6} ${gx-gRx*0.3} ${gy-gRy} Q ${gx+gRx*0.2} ${gy-gRy-4} ${gx+gRx*0.7} ${gy-gRy+2} Q ${gx+gRx+2} ${gy-gRy*0.4} ${gx+gRx} ${gy+2} Q ${gx+gRx-2} ${gy+gRy*0.7} ${gx+gRx*0.3} ${gy+gRy} Q ${gx-gRx*0.2} ${gy+gRy+2} ${gx-gRx+3} ${gy+gRy*0.5} Z`;
+    els.push(`<path d="${greenPath}" fill="#3a8a2a" stroke="#4a9a3a" stroke-width="1.5"/>`);
+    // Green contours
+    els.push(`<ellipse cx="${gx+2}" cy="${gy-2}" rx="${gRx*0.5}" ry="${gRy*0.4}" fill="none" stroke="rgba(74,154,58,0.25)" stroke-width="0.5"/>`);
+    
+    // Pin
+    els.push(`<circle cx="${gx}" cy="${gy}" r="2" fill="white"/>`);
+    els.push(`<line x1="${gx}" y1="${gy}" x2="${gx}" y2="${gy-14}" stroke="white" stroke-width="1.5"/>`);
+    els.push(`<polygon points="${gx},${gy-14} ${gx+7},${gy-11} ${gx},${gy-8}" fill="#e33"/>`);
 
-    return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
-        <rect width="${w}" height="${h}" fill="#0a1510"/>
-        <path d="${fairwayPath}" fill="#1a4d2e" stroke="#2a6b3e" stroke-width="1"/>
-        ${landingZoneSVG}
-        <ellipse cx="${greenX}" cy="${greenY}" rx="${greenRx}" ry="${greenRy}" fill="#2d8a4e" stroke="#3da65e" stroke-width="1.5"/>
-        <line x1="${greenX}" y1="${greenY-18}" x2="${greenX}" y2="${greenY-2}" stroke="white" stroke-width="1.5"/>
-        <polygon points="${greenX},${greenY-18} ${greenX+10},${greenY-13} ${greenX},${greenY-8}" fill="#ff4757"/>
-        <rect x="${w/2-20}" y="${teeY-6}" width="40" height="12" rx="3" fill="#4a7c59" stroke="#5a9c6a" stroke-width="1"/>
-        <text x="${w/2}" y="${teeY+22}" text-anchor="middle" font-size="12" font-weight="bold" fill="white">${hole.distance} yds</text>
-        ${markersSVG}
-        ${hazardsSVG}
-        <text x="16" y="30" font-size="14" font-weight="bold" fill="rgba(255,255,255,.5)">#${hole.hole_number}</text>
-        <text x="${w-16}" y="30" text-anchor="end" font-size="12" fill="rgba(255,255,255,.3)">Par ${hole.par}</text>
-        <text x="${w/2}" y="${h-10}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.3)">${holeShape}</text>
-    </svg>`;
+    // Tee box
+    els.push(`<rect x="${teeX-14}" y="${teeY-5}" width="28" height="10" rx="3" fill="#4a9a4a" stroke="#5aba5a" stroke-width="1"/>`);
+    const teeColors = [['#222',-7],['#3355cc',-3],['#fff',1],['#c44',5]];
+    teeColors.forEach(([c,dx]) => els.push(`<circle cx="${teeX+dx}" cy="${teeY}" r="1.8" fill="${c}"/>`));
+    
+    // Yardage markers
+    const distLines = [100, 150, 200];
+    if (isPar5) distLines.push(250);
+    distLines.filter(d => d < hole.distance - 30).forEach(d => {
+        const frac = d / hole.distance;
+        // Find position along centerline
+        const idx = Math.min(Math.floor(frac * (cl.length-1)), cl.length-2);
+        const t = frac * (cl.length-1) - idx;
+        const mx = cl[idx][0] + t * (cl[idx+1][0] - cl[idx][0]);
+        const my = cl[idx][1] + t * (cl[idx+1][1] - cl[idx][1]);
+        const fw = fwW[Math.min(idx, fwW.length-1)];
+        const col = d === 150 ? 'rgba(0,212,170,0.3)' : 'rgba(255,255,255,0.15)';
+        const tcol = d === 150 ? 'rgba(0,212,170,0.5)' : 'rgba(255,255,255,0.25)';
+        els.push(`<line x1="${(mx-fw+5).toFixed(0)}" y1="${my.toFixed(0)}" x2="${(mx+fw-5).toFixed(0)}" y2="${my.toFixed(0)}" stroke="${col}" stroke-width="0.5" stroke-dasharray="3,3"/>`);
+        els.push(`<text x="${(mx-fw).toFixed(0)}" y="${(my+3).toFixed(0)}" font-size="8" fill="${tcol}" text-anchor="end">${d}</text>`);
+        els.push(`<text x="${(mx+fw).toFixed(0)}" y="${(my+3).toFixed(0)}" font-size="8" fill="${tcol}">${d}</text>`);
+    });
+
+    // Landing zone for par 4/5
+    if (!isPar3) {
+        const driveDist = isPar5 ? 250 : 220;
+        const frac = Math.min(driveDist / hole.distance, 0.7);
+        const idx = Math.min(Math.floor(frac * (cl.length-1)), cl.length-2);
+        const t = frac * (cl.length-1) - idx;
+        const lx = cl[idx][0] + t * (cl[idx+1][0] - cl[idx][0]);
+        const ly = cl[idx][1] + t * (cl[idx+1][1] - cl[idx][1]);
+        els.push(`<circle cx="${lx.toFixed(0)}" cy="${ly.toFixed(0)}" r="15" fill="none" stroke="rgba(255,217,61,0.4)" stroke-width="1.5" stroke-dasharray="4,3"/>`);
+        els.push(`<circle cx="${lx.toFixed(0)}" cy="${ly.toFixed(0)}" r="2.5" fill="rgba(255,217,61,0.6)"/>`);
+        els.push(`<text x="${lx.toFixed(0)}" y="${(ly+24).toFixed(0)}" text-anchor="middle" font-size="9" fill="rgba(255,217,61,0.7)">${Math.round(driveDist)}yd</text>`);
+    }
+
+    // Labels
+    els.push(`<text x="16" y="22" font-size="13" font-weight="bold" fill="rgba(255,255,255,.5)">#${hole.hole_number}</text>`);
+    els.push(`<text x="${w-16}" y="22" text-anchor="end" font-size="11" fill="rgba(255,255,255,.35)">Par ${hole.par} · ${hole.distance}</text>`);
+    els.push(`<text x="${w/2}" y="${h-8}" text-anchor="middle" font-size="12" font-weight="bold" fill="white">${hole.distance} yds</text>`);
+
+    return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">\n${els.join('\n')}\n</svg>`;
 }
+
 
 // ── INTERACTIVE HOLE TAP (for SVG diagram) ──
 let playerPosition = null;
@@ -1439,7 +1502,7 @@ function redrawPlayerMarker() {
     const old = svg.querySelector('#playerMarker');
     if (old) old.remove();
     
-    const svgW = 300, svgH = 540;
+    const svgW = 300, svgH = 560;
     const px = playerPosition.relX * svgW;
     const py = playerPosition.relY * svgH;
     
@@ -1487,7 +1550,7 @@ function handleHoleTap(event, holeNum) {
             const old = svg.querySelector('#playerMarker');
             if (old) old.remove();
             
-            const svgW = 300, svgH = 540;
+            const svgW = 300, svgH = 560;
             const px = relX * svgW;
             const py = relY * svgH;
             
