@@ -105,6 +105,49 @@ async def serve_app():
     return FileResponse(frontend_path)
 
 
+@app.get("/test4")
+async def test_hole4():
+    """Debug page: render hole 4 SVG with hardcoded dogleg_right"""
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse("""<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width"><title>Hole 4 Test</title>
+<style>body{background:#1a1a2e;color:#fff;font-family:sans-serif;text-align:center;padding:20px}svg{max-width:300px}</style></head><body>
+<h2>Hole 4 - Dogleg Right Test</h2>
+<div id="out"></div>
+<script>
+const w=300,h=540,fwTop=100,fwBottom=h-100,fwWidth=70;
+const doglegPoint=fwBottom-((fwBottom-fwTop)*0.6);
+const shift=60;
+const fairwayPath=`M ${w/2-fwWidth} ${fwBottom}
+ L ${w/2-fwWidth} ${doglegPoint+40}
+ Q ${w/2-fwWidth+20} ${doglegPoint} ${w/2-fwWidth+shift} ${doglegPoint-30}
+ L ${w/2-fwWidth+shift-5} ${fwTop+20}
+ Q ${w/2+shift-15} ${fwTop} ${w/2+shift} ${fwTop}
+ Q ${w/2+shift+15} ${fwTop} ${w/2+fwWidth+shift+5} ${fwTop+20}
+ L ${w/2+fwWidth+shift} ${doglegPoint-30}
+ Q ${w/2+fwWidth+20} ${doglegPoint} ${w/2+fwWidth} ${doglegPoint+40}
+ L ${w/2+fwWidth} ${fwBottom} Z`;
+document.getElementById('out').innerHTML=`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+<rect width="${w}" height="${h}" fill="#1a3d1a" rx="12"/>
+<path d="${fairwayPath}" fill="#2d5a1e" stroke="#3a7a2a" stroke-width="1.5"/>
+<ellipse cx="${w/2+shift}" cy="${fwTop-10}" rx="35" ry="25" fill="#3a8a2a" stroke="#4a9a3a" stroke-width="2"/>
+<text x="${w/2+shift}" y="${fwTop-6}" text-anchor="middle" font-size="16" fill="red">🚩</text>
+<rect x="${w/2-20}" y="${fwBottom+20}" width="40" height="15" rx="4" fill="#3a7a2a"/>
+<text x="${w/2}" y="${h-60}" text-anchor="middle" font-size="12" fill="#fff">387 yds</text>
+<text x="16" y="30" font-size="14" fill="rgba(255,255,255,.5)">#4</text>
+<text x="${w-16}" y="30" text-anchor="end" font-size="12" fill="rgba(255,255,255,.3)">Par 4</text>
+<text x="${w/2}" y="${h-10}" text-anchor="middle" font-size="10" fill="yellow">Shape: dogleg_right (hardcoded)</text>
+</svg>`;
+</script>
+<h3>Now fetching from API...</h3>
+<div id="api"></div>
+<script>
+fetch('/api/v1/courses/rocky_river_gc/holes').then(r=>r.json()).then(d=>{
+  const h4=d.holes.find(h=>h.hole_number===4);
+  document.getElementById('api').innerHTML='<pre>'+JSON.stringify(h4,null,2)+'</pre>';
+});
+</script>
+</body></html>""")
+
 @app.get("/")
 @limiter.limit("100/minute")
 def read_root(request: Request):
